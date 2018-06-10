@@ -1,0 +1,15 @@
+*.pyc
+*.DS_Store
+*~
+data/
+*.tar.gz
+*.egg-info
+checkpoint*
+data/*
+*log
+pred_out/*
+nohup*
+.vs/*
+*.pyproj
+*.sln
+launch_docker
