@@ -2,6 +2,7 @@ This is a packge of SAN (Stochastic Answer Networks for Machine Reading Comprehe
 
 # Please cite the following papers if you use this package:
 https://arxiv.org/abs/1804.07888
+
 https://arxiv.org/abs/1712.03556
 
 
@@ -21,6 +22,10 @@ https://arxiv.org/abs/1712.03556
 2. train a model
    >python train.py
 ################################
+
+######### TODO #####
+1. Publish the pretrained models.
+
 
 Some of codes are borrowed from: https://github.com/hitvoice/DrQA
 
