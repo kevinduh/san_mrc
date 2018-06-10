@@ -2,10 +2,10 @@
 
 This PyTorch package implements the Stochastic Answer Network (SAN) for Machine Reading Comprehension, as described in:
 
-Xiaodong Liu, Yelong Shen, Kevin Duh, Jianfeng Gao
-Stochastic Answer Networks for Machine Reading Comprehension
-Proceedings of the 56th Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers)
-<a href="https://arxiv.org/abs/1712.03556>arXiv link</a>
+Xiaodong Liu, Yelong Shen, Kevin Duh, Jianfeng Gao<br/>
+Stochastic Answer Networks for Machine Reading Comprehension</br>
+Proceedings of the 56th Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers)<br/>
+[arXiv version](https://arxiv.org/abs/1712.03556)
 
 Please cite the above paper if you use this code. 
 
