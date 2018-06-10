@@ -6,7 +6,7 @@ https://arxiv.org/abs/1804.07888
 https://arxiv.org/abs/1712.03556
 
 
-######### SETUP ENV ###########
+######### SETUP ENV
 1. python3.6
 2. install requirements:
    >pip install -r requirements.txt
@@ -16,14 +16,14 @@ https://arxiv.org/abs/1712.03556
 
 ###############################
 
-######### Train a SAN Model #####
-1. preproces data
+######### Train a SAN Model
+1. preprocess data
    >python prepro.py
 2. train a model
    >python train.py
 ################################
 
-######### TODO #####
+######### TODO
 1. Publish the pretrained models.
 
 
