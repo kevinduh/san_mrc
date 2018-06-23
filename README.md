@@ -18,7 +18,7 @@ Please cite the above paper if you use this code.
 3. download data/word2vec 
    > sh download.sh
 4. You might need to download the en module for spacy
-   > python -m spacy download en              # default English model (~50MB)
+   > python -m spacy download en              # default English model (~50MB) <br/>
    > python -m spacy download en_core_web_md  # larger English model (~1GB)
 
 ### Train a SAN Model
