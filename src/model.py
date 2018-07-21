@@ -97,6 +97,10 @@ class DocReaderModel(object):
     def predict(self, batch, top_k=1):
         self.network.eval()
         self.network.drop_emb = False
+        # Transfer trained embedding to evaluation embedding
+        if self.eval_embed_transfer:
+            self.update_eval_embed()
+            self.eval_embed_transfer = False
         start, end = self.network(batch)
         start = F.softmax(start)
         end = F.softmax(end)
