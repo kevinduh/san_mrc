@@ -26,44 +26,59 @@ TODO: adding multi-thread ...
 """
 NLP = spacy.load('en', disable=['vectors', 'textcat', 'parser'])
 
-def build_vocab(data, glove_vocab=None, sort_all=False, thread=8, clean_on=False):
-    nlp = spacy.load('en', disable=['vectors', 'textcat', 'tagger', 'ner', 'parser'])
-    def token(sample, key=None):
-        s = sample[key]
-        if clean_on:
-            s = reform_text(s)
-        return [w.text for w in nlp(s) if len(w.text) > 0]
-    logger.info('Collect vocab')
-    #pool = ThreadPool(thread)
+def build_vocab(data, glove_vocab=None, sort_all=False, thread=24, clean_on=False):
+    print('Collect vocab/pos counter/ner counter')
+    # docs
+    docs = [reform_text(sample['context']) for sample in data]
+    doc_tokened = [doc for doc in NLP.pipe(docs, batch_size=64, n_threads=thread)]
+    print('Done with doc tokenize')
+    questions = [reform_text(sample['question']) for sample in data]
+    questions_tokened = [question for question in NLP.pipe(questions, batch_size=64, n_threads=thread)]
+    print('Done with question tokenize')
+
+    tag_counter = Counter()
+    ner_counter = Counter()
     if sort_all:
         counter = Counter()
-        token_ = partial(token, key='context')
-        for sample in tqdm.tqdm(data, total=len(data)):
-            counter.update(token_(sample))
-        token_ = partial(token, key='question')
-        for sample in tqdm.tqdm(data, total=len(data)):
-            counter.update(token_(sample))
+        merged = doc_tokened + questions_tokened
+        for tokened in tqdm.tqdm(merged, total=len(data)):
+            counter.update([w.text for w in tokened if len(w.text) > 0])
+            tag_counter.update([w.tag_ for w in tokened if len(w.text) > 0])
+            ner_counter.update(['{}_{}'.format(w.ent_type_, w.ent_iob_) for w in tokened])
         vocab = sorted([w for w in counter if w in glove_vocab], key=counter.get, reverse=True)
     else:
         query_counter = Counter()
         doc_counter = Counter()
-        token_ = partial(token, key='context')
-        for sample in tqdm.tqdm(data, total=len(data)):
-            doc_counter.update(token_(sample))
-        token_ = partial(token, key='question')
-        for sample in tqdm.tqdm(data, total=len(data)):
-            query_counter.update(token_(sample))
+
+        for tokened in tqdm.tqdm(doc_tokened, total=len(doc_tokened)):
+            doc_counter.update([w.text for w in tokened if len(w.text) > 0])
+            tag_counter.update([w.tag_ for w in tokened if len(w.text) > 0])
+            ner_counter.update(['{}_{}'.format(w.ent_type_, w.ent_iob_) for w in tokened])
+
+        for tokened in tqdm.tqdm(questions_tokened, total=len(questions_tokened)):
+            query_counter.update([w.text for w in tokened if len(w.text) > 0])
+            tag_counter.update([w.tag_ for w in tokened if len(w.text) > 0])
+            ner_counter.update(['{}_{}'.format(w.ent_type_, w.ent_iob_) for w in tokened])
         counter = query_counter + doc_counter
         # sort query words
         vocab = sorted([w for w in query_counter if w in glove_vocab], key=query_counter.get, reverse=True)
         vocab += sorted([w for w in doc_counter.keys() - query_counter.keys() if w in glove_vocab], key=counter.get, reverse=True)
+    tag_counter = sorted([w for w in tag_counter], key=tag_counter.get, reverse=True)
+    ner_counter = sorted([w for w in ner_counter], key=ner_counter.get, reverse=True)
+
     total = sum(counter.values())
     matched = sum(counter[w] for w in vocab)
-    logger.info('raw vocab size vs vocab in glove: {0}/{1}'.format(len(counter), len(vocab)))
-    logger.info('OOV rate:{0:.4f}={1}/{2}'.format(100.0 * (total - matched)/total, (total - matched), total))
+    print('Raw vocab size vs vocab in glove: {0}/{1}'.format(len(counter), len(vocab)))
+    print('OOV rate:{0:.4f}={1}/{2}'.format(100.0 * (total - matched)/total, (total - matched), total))
     vocab = Vocabulary.build(vocab)
-    logger.info('final vocab size: {}'.format(len(vocab)))
-    return vocab
+    tag_vocab = Vocabulary.build(tag_counter)
+    ner_vocab = Vocabulary.build(ner_counter)
+    print('final vocab size: {}'.format(len(vocab)))
+    print('POS Tag vocab size: {}'.format(len(tag_vocab)))
+    print('NER Tag vocab size: {}'.format(len(ner_vocab)))
+
+    return vocab, tag_vocab, ner_vocab
+
 
 def load_data(path, is_train=True):
     rows = []
@@ -91,7 +106,7 @@ def postag_func(toks, vocab):
     return [vocab[w.tag_] for w in toks if len(w.text) > 0]
 
 def nertag_func(toks, vocab):
-    return [vocab[w.ent_type_] for w in toks if len(w.text) > 0]
+    return [vocab['{}_{}'.format(w.ent_type_, w.ent_iob_)] for w in toks if len(w.text) > 0]
 
 def tok_func(toks, vocab):
     return [vocab[w.text] for w in toks if len(w.text) > 0]
@@ -179,23 +194,22 @@ def main():
     logger.info('{}-dim word vector path: {}'.format(args.glove_dim, args.glove))
     glove_path = args.glove
     glove_dim = args.glove_dim
-    nlp = spacy.load('en', parser=False)
     set_environment(args.seed)
     logger.info('Loading glove vocab.')
     glove_vocab = load_glove_vocab(glove_path, glove_dim)
     # load data
     train_data = load_data(train_path)
     valid_data = load_data(valid_path, False)
-    vocab_tag = Vocabulary.build(nlp.tagger.tag_names, neat=True)
-    vocab_ner = Vocabulary.build([''] + nlp.entity.cfg[u'actions']['1'], neat=True)
+
     logger.info('Build vocabulary')
-    vocab = build_vocab(train_data + valid_data, glove_vocab, sort_all=args.sort_all, clean_on=True)
+    vocab, vocab_tag, vocab_ner = build_vocab(train_data + valid_data, glove_vocab, sort_all=args.sort_all, clean_on=True)
     meta_path = os.path.join(args.data_dir, args.meta)
     logger.info('building embedding')
     embedding = build_embedding(glove_path, vocab, glove_dim)
     meta = {'vocab': vocab, 'vocab_tag': vocab_tag, 'vocab_ner': vocab_ner, 'embedding': embedding}
     with open(meta_path, 'wb') as f:
         pickle.dump(meta, f)
+
     train_fout = os.path.join(args.data_dir, args.train_data)
     build_data(train_data, vocab, vocab_tag, vocab_ner, train_fout, True)
     dev_fout = os.path.join(args.data_dir, args.dev_data)

@@ -136,9 +136,9 @@ class LexiconEncoder(nn.Module):
 
         if self.opt['prealign_on']:
             q2d_atten = self.prealign(doc_emb, query_emb, query_mask)
-            d2q_atten = self.prealign(query_emb, doc_emb, doc_mask)
             drnn_input_list.append(q2d_atten)
             if self.opt['prealign_bidi']:
+                d2q_atten = self.prealign(query_emb, doc_emb, doc_mask)
                 qrnn_input_list.append(d2q_atten)
 
         if self.opt['pos_on']:
@@ -155,13 +155,15 @@ class LexiconEncoder(nn.Module):
 
         if self.opt['feat_on']:
             doc_fea = self.patch(batch['doc_fea'])
+            doc_fea = self.dropout(doc_fea)
             drnn_input_list.append(doc_fea)
 
         doc_input = torch.cat(drnn_input_list, 2)
         query_input = torch.cat(qrnn_input_list, 2)
         if self.pwnn_on:
-            doc_input = self.doc_pwnn(doc_input)
-            query_input = self.que_pwnn(query_input)
             doc_input = self.dropout(doc_input)
             query_input = self.dropout(query_input)
+            doc_input = self.doc_pwnn(doc_input)
+            query_input = self.que_pwnn(query_input)
+
         return doc_input, query_input, doc_emb, query_emb, doc_cove_low, doc_cove_high, query_cove_low, query_cove_high, doc_mask, query_mask
