@@ -144,13 +144,13 @@ class LexiconEncoder(nn.Module):
         if self.opt['pos_on']:
             doc_pos = self.patch(batch['doc_pos'])
             doc_pos_emb = self.pos_embedding(doc_pos)
-            #doc_pos_emb = self.dropout(doc_pos_emb)
+            doc_pos_emb = self.dropout(doc_pos_emb)
             drnn_input_list.append(doc_pos_emb)
 
         if self.opt['ner_on']:
             doc_ner = self.patch(batch['doc_ner'])
             doc_ner_emb = self.ner_embedding(doc_ner)
-            #doc_ner_emb = self.dropout(doc_ner_emb)
+            doc_ner_emb = self.dropout(doc_ner_emb)
             drnn_input_list.append(doc_ner_emb)
 
         if self.opt['feat_on']:
@@ -162,6 +162,6 @@ class LexiconEncoder(nn.Module):
         if self.pwnn_on:
             doc_input = self.doc_pwnn(doc_input)
             query_input = self.que_pwnn(query_input)
-        doc_input = self.dropout(doc_input)
-        query_input = self.dropout(query_input)
+            doc_input = self.dropout(doc_input)
+            query_input = self.dropout(query_input)
         return doc_input, query_input, doc_emb, query_emb, doc_cove_low, doc_cove_high, query_cove_low, query_cove_high, doc_mask, query_mask

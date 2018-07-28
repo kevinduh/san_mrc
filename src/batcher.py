@@ -8,6 +8,7 @@ import logging
 import numpy as np
 import pickle as pkl
 from shutil import copyfile
+from my_utils.tokenizer import UNK_ID
 
 def load_meta(opt, meta_path):
     with open(meta_path, 'rb') as f:
@@ -19,17 +20,22 @@ def load_meta(opt, meta_path):
     return embedding, opt
 
 class BatchGen:
-    def __init__(self, data_path, batch_size, gpu, is_train=True, doc_maxlen=1000):
+    def __init__(self, data_path, batch_size, gpu, is_train=True, doc_maxlen=1000, dropout_w=0.05, dw_type=0):
         self.batch_size = batch_size
         self.doc_maxlen = doc_maxlen
         self.is_train = is_train
         self.gpu = gpu
         self.data_path = data_path
+        self.dropout_w = dropout_w
+        self.dw_type = dw_type
+
         self.data = self.load(self.data_path, is_train, doc_maxlen)
+
         if is_train:
             indices = list(range(len(self.data)))
             random.shuffle(indices)
             data = [self.data[i] for i in indices]
+
         data = [self.data[i:i + batch_size] for i in range(0, len(self.data), batch_size)]
         self.data = data
         self.offset = 0

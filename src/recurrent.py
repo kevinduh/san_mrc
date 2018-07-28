@@ -21,7 +21,7 @@ class OneLayerBRNN(nn.Module):
         self.dropout = dropout
         self.output_size = hidden_size if self.maxout_on else hidden_size * 2
         self.hidden_size = hidden_size
-        self.rnn = getattr(nn, self.cell_type, default=nn.GRU)(input_size, hidden_size, num_layers=1, bidirectional=True)
+        self.rnn = getattr(nn, self.cell_type)(input_size, hidden_size, num_layers=1, bidirectional=True)
 
     def forward(self, x, x_mask):
         x = x.transpose(0, 1)
@@ -143,7 +143,6 @@ class ContextualEmbed(nn.Module):
         #output1 = unpack(output1, batch_first=True)[0]
         #output2 = unpack(output2, batch_first=True)[0]
         #_, _indices = torch.sort(indices, 0)
-        output1 = output1[_indices]
-        output2 = output2[_indices]
+        #output1 = output1[_indices]
+        #output2 = output2[_indices]
         return output1, output2
-
