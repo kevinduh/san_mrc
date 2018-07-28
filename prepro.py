@@ -130,7 +130,7 @@ def build_span(context, answer, context_token, answer_start, answer_end, is_trai
         p_str += token_len
         p_token += 1
     if is_train and (t_start == -1 or t_end == -1):
-        return (None, None, [])
+        return (-1, -1, [])
     else:
         return (t_start, t_end, t_span)
 

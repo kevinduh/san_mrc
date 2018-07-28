@@ -18,7 +18,7 @@ from src.batcher import load_meta, BatchGen
 from config import set_args
 from my_utils.utils import set_environment
 from my_utils.log_wrapper import create_logger
-from my_utils.squad_eval import evaluate_file
+from my_utils.squad_eval import evaluate
 
 args = set_args()
 # set model dir
@@ -31,7 +31,20 @@ set_environment(args.seed, args.cuda)
 # setup logger
 logger =  create_logger(__name__, to_disk=True, log_file=args.log_file)
 
-def check(model, data, gold_path):
+def load_squad(data_path):
+    """Loading squad data
+    """
+    expected_version = '1.1'
+    with open(data_path) as dataset_file:
+        dataset_json = json.load(dataset_file)
+        if (dataset_json['version'] != expected_version):
+            print('Evaluation expects v-' + expected_version +
+                  ', but got dataset with v-' + dataset_json['version'],
+                  file=sys.stderr)
+        dataset = dataset_json['data']
+        return dataset
+
+def check(model, data, gold):
     data.reset()
     predictions = {}
     for batch in data:
@@ -40,7 +53,7 @@ def check(model, data, gold_path):
         for uid, pred in zip(uids, phrase):
             predictions[uid] = pred
 
-    results = evaluate_file(gold_path, predictions)
+    results = evaluate_file(gold, predictions)
     return results['exact_match'], results['f1'], predictions
 
 def main():
@@ -54,6 +67,9 @@ def main():
     dev_data = BatchGen(os.path.join(args.data_dir, args.dev_data),
                           batch_size=args.batch_size,
                           gpu=args.cuda, is_train=False)
+
+    # load golden standard
+    dev_gold = load_squad(args.dev_gold)
 
     model = DocReaderModel(opt, embedding)
     # model meta str
@@ -79,7 +95,7 @@ def main():
                     model.updates, model.train_loss.avg,
                     str((datetime.now() - start) / (i + 1) * (len(train_data) - i - 1)).split('.')[0]))
         # dev eval
-        em, f1, results = check(model, dev_data, args.dev_gold)
+        em, f1, results = check(model, dev_data, dev_gold)
         output_path = os.path.join(model_dir, 'dev_output_{}.json'.format(epoch))
         with open(output_path, 'w') as f:
             json.dump(results, f)

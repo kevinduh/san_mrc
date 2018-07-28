@@ -102,8 +102,8 @@ class DocReaderModel(object):
             self.update_eval_embed()
             self.eval_embed_transfer = False
         start, end = self.network(batch)
-        start = F.softmax(start)
-        end = F.softmax(end)
+        start = F.softmax(start, 1)
+        end = F.softmax(end, 1)
         start = start.data.cpu()
         end = end.data.cpu()
         text = batch['text']
@@ -154,7 +154,6 @@ class DocReaderModel(object):
                     = self.network.lexicon_encoder.fixed_embedding
 
     def save(self, filename, epoch):
-        # strip cove
         network_state = dict([(k, v) for k, v in self.network.state_dict().items() if k[0:4] != 'CoVe'])
         if 'eval_embed.weight' in network_state:
             del network_state['eval_embed.weight']
@@ -170,7 +169,7 @@ class DocReaderModel(object):
     def cuda(self):
         self.network.cuda()
 
-    def position_encoding(self, m, threshold=4):
+    def position_encoding(self, m, threshold=5):
         encoding = np.ones((m, m), dtype=np.float32)
         for i in range(m):
             for j in range(i, m):

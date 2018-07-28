@@ -58,6 +58,18 @@ class BatchGen:
             self.data = [self.data[i] for i in indices]
         self.offset = 0
 
+    def __random_select__(self, arr):
+        if self.dropout_w > 0:
+            if self.dw_type > 0:
+                ids = list(set(arr))
+                ids_size = len(ids)
+                random.shuffle(ids)
+                ids = set(ids[:int(ids_size * self.dropout_w)])
+                return [UNK_ID if e in ids else e for e in arr]
+            else:
+                return [UNK_ID if random.uniform(0, 1) < self.dropout_w else e for e in arr]
+        else: return arr
+
     def __len__(self):
         return len(self.data)
 
@@ -79,14 +91,21 @@ class BatchGen:
 
             for i, sample in enumerate(batch):
                 select_len = min(len(sample['doc_tok']), doc_len)
-                doc_id[i, :select_len] = torch.LongTensor(sample['doc_tok'][:select_len])
+                doc_tok = sample['doc_tok']
+                query_tok = sample['query_tok']
+
+                if self.is_train:
+                    doc_tok = self.__random_select__(doc_tok)
+                    query_tok = self.__random_select__(query_tok)
+
+                doc_id[i, :select_len] = torch.LongTensor(doc_tok[:select_len])
                 doc_tag[i, :select_len] = torch.LongTensor(sample['doc_pos'][:select_len])
                 doc_ent[i, :select_len] = torch.LongTensor(sample['doc_ner'][:select_len])
                 for j, feature in enumerate(eval(sample['doc_fea'])):
                     doc_feature[i, j, :] = torch.Tensor(feature)
-                # parse query
-                select_len = min(len(sample['query_tok']), query_len)
-                query_id[i, :len(sample['query_tok'])] = torch.LongTensor(sample['query_tok'][:select_len])
+
+                select_len = min(len(query_tok), query_len)
+                query_id[i, :len(sample['query_tok'])] = torch.LongTensor(query_tok[:select_len])
 
             doc_mask = torch.eq(doc_id, 0)
             query_mask = torch.eq(query_id, 0)

@@ -9,22 +9,19 @@ from torch.nn.utils.rnn import pad_packed_sequence as unpack
 from torch.nn.utils.rnn import pack_padded_sequence as pack
 from .my_optim import weight_norm as WN
 
-# TODO: use system func to bind ~
-RNN_MAP = {'lstm': nn.LSTM, 'gru': nn.GRU, 'rnn': nn.RNN}
-
 class OneLayerBRNN(nn.Module):
     def __init__(self, input_size, hidden_size, prefix='stack_rnn', opt={}, dropout=None):
         super(OneLayerBRNN, self).__init__()
         self.opt = opt
         self.prefix = prefix
-        self.cell_type = self.opt.get('{}_cell'.format(self.prefix), 'lstm')
+        self.cell_type = self.opt.get('{}_cell'.format(self.prefix), 'lstm').upper()
         self.emb_dim = self.opt.get('{}_embd_dim'.format(self.prefix), 0)
         self.maxout_on = self.opt.get('{}_maxout_on'.format(self.prefix), False)
         self.weight_norm_on = self.opt.get('{}_weight_norm_on'.format(self.prefix), False)
         self.dropout = dropout
         self.output_size = hidden_size if self.maxout_on else hidden_size * 2
         self.hidden_size = hidden_size
-        self.rnn = RNN_MAP[self.cell_type](input_size, hidden_size, num_layers=1, bidirectional=True)
+        self.rnn = getattr(nn, self.cell_type, default=nn.GRU)(input_size, hidden_size, num_layers=1, bidirectional=True)
 
     def forward(self, x, x_mask):
         x = x.transpose(0, 1)
@@ -42,11 +39,11 @@ class BRNNEncoder(nn.Module):
         super(BRNNEncoder, self).__init__()
         self.opt = opt
         self.dropout = dropout
-        self.cell_type = opt.get('{}_cell'.format(self.prefix), 'gru')
+        self.cell_type = opt.get('{}_cell'.format(self.prefix), 'gru').upper()
         self.weight_norm_on = opt.get('{}_weight_norm_on'.format(self.prefix), False)
         self.top_layer_only = opt.get('{}_top_layer_only'.format(self.prefix), False)
         self.num_layers = opt.get('{}_num_layers'.format(self.prefix), 1)
-        self.rnn = RNN_MAP[self.cell_type](input_size, hidden_size, self.num_layers, bidirectional=True)
+        self.rnn = getattr(nn, self.cell_type, default=nn.GRU)(input_size, hidden_size, self.num_layers, bidirectional=True)
         if self.weight_norm_on:
             self.rnn = WN(self.rnn)
         if self.top_layer_only:
@@ -138,13 +135,14 @@ class ContextualEmbed(nn.Module):
     def forward(self, x_idx, x_mask):
         emb = self.embedding if self.training else self.eval_embed
         x_hiddens = emb(x_idx)
-        lengths = x_mask.data.eq(0).long().sum(1).squeeze()
-        lens, indices = torch.sort(lengths, 0, True)
-        output1, _ = self.rnn1(pack(x_hiddens[indices], lens.tolist(), batch_first=True))
+        #lengths = x_mask.data.eq(0).long().sum(1).squeeze()
+        #lens, indices = torch.sort(lengths, 0, True)
+        #output1, _ = self.rnn1(pack(x_hiddens[indices], lens.tolist(), batch_first=True))
+        output1, _ = self.rnn1(x_hiddens)
         output2, _ = self.rnn2(output1)
-        output1 = unpack(output1, batch_first=True)[0]
-        output2 = unpack(output2, batch_first=True)[0]
-        _, _indices = torch.sort(indices, 0)
+        #output1 = unpack(output1, batch_first=True)[0]
+        #output2 = unpack(output2, batch_first=True)[0]
+        #_, _indices = torch.sort(indices, 0)
         output1 = output1[_indices]
         output2 = output2[_indices]
         return output1, output2

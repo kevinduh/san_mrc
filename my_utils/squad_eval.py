@@ -51,18 +51,6 @@ def metric_max_over_ground_truths(metric_fn, prediction, ground_truths):
         scores_for_ground_truths.append(score)
     return max(scores_for_ground_truths)
 
-def evaluate_file(data_path, predictions):
-    """Used for validate"""
-    expected_version = '1.1'
-    with open(data_path) as dataset_file:
-        dataset_json = json.load(dataset_file)
-        if (dataset_json['version'] != expected_version):
-            print('Evaluation expects v-' + expected_version +
-                  ', but got dataset with v-' + dataset_json['version'],
-                  file=sys.stderr)
-        dataset = dataset_json['data']
-        return evaluate(dataset, predictions)
-
 def evaluate(dataset, predictions):
     f1 = exact_match = total = 0
     for article in dataset:
