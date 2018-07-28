@@ -53,7 +53,7 @@ def check(model, data, gold):
         for uid, pred in zip(uids, phrase):
             predictions[uid] = pred
 
-    results = evaluate_file(gold, predictions)
+    results = evaluate(gold, predictions)
     return results['exact_match'], results['f1'], predictions
 
 def main():

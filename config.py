@@ -132,7 +132,7 @@ def train_config(parser):
                         help='supported optimizer: adamax, sgd, adadelta, adam')
     parser.add_argument('--grad_clipping', type=float, default=10)
     parser.add_argument('--weight_decay', type=float, default=0)
-    parser.add_argument('--learning_rate', type=float, default=0.001)
+    parser.add_argument('--learning_rate', type=float, default=0.002)
     parser.add_argument('--momentum', type=float, default=0)
     parser.add_argument('--vb_dropout', action='store_false')
     parser.add_argument('--dropout_p', type=float, default=0.4)
