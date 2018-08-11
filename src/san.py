@@ -91,10 +91,10 @@ class SAN(nn.Module):
             end_scores_list.append(end_scores)
 
         if self.mem_type == 1:
-            mask = generate_mask(self.alpha.data.new(x.size(0), self.num_turn), self.mem_random_drop) 
+            mask = generate_mask(self.alpha.data.new(x.size(0), self.num_turn), self.mem_random_drop)
             mask = [m.contiguous() for m in torch.unbind(mask, 1)]
-            start_scores_list = [mask[idx].view(x.size(0), 1).expand_as(inp) * F.softmax(inp, 1) for idx, inp in enumerate(start_scores_list)] 
-            end_scores_list = [mask[idx].view(x.size(0), 1).expand_as(inp) * F.softmax(inp, 1) for idx, inp in enumerate(end_scores_list)] 
+            start_scores_list = [mask[idx].view(x.size(0), 1).expand_as(inp) * F.softmax(inp, 1) for idx, inp in enumerate(start_scores_list)]
+            end_scores_list = [mask[idx].view(x.size(0), 1).expand_as(inp) * F.softmax(inp, 1) for idx, inp in enumerate(end_scores_list)]
             start_scores = torch.stack(start_scores_list, 2)
             end_scores = torch.stack(end_scores_list, 2)
             start_scores = torch.mean(start_scores, 2)

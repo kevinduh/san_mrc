@@ -135,14 +135,15 @@ class ContextualEmbed(nn.Module):
     def forward(self, x_idx, x_mask):
         emb = self.embedding if self.training else self.eval_embed
         x_hiddens = emb(x_idx)
-        #lengths = x_mask.data.eq(0).long().sum(1).squeeze()
-        #lens, indices = torch.sort(lengths, 0, True)
-        #output1, _ = self.rnn1(pack(x_hiddens[indices], lens.tolist(), batch_first=True))
-        output1, _ = self.rnn1(x_hiddens)
+        lengths = x_mask.data.eq(0).long().sum(1) # note: I deleted squeeze here
+        max_len = x_mask.size(1)
+        lens, indices = torch.sort(lengths, 0, True)
+        output1, _ = self.rnn1(pack(x_hiddens[indices], lens.tolist(), batch_first=True))
         output2, _ = self.rnn2(output1)
-        #output1 = unpack(output1, batch_first=True)[0]
-        #output2 = unpack(output2, batch_first=True)[0]
-        #_, _indices = torch.sort(indices, 0)
-        #output1 = output1[_indices]
-        #output2 = output2[_indices]
+        output1 = unpack(output1, batch_first=True, total_length=max_len)[0]
+        output2 = unpack(output2, batch_first=True, total_length=max_len)[0]
+        _, _indices = torch.sort(indices, 0)
+        output1 = output1[_indices]
+        output2 = output2[_indices]
         return output1, output2
+

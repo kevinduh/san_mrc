@@ -7,7 +7,7 @@ Author: xiaodl@microsoft.com
 import numpy as np
 from .tokenizer import normalize_text
 
-def load_glove_vocab(path, glove_dim=300, fast_vec_format=False):
+def load_glove_vocab(path, glove_dim=300, fast_veqqqqc_format=False):
     vocab = set()
     with open(path, encoding="utf8") as f:
         line_count = 0
