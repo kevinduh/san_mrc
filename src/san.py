@@ -20,7 +20,8 @@ from src.dropout_wrapper import DropoutWrapper
 
 SMALL_POS_NUM=1.0e-30
 
-def generate_mask(new_data, dropout_p=0.0):
+def generate_mask(new_data, dropout_p=0.0, is_training=False):
+    if not is_training: dropout_p = 0.0
     new_data = (1-dropout_p) * (new_data.zero_() + 1)
     for i in range(new_data.size(0)):
         one = random.randint(0, new_data.size(1)-1)
@@ -91,7 +92,7 @@ class SAN(nn.Module):
             end_scores_list.append(end_scores)
 
         if self.mem_type == 1:
-            mask = generate_mask(self.alpha.data.new(x.size(0), self.num_turn), self.mem_random_drop)
+            mask = generate_mask(self.alpha.data.new(x.size(0), self.num_turn), self.mem_random_drop, self.training)
             mask = [m.contiguous() for m in torch.unbind(mask, 1)]
             start_scores_list = [mask[idx].view(x.size(0), 1).expand_as(inp) * F.softmax(inp, 1) for idx, inp in enumerate(start_scores_list)]
             end_scores_list = [mask[idx].view(x.size(0), 1).expand_as(inp) * F.softmax(inp, 1) for idx, inp in enumerate(end_scores_list)]

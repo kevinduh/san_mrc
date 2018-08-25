@@ -90,9 +90,8 @@ class ContextualEmbedV2(nn.Module):
         pass
 
     def forward(self, x, x_mask):
-        """A pretrained MT-LSTM (McCann et. al. 2017).
-        """
-        lengths = x_mask.data.eq(0).long().sum(1).squeeze()
+        lengths = x_mask.data.eq(0).long().sum(1)
+        max_len = x_mask.size(1)
         lens, indices = torch.sort(lengths, 0, True)
         output1, _ = self.rnn1(pack(x[indices], lens.tolist(), batch_first=True))
         output2, _ = self.rnn2(output1)
@@ -135,7 +134,7 @@ class ContextualEmbed(nn.Module):
     def forward(self, x_idx, x_mask):
         emb = self.embedding if self.training else self.eval_embed
         x_hiddens = emb(x_idx)
-        lengths = x_mask.data.eq(0).long().sum(1) # note: I deleted squeeze here
+        lengths = x_mask.data.eq(0).long().sum(1)
         max_len = x_mask.size(1)
         lens, indices = torch.sort(lengths, 0, True)
         output1, _ = self.rnn1(pack(x_hiddens[indices], lens.tolist(), batch_first=True))

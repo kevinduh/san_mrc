@@ -22,7 +22,7 @@ class LexiconEncoder(nn.Module):
 
     def create_word_embed(self, embedding=None, opt={}, prefix='wemb'):
         vocab_size = opt.get('vocab_size', 1)
-        embed_dim = opt.get('{}_dim'.format(prefix), 300)
+        embed_dim = opt.get('embedding_dim', 300)
         self.embedding = self.create_embed(vocab_size, embed_dim)
         if embedding is not None:
             self.embedding.weight.data = embedding
@@ -39,13 +39,13 @@ class LexiconEncoder(nn.Module):
         return embed_dim
 
     def create_pos_embed(self, opt={}, prefix='pos'):
-        vocab_size = opt.get('{}_vocab_size'.format(prefix), 56)
+        vocab_size = opt.get('{}_vocab_size'.format(prefix), 54)
         embed_dim = opt.get('{}_dim'.format(prefix), 12)
         self.pos_embedding = self.create_embed(vocab_size, embed_dim)
         return embed_dim
 
     def create_ner_embed(self, opt={}, prefix='ner'):
-        vocab_size = opt.get('{}_vocab_size'.format(prefix), 19)
+        vocab_size = opt.get('{}_vocab_size'.format(prefix), 41)
         embed_dim = opt.get('{}_dim'.format(prefix), 8)
         self.ner_embedding = self.create_embed(vocab_size, embed_dim)
         return embed_dim
@@ -63,6 +63,8 @@ class LexiconEncoder(nn.Module):
         que_input_size = 0
         self.dropout = DropoutWrapper(opt['dropout_p']) if dropout == None else dropout
         self.dropout_emb = DropoutWrapper(opt['dropout_emb'])
+        self.dropout_cove = DropoutWrapper(opt['dropout_cov'])
+
         # word embedding
         embedding_dim = self.create_word_embed(embedding, opt)
         self.embedding_dim = embedding_dim
@@ -127,10 +129,10 @@ class LexiconEncoder(nn.Module):
         if self.opt['covec_on']:
             doc_cove_low, doc_cove_high = self.ContextualEmbed(doc_tok, doc_mask)
             query_cove_low, query_cove_high = self.ContextualEmbed(query_tok, query_mask)
-            doc_cove_low = self.dropout(doc_cove_low)
-            doc_cove_high = self.dropout(doc_cove_high)
-            query_cove_low = self.dropout(query_cove_low)
-            query_cove_high = self.dropout(query_cove_high)
+            doc_cove_low = self.dropout_cove(doc_cove_low)
+            doc_cove_high = self.dropout_cove(doc_cove_high)
+            query_cove_low = self.dropout_cove(query_cove_low)
+            query_cove_high = self.dropout_cove(query_cove_high)
             drnn_input_list.append(doc_cove_low)
             qrnn_input_list.append(query_cove_low)
 

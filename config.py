@@ -8,16 +8,16 @@ Configuration file
 """
 def model_config(parser):
     parser.add_argument('--vocab_size', type=int, default=0)
-    parser.add_argument('--wemb_dim', type=int, default=300)
     parser.add_argument('--covec_on', action='store_false')
     parser.add_argument('--embedding_dim', type=int, default=300)
+    parser.add_argument('--fasttext_on', action='store_true')
 
     # pos
     parser.add_argument('--no_pos', dest='pos_on', action='store_false')
-    parser.add_argument('--pos_vocab_size', type=int, default=56)
+    parser.add_argument('--pos_vocab_size', type=int, default=54)
     parser.add_argument('--pos_dim', type=int, default=12)
-    parser.add_argument('--no_ner', dest='ner_on', action='store_false')
-    parser.add_argument('--ner_vocab_size', type=int, default=19)
+    parser.add_argument('--no_ner', dest='ner_on', action='store_false', help='NER_BIO')
+    parser.add_argument('--ner_vocab_size', type=int, default=41)
     parser.add_argument('--ner_dim', type=int, default=8)
     parser.add_argument('--no_feat', dest='feat_on', action='store_false')
     parser.add_argument('--num_features', type=int, default=4)
@@ -36,7 +36,7 @@ def model_config(parser):
     parser.add_argument('--prealign_activation', type=str, default='relu')
 
     parser.add_argument('--pwnn_on', action='store_false')
-    parser.add_argument('--pwnn_hidden_size', type=int, default=128)
+    parser.add_argument('--pwnn_hidden_size', type=int, default=256, help='support short con')
 
     ##contextual encoding
     parser.add_argument('--contextual_hidden_size', type=int, default=128)
@@ -86,7 +86,7 @@ def model_config(parser):
 
     parser.add_argument('--max_len', type=int, default=5)
     parser.add_argument('--decoder_num_turn', type=int, default=5)
-    parser.add_argument('--decoder_mem_type', type=int, default=1)
+    parser.add_argument('--decoder_mem_type', type=int, default=0)
     parser.add_argument('--decoder_mem_drop_p', type=float, default=0.1)
     parser.add_argument('--decoder_opt', type=int, default=0)
     parser.add_argument('--decoder_att_hidden_size', type=int, default=128)
@@ -102,7 +102,7 @@ def model_config(parser):
 def data_config(parser):
     parser.add_argument('--log_file', default='san.log', help='path for log file.')
     parser.add_argument('--data_dir', default='data/')
-    parser.add_argument('--meta', default='squad_meta.pick', help='path to preprocessed meta file.')
+    parser.add_argument('--meta', default='meta.pick')
     parser.add_argument('--train_data', default='train_data.json',
                         help='path to preprocessed training data file.')
     parser.add_argument('--dev_data', default='dev_data.json',
@@ -112,8 +112,6 @@ def data_config(parser):
     parser.add_argument('--covec_path', default='data/MT-LSTM.pt')
     parser.add_argument('--glove', default='data/glove.840B.300d.txt',
                         help='path to word vector file.')
-    parser.add_argument('--glove_dim', type=int, default=300,
-                        help='word vector dimension.')
     parser.add_argument('--sort_all', action='store_true',
                         help='sort the vocabulary by frequencies of all words.'
                              'Otherwise consider question words first.')
@@ -124,21 +122,19 @@ def data_config(parser):
 def train_config(parser):
     parser.add_argument('--cuda', type=bool, default=torch.cuda.is_available(), 
                         help='Use GPU acceleration.')
-    parser.add_argument('--log_per_updates', type=int, default=50)
-    parser.add_argument('--epoches', type=int, default=128)
+    parser.add_argument('--log_per_updates', type=int, default=100)
+    parser.add_argument('--epoches', type=int, default=50)
     parser.add_argument('--batch_size', type=int, default=32)
-    parser.add_argument('--resume')
-    parser.add_argument('--optimizer', default='adamax',
-                        help='supported optimizer: adamax, sgd, adadelta, adam')
-    parser.add_argument('--grad_clipping', type=float, default=10)
+    parser.add_argument('--optimizer', default='adamax')
+    parser.add_argument('--grad_clipping', type=float, default=5)
     parser.add_argument('--weight_decay', type=float, default=0)
     parser.add_argument('--learning_rate', type=float, default=0.002)
     parser.add_argument('--momentum', type=float, default=0)
     parser.add_argument('--vb_dropout', action='store_false')
-    parser.add_argument('--dropout_p', type=float, default=0.4)
+    parser.add_argument('--dropout_p', type=float, default=0.35)
     parser.add_argument('--dropout_emb', type=float, default=0.4)
+    parser.add_argument('--dropout_cov', type=float, default=0.4)
     parser.add_argument('--dropout_w', type=float, default=0.05)
-
     # scheduler
     parser.add_argument('--no_lr_scheduler', dest='have_lr_scheduler', action='store_false')
     parser.add_argument('--multi_step_lr', type=str, default='10,20,30')
@@ -147,8 +143,13 @@ def train_config(parser):
     parser.add_argument('--fix_embeddings', action='store_true', help='if true, `tune_partial` will be ignored.')
     parser.add_argument('--tune_partial', type=int, default=1000, help='finetune top-x embeddings (including <PAD>, <UNK>).')
     parser.add_argument('--model_dir', default='checkpoint')
-    parser.add_argument('--seed', type=int, default=2018,
-                        help='random seed for data shuffling, embedding init, etc.')
+    parser.add_argument('--seed', type=int, default=2018)
+
+    # dummy settings on philly
+    parser.add_argument('--gpu', default=0, type=int, help='Use for philly tools.')
+    parser.add_argument('--dataDir', default=None, type=str, help='Use for philly tools.')
+    parser.add_argument('--modelDir', default='checkpoint', type=str, help='Use for philly tools. Will replace model_dir if exists.')
+    parser.add_argument('--logDir',default='.', type=str, help='Use for philly tools. Will replace log_file location if exists.')
     return parser
 
 def set_args():

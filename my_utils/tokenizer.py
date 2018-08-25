@@ -23,6 +23,21 @@ UNK_ID = 1
 STA_ID = 2
 END_ID = 3
 
+DigitsMapper = {'0': 'zero', '1': 'one', '2': 'two', '3': 'three', '4': 'four', '5': 'five', '6': 'six', '7': 'seven', '8': 'eight', '9': 'nine', '10': 'ten',
+                'zero': '0', 'one': '1', 'two': '2', 'three': '3', 'four': '4', 'five': '5', 'six': '6', 'seven': '7','eight': '8', 'nine': '9', 'ten': '10'}
+
+def normal_query(query, document):
+    """ normalize digits
+    """
+    nq = []
+    for w in query:
+        if w in DigitsMapper and w not in document:
+            if DigitsMapper[w] in document:
+                w = DigitsMapper[w]
+        nq.append(w)
+    return nq
+
+
 def normalize_text(text):
     return unicodedata.normalize('NFD', text)
 
