@@ -13,7 +13,6 @@ import tqdm
 import pickle
 from functools import partial
 from collections import Counter
-## clean up
 from my_utils.tokenizer import Vocabulary, reform_text
 from my_utils.word2vec_utils import load_glove_vocab, build_embedding
 from my_utils.utils import set_environment
@@ -22,62 +21,43 @@ from config import set_args
 
 """
 This script is to preproces SQuAD dataset.
-TODO: adding multi-thread ...
 """
 NLP = spacy.load('en', disable=['vectors', 'textcat', 'parser'])
 
 def build_vocab(data, glove_vocab=None, sort_all=False, thread=24, clean_on=False):
-    print('Collect vocab/pos counter/ner counter')
+    # disable tagger, ner and parser for speeding up
+    nlp = spacy.load('en', disable=['vectors', 'textcat', 'tagger', 'ner', 'parser'])
     # docs
     docs = [reform_text(sample['context']) for sample in data]
-    doc_tokened = [doc for doc in NLP.pipe(docs, batch_size=64, n_threads=thread)]
+    doc_tokened = [doc for doc in nlp.pipe(docs, batch_size=100, n_threads=thread)]
     print('Done with doc tokenize')
     questions = [reform_text(sample['question']) for sample in data]
-    questions_tokened = [question for question in NLP.pipe(questions, batch_size=64, n_threads=thread)]
+    questions_tokened = [question for question in nlp.pipe(questions, batch_size=100, n_threads=thread)]
     print('Done with question tokenize')
 
-    tag_counter = Counter()
-    ner_counter = Counter()
     if sort_all:
         counter = Counter()
         merged = doc_tokened + questions_tokened
         for tokened in tqdm.tqdm(merged, total=len(data)):
             counter.update([w.text for w in tokened if len(w.text) > 0])
-            tag_counter.update([w.tag_ for w in tokened if len(w.text) > 0])
-            ner_counter.update(['{}_{}'.format(w.ent_type_, w.ent_iob_) for w in tokened])
         vocab = sorted([w for w in counter if w in glove_vocab], key=counter.get, reverse=True)
     else:
         query_counter = Counter()
         doc_counter = Counter()
-
         for tokened in tqdm.tqdm(doc_tokened, total=len(doc_tokened)):
             doc_counter.update([w.text for w in tokened if len(w.text) > 0])
-            tag_counter.update([w.tag_ for w in tokened if len(w.text) > 0])
-            ner_counter.update(['{}_{}'.format(w.ent_type_, w.ent_iob_) for w in tokened])
-
         for tokened in tqdm.tqdm(questions_tokened, total=len(questions_tokened)):
             query_counter.update([w.text for w in tokened if len(w.text) > 0])
-            tag_counter.update([w.tag_ for w in tokened if len(w.text) > 0])
-            ner_counter.update(['{}_{}'.format(w.ent_type_, w.ent_iob_) for w in tokened])
         counter = query_counter + doc_counter
-        # sort query words
         vocab = sorted([w for w in query_counter if w in glove_vocab], key=query_counter.get, reverse=True)
         vocab += sorted([w for w in doc_counter.keys() - query_counter.keys() if w in glove_vocab], key=counter.get, reverse=True)
-    tag_counter = sorted([w for w in tag_counter], key=tag_counter.get, reverse=True)
-    ner_counter = sorted([w for w in ner_counter], key=ner_counter.get, reverse=True)
-
     total = sum(counter.values())
     matched = sum(counter[w] for w in vocab)
     print('Raw vocab size vs vocab in glove: {0}/{1}'.format(len(counter), len(vocab)))
     print('OOV rate:{0:.4f}={1}/{2}'.format(100.0 * (total - matched)/total, (total - matched), total))
     vocab = Vocabulary.build(vocab)
-    tag_vocab = Vocabulary.build(tag_counter)
-    ner_vocab = Vocabulary.build(ner_counter)
-    print('final vocab size: {}'.format(len(vocab)))
-    print('POS Tag vocab size: {}'.format(len(tag_vocab)))
-    print('NER Tag vocab size: {}'.format(len(ner_vocab)))
-
-    return vocab, tag_vocab, ner_vocab
+    print('Got {} words'.format(len(vocab)))
+    return vocab
 
 
 def load_data(path, is_train=True):
@@ -91,6 +71,7 @@ def load_data(path, is_train=True):
             for qa in paragraph['qas']:
                 uid, question = qa['id'], qa['question']
                 answers = qa.get('answers', [])
+                # TODO: extend to support v2 ?
                 if is_train:
                     if len(answers) < 1: continue
                     answer = answers[0]['text']
@@ -150,6 +131,7 @@ def build_span(context, answer, context_token, answer_start, answer_end, is_trai
         return (t_start, t_end, t_span)
 
 def feature_func(sample, vocab, vocab_tag, vocab_ner, is_train=True):
+    # TODO: this is too slow
     query_tokend = NLP(reform_text(sample['question']))
     doc_tokend = NLP(reform_text(sample['context']))
     # features
@@ -202,7 +184,15 @@ def main():
     valid_data = load_data(valid_path, False)
 
     logger.info('Build vocabulary')
-    vocab, vocab_tag, vocab_ner = build_vocab(train_data + valid_data, glove_vocab, sort_all=args.sort_all, clean_on=True)
+    vocab = build_vocab(train_data + valid_data, glove_vocab, sort_all=args.sort_all, clean_on=True)
+
+    # loading ner/pos tagging vocab
+    resource_path = 'resource'
+    with open(os.path.join(resource_path, 'vocab_tag.pick'),'rb') as f:
+        vocab_tag = pickle.load(f)
+    with open(os.path.join(resource_path,'vocab_ner.pick'),'rb') as f:
+        vocab_ner = pickle.load(f)
+
     meta_path = os.path.join(args.data_dir, args.meta)
     logger.info('building embedding')
     embedding = build_embedding(glove_path, vocab, glove_dim)
