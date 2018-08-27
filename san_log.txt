@@ -1,0 +1,2362 @@
+2018-08-25 08:34:55 [main        ] WARNING  [~Processing SQuAD dataset~]
+2018-08-25 08:34:55 [main        ] INFO     [The path of training data: data/train-v1.1.json]
+2018-08-25 08:34:55 [main        ] INFO     [The path of validation data: data/dev-v1.1.json]
+2018-08-25 08:34:55 [main        ] INFO     [300-dim word vector path: data/glove.840B.300d.txt]
+2018-08-25 08:34:55 [main        ] INFO     [Loading glove vocab.]
+2018-08-25 08:36:14 [main        ] INFO     [Build vocabulary]
+2018-08-25 08:36:14 [build_vocab ] INFO     [Collect vocab/pos counter/ner counter]
+2018-08-25 08:43:56 [build_vocab ] INFO     [Done with doc tokenize]
+2018-08-25 08:44:36 [build_vocab ] INFO     [Done with question tokenize]
+2018-08-25 08:45:20 [build_vocab ] INFO     [Raw vocab size vs vocab in glove: 105848/90977]
+2018-08-25 08:45:20 [build_vocab ] INFO     [OOV rate:0.5547=83277/15013062]
+2018-08-25 08:45:20 [build_vocab ] INFO     [final vocab size: 90981]
+2018-08-25 08:45:34 [main        ] INFO     [Done with vocabulary collection]
+2018-08-25 08:45:34 [main        ] INFO     [Loading resource]
+2018-08-25 08:45:34 [main        ] INFO     [building embedding]
+2018-08-25 09:34:25 [build_data  ] INFO     [dropped 0 in total 87599]
+2018-08-25 09:40:13 [build_data  ] INFO     [dropped 0 in total 10570]
+2018-08-25 09:40:13 [main        ] INFO     [It totally took 65.29131303628286 minutes to processe the data!!]
+2018-08-25 09:40:28 [main        ] INFO     [Launching the SAN]
+2018-08-25 09:40:28 [main        ] INFO     [Loading data]
+2018-08-25 09:41:06 [main        ] INFO     [
+############# Model Arch of SAN #############
+DNetwork(
+  (dropout): DropoutWrapper()
+  (lexicon_encoder): LexiconEncoder(
+    (dropout): DropoutWrapper()
+    (dropout_emb): DropoutWrapper()
+    (dropout_cove): DropoutWrapper()
+    (embedding): Embedding(90981, 300, padding_idx=0)
+    (ContextualEmbed): ContextualEmbed(
+      (embedding): Embedding(90981, 300, padding_idx=0)
+      (rnn1): LSTM(300, 300, bidirectional=True)
+      (rnn2): LSTM(600, 300, bidirectional=True)
+    )
+    (prealign): AttentionWrapper(
+      (score_func): SimilarityWrapper(
+        (score_func): DotProductProject(
+          (dropout): DropoutWrapper()
+          (proj_1): Linear(in_features=300, out_features=128, bias=False)
+          (proj_2): Linear(in_features=300, out_features=128, bias=False)
+        )
+      )
+    )
+    (pos_embedding): Embedding(54, 12, padding_idx=0)
+    (ner_embedding): Embedding(41, 8, padding_idx=0)
+    (doc_pwnn): PositionwiseNN(
+      (w_0): Conv1d(1224, 256, kernel_size=(1,), stride=(1,))
+      (w_1): Conv1d(256, 256, kernel_size=(1,), stride=(1,))
+      (dropout): DropoutWrapper()
+    )
+    (que_pwnn): PositionwiseNN(
+      (w_0): Conv1d(900, 256, kernel_size=(1,), stride=(1,))
+      (w_1): Conv1d(256, 256, kernel_size=(1,), stride=(1,))
+      (dropout): DropoutWrapper()
+    )
+  )
+  (doc_encoder_low): OneLayerBRNN(
+    (dropout): DropoutWrapper()
+    (rnn): LSTM(856, 128, bidirectional=True)
+  )
+  (doc_encoder_high): OneLayerBRNN(
+    (dropout): DropoutWrapper()
+    (rnn): LSTM(856, 128, bidirectional=True)
+  )
+  (query_encoder_low): OneLayerBRNN(
+    (dropout): DropoutWrapper()
+    (rnn): LSTM(856, 128, bidirectional=True)
+  )
+  (query_encoder_high): OneLayerBRNN(
+    (dropout): DropoutWrapper()
+    (rnn): LSTM(856, 128, bidirectional=True)
+  )
+  (query_understand): OneLayerBRNN(
+    (dropout): DropoutWrapper()
+    (rnn): LSTM(512, 128, bidirectional=True)
+  )
+  (deep_attn): DeepAttentionWrapper(
+    (dropout): DropoutWrapper()
+    (attn_list): ModuleList(
+      (0): AttentionWrapper(
+        (score_func): SimilarityWrapper(
+          (score_func): DotProductProject(
+            (dropout): DropoutWrapper()
+            (proj_1): Linear(in_features=1412, out_features=128, bias=False)
+            (proj_2): Linear(in_features=1412, out_features=128, bias=False)
+          )
+        )
+      )
+      (1): AttentionWrapper(
+        (score_func): SimilarityWrapper(
+          (score_func): DotProductProject(
+            (dropout): DropoutWrapper()
+            (proj_1): Linear(in_features=1412, out_features=128, bias=False)
+            (proj_2): Linear(in_features=1412, out_features=128, bias=False)
+          )
+        )
+      )
+      (2): AttentionWrapper(
+        (score_func): SimilarityWrapper(
+          (score_func): DotProductProject(
+            (dropout): DropoutWrapper()
+            (proj_1): Linear(in_features=1412, out_features=128, bias=False)
+            (proj_2): Linear(in_features=1412, out_features=128, bias=False)
+          )
+        )
+      )
+    )
+  )
+  (doc_understand): OneLayerBRNN(
+    (dropout): DropoutWrapper()
+    (rnn): LSTM(1280, 128, bidirectional=True)
+  )
+  (doc_self_attn): AttentionWrapper(
+    (score_func): SimilarityWrapper(
+      (score_func): DotProductProject(
+        (dropout): DropoutWrapper()
+        (proj_1): Linear(in_features=2436, out_features=128, bias=False)
+        (proj_2): Linear(in_features=2436, out_features=128, bias=False)
+      )
+    )
+  )
+  (doc_mem_gen): OneLayerBRNN(
+    (dropout): DropoutWrapper()
+    (rnn): LSTM(512, 128, bidirectional=True)
+  )
+  (query_sum_attn): SelfAttnWrapper(
+    (att): LinearSelfAttn(
+      (linear): Linear(in_features=256, out_features=1, bias=True)
+      (dropout): DropoutWrapper()
+    )
+  )
+  (decoder): SAN(
+    (attn_b): FlatSimilarityWrapper(
+      (att_dropout): DropoutWrapper()
+      (score_func): BilinearFlatSim(
+        (linear): Linear(in_features=256, out_features=256, bias=True)
+        (dropout): DropoutWrapper()
+      )
+    )
+    (attn_e): FlatSimilarityWrapper(
+      (att_dropout): DropoutWrapper()
+      (score_func): BilinearFlatSim(
+        (linear): Linear(in_features=256, out_features=256, bias=True)
+        (dropout): DropoutWrapper()
+      )
+    )
+    (rnn): GRUCell(256, 256)
+    (dropout): DropoutWrapper()
+  )
+)
+]
+2018-08-25 09:41:07 [main        ] INFO     [Total number of params: 9194034]
+2018-08-25 09:41:09 [main        ] WARNING  [At epoch 0]
+2018-08-25 12:11:13 [main        ] INFO     [Launching the SAN]
+2018-08-25 12:11:13 [main        ] INFO     [Loading data]
+2018-08-25 12:11:51 [main        ] INFO     [
+############# Model Arch of SAN #############
+DNetwork(
+  (dropout): DropoutWrapper()
+  (lexicon_encoder): LexiconEncoder(
+    (dropout): DropoutWrapper()
+    (dropout_emb): DropoutWrapper()
+    (dropout_cove): DropoutWrapper()
+    (embedding): Embedding(90981, 300, padding_idx=0)
+    (ContextualEmbed): ContextualEmbed(
+      (embedding): Embedding(90981, 300, padding_idx=0)
+      (rnn1): LSTM(300, 300, bidirectional=True)
+      (rnn2): LSTM(600, 300, bidirectional=True)
+    )
+    (prealign): AttentionWrapper(
+      (score_func): SimilarityWrapper(
+        (score_func): DotProductProject(
+          (dropout): DropoutWrapper()
+          (proj_1): Linear(in_features=300, out_features=128, bias=False)
+          (proj_2): Linear(in_features=300, out_features=128, bias=False)
+        )
+      )
+    )
+    (pos_embedding): Embedding(54, 12, padding_idx=0)
+    (ner_embedding): Embedding(41, 8, padding_idx=0)
+    (doc_pwnn): PositionwiseNN(
+      (w_0): Conv1d(1224, 256, kernel_size=(1,), stride=(1,))
+      (w_1): Conv1d(256, 256, kernel_size=(1,), stride=(1,))
+      (dropout): DropoutWrapper()
+    )
+    (que_pwnn): PositionwiseNN(
+      (w_0): Conv1d(900, 256, kernel_size=(1,), stride=(1,))
+      (w_1): Conv1d(256, 256, kernel_size=(1,), stride=(1,))
+      (dropout): DropoutWrapper()
+    )
+  )
+  (doc_encoder_low): OneLayerBRNN(
+    (dropout): DropoutWrapper()
+    (rnn): LSTM(856, 128, bidirectional=True)
+  )
+  (doc_encoder_high): OneLayerBRNN(
+    (dropout): DropoutWrapper()
+    (rnn): LSTM(856, 128, bidirectional=True)
+  )
+  (query_encoder_low): OneLayerBRNN(
+    (dropout): DropoutWrapper()
+    (rnn): LSTM(856, 128, bidirectional=True)
+  )
+  (query_encoder_high): OneLayerBRNN(
+    (dropout): DropoutWrapper()
+    (rnn): LSTM(856, 128, bidirectional=True)
+  )
+  (query_understand): OneLayerBRNN(
+    (dropout): DropoutWrapper()
+    (rnn): LSTM(512, 128, bidirectional=True)
+  )
+  (deep_attn): DeepAttentionWrapper(
+    (dropout): DropoutWrapper()
+    (attn_list): ModuleList(
+      (0): AttentionWrapper(
+        (score_func): SimilarityWrapper(
+          (score_func): DotProductProject(
+            (dropout): DropoutWrapper()
+            (proj_1): Linear(in_features=1412, out_features=128, bias=False)
+            (proj_2): Linear(in_features=1412, out_features=128, bias=False)
+          )
+        )
+      )
+      (1): AttentionWrapper(
+        (score_func): SimilarityWrapper(
+          (score_func): DotProductProject(
+            (dropout): DropoutWrapper()
+            (proj_1): Linear(in_features=1412, out_features=128, bias=False)
+            (proj_2): Linear(in_features=1412, out_features=128, bias=False)
+          )
+        )
+      )
+      (2): AttentionWrapper(
+        (score_func): SimilarityWrapper(
+          (score_func): DotProductProject(
+            (dropout): DropoutWrapper()
+            (proj_1): Linear(in_features=1412, out_features=128, bias=False)
+            (proj_2): Linear(in_features=1412, out_features=128, bias=False)
+          )
+        )
+      )
+    )
+  )
+  (doc_understand): OneLayerBRNN(
+    (dropout): DropoutWrapper()
+    (rnn): LSTM(1280, 128, bidirectional=True)
+  )
+  (doc_self_attn): AttentionWrapper(
+    (score_func): SimilarityWrapper(
+      (score_func): DotProductProject(
+        (dropout): DropoutWrapper()
+        (proj_1): Linear(in_features=2436, out_features=128, bias=False)
+        (proj_2): Linear(in_features=2436, out_features=128, bias=False)
+      )
+    )
+  )
+  (doc_mem_gen): OneLayerBRNN(
+    (dropout): DropoutWrapper()
+    (rnn): LSTM(512, 128, bidirectional=True)
+  )
+  (query_sum_attn): SelfAttnWrapper(
+    (att): LinearSelfAttn(
+      (linear): Linear(in_features=256, out_features=1, bias=True)
+      (dropout): DropoutWrapper()
+    )
+  )
+  (decoder): SAN(
+    (attn_b): FlatSimilarityWrapper(
+      (att_dropout): DropoutWrapper()
+      (score_func): BilinearFlatSim(
+        (linear): Linear(in_features=256, out_features=256, bias=True)
+        (dropout): DropoutWrapper()
+      )
+    )
+    (attn_e): FlatSimilarityWrapper(
+      (att_dropout): DropoutWrapper()
+      (score_func): BilinearFlatSim(
+        (linear): Linear(in_features=256, out_features=256, bias=True)
+        (dropout): DropoutWrapper()
+      )
+    )
+    (rnn): GRUCell(256, 256)
+    (dropout): DropoutWrapper()
+  )
+)
+]
+2018-08-25 12:11:51 [main        ] INFO     [Total number of params: 9194034]
+2018-08-25 12:11:53 [main        ] WARNING  [At epoch 0]
+2018-08-25 12:11:54 [main        ] INFO     [#updates[     1] train loss[10.12599] remaining[0:51:41]]
+2018-08-25 12:12:29 [main        ] INFO     [#updates[   100] train loss[8.80597] remaining[0:15:55]]
+2018-08-25 12:13:08 [main        ] INFO     [#updates[   200] train loss[8.20786] remaining[0:15:43]]
+2018-08-25 12:13:43 [main        ] INFO     [#updates[   300] train loss[7.76073] remaining[0:14:53]]
+2018-08-25 12:14:17 [main        ] INFO     [#updates[   400] train loss[7.49146] remaining[0:14:02]]
+2018-08-25 12:14:51 [main        ] INFO     [#updates[   500] train loss[7.29762] remaining[0:13:16]]
+2018-08-25 12:15:26 [main        ] INFO     [#updates[   600] train loss[7.15048] remaining[0:12:37]]
+2018-08-25 12:16:01 [main        ] INFO     [#updates[   700] train loss[7.01062] remaining[0:12:00]]
+2018-08-25 12:16:35 [main        ] INFO     [#updates[   800] train loss[6.88960] remaining[0:11:22]]
+2018-08-25 12:17:08 [main        ] INFO     [#updates[   900] train loss[6.80216] remaining[0:10:43]]
+2018-08-25 12:17:42 [main        ] INFO     [#updates[  1000] train loss[6.70566] remaining[0:10:06]]
+2018-08-25 12:18:16 [main        ] INFO     [#updates[  1100] train loss[6.63251] remaining[0:09:30]]
+2018-08-25 12:18:50 [main        ] INFO     [#updates[  1200] train loss[6.55958] remaining[0:08:54]]
+2018-08-25 12:19:24 [main        ] INFO     [#updates[  1300] train loss[6.49341] remaining[0:08:18]]
+2018-08-25 12:19:58 [main        ] INFO     [#updates[  1400] train loss[6.43957] remaining[0:07:43]]
+2018-08-25 12:20:33 [main        ] INFO     [#updates[  1500] train loss[6.38969] remaining[0:07:08]]
+2018-08-25 12:21:06 [main        ] INFO     [#updates[  1600] train loss[6.34382] remaining[0:06:33]]
+2018-08-25 12:21:40 [main        ] INFO     [#updates[  1700] train loss[6.29693] remaining[0:05:58]]
+2018-08-25 12:22:15 [main        ] INFO     [#updates[  1800] train loss[6.25650] remaining[0:05:24]]
+2018-08-25 12:22:50 [main        ] INFO     [#updates[  1900] train loss[6.21811] remaining[0:04:49]]
+2018-08-25 12:23:25 [main        ] INFO     [#updates[  2000] train loss[6.17081] remaining[0:04:15]]
+2018-08-25 12:23:59 [main        ] INFO     [#updates[  2100] train loss[6.13705] remaining[0:03:40]]
+2018-08-25 12:24:33 [main        ] INFO     [#updates[  2200] train loss[6.09071] remaining[0:03:05]]
+2018-08-25 12:25:07 [main        ] INFO     [#updates[  2300] train loss[6.05234] remaining[0:02:31]]
+2018-08-25 12:25:41 [main        ] INFO     [#updates[  2400] train loss[6.01092] remaining[0:01:56]]
+2018-08-25 12:26:15 [main        ] INFO     [#updates[  2500] train loss[5.97614] remaining[0:01:22]]
+2018-08-25 12:26:50 [main        ] INFO     [#updates[  2600] train loss[5.94000] remaining[0:00:47]]
+2018-08-25 12:27:24 [main        ] INFO     [#updates[  2700] train loss[5.91023] remaining[0:00:13]]
+2018-08-25 02:34:45 [main        ] WARNING  [~Processing SQuAD dataset~]
+2018-08-25 02:34:45 [main        ] INFO     [The path of training data: data/train-v1.1.json]
+2018-08-25 02:34:45 [main        ] INFO     [The path of validation data: data/dev-v1.1.json]
+2018-08-25 02:34:45 [main        ] INFO     [300-dim word vector path: data/glove.840B.300d.txt]
+2018-08-25 02:36:11 [main        ] WARNING  [~Processing SQuAD dataset~]
+2018-08-25 02:36:11 [main        ] INFO     [The path of training data: data/train-v1.1.json]
+2018-08-25 02:36:11 [main        ] INFO     [The path of validation data: data/dev-v1.1.json]
+2018-08-25 02:36:11 [main        ] INFO     [300-dim word vector path: data/glove.840B.300d.txt]
+2018-08-25 02:42:55 [build_data  ] INFO     [dropped 0 in total 10570]
+2018-08-25 02:42:55 [main        ] INFO     [It totally took 6.735008072853089 minutes to processe the data!!]
+2018-08-25 02:44:37 [main        ] INFO     [Launching the SAN]
+2018-08-25 02:44:37 [main        ] INFO     [Loading data]
+2018-08-25 02:45:13 [main        ] INFO     [
+############# Model Arch of SAN #############
+DNetwork(
+  (dropout): DropoutWrapper()
+  (lexicon_encoder): LexiconEncoder(
+    (dropout): DropoutWrapper()
+    (dropout_emb): DropoutWrapper()
+    (dropout_cove): DropoutWrapper()
+    (embedding): Embedding(90981, 300, padding_idx=0)
+    (ContextualEmbed): ContextualEmbed(
+      (embedding): Embedding(90981, 300, padding_idx=0)
+      (rnn1): LSTM(300, 300, bidirectional=True)
+      (rnn2): LSTM(600, 300, bidirectional=True)
+    )
+    (prealign): AttentionWrapper(
+      (score_func): SimilarityWrapper(
+        (score_func): DotProductProject(
+          (dropout): DropoutWrapper()
+          (proj_1): Linear(in_features=300, out_features=128, bias=False)
+          (proj_2): Linear(in_features=300, out_features=128, bias=False)
+        )
+      )
+    )
+    (pos_embedding): Embedding(54, 12, padding_idx=0)
+    (ner_embedding): Embedding(41, 8, padding_idx=0)
+    (doc_pwnn): PositionwiseNN(
+      (w_0): Conv1d(1224, 256, kernel_size=(1,), stride=(1,))
+      (w_1): Conv1d(256, 256, kernel_size=(1,), stride=(1,))
+      (dropout): DropoutWrapper()
+    )
+    (que_pwnn): PositionwiseNN(
+      (w_0): Conv1d(900, 256, kernel_size=(1,), stride=(1,))
+      (w_1): Conv1d(256, 256, kernel_size=(1,), stride=(1,))
+      (dropout): DropoutWrapper()
+    )
+  )
+  (doc_encoder_low): OneLayerBRNN(
+    (dropout): DropoutWrapper()
+    (rnn): LSTM(856, 128, bidirectional=True)
+  )
+  (doc_encoder_high): OneLayerBRNN(
+    (dropout): DropoutWrapper()
+    (rnn): LSTM(856, 128, bidirectional=True)
+  )
+  (query_encoder_low): OneLayerBRNN(
+    (dropout): DropoutWrapper()
+    (rnn): LSTM(856, 128, bidirectional=True)
+  )
+  (query_encoder_high): OneLayerBRNN(
+    (dropout): DropoutWrapper()
+    (rnn): LSTM(856, 128, bidirectional=True)
+  )
+  (query_understand): OneLayerBRNN(
+    (dropout): DropoutWrapper()
+    (rnn): LSTM(512, 128, bidirectional=True)
+  )
+  (deep_attn): DeepAttentionWrapper(
+    (dropout): DropoutWrapper()
+    (attn_list): ModuleList(
+      (0): AttentionWrapper(
+        (score_func): SimilarityWrapper(
+          (score_func): DotProductProject(
+            (dropout): DropoutWrapper()
+            (proj_1): Linear(in_features=1412, out_features=128, bias=False)
+            (proj_2): Linear(in_features=1412, out_features=128, bias=False)
+          )
+        )
+      )
+      (1): AttentionWrapper(
+        (score_func): SimilarityWrapper(
+          (score_func): DotProductProject(
+            (dropout): DropoutWrapper()
+            (proj_1): Linear(in_features=1412, out_features=128, bias=False)
+            (proj_2): Linear(in_features=1412, out_features=128, bias=False)
+          )
+        )
+      )
+      (2): AttentionWrapper(
+        (score_func): SimilarityWrapper(
+          (score_func): DotProductProject(
+            (dropout): DropoutWrapper()
+            (proj_1): Linear(in_features=1412, out_features=128, bias=False)
+            (proj_2): Linear(in_features=1412, out_features=128, bias=False)
+          )
+        )
+      )
+    )
+  )
+  (doc_understand): OneLayerBRNN(
+    (dropout): DropoutWrapper()
+    (rnn): LSTM(1280, 128, bidirectional=True)
+  )
+  (doc_self_attn): AttentionWrapper(
+    (score_func): SimilarityWrapper(
+      (score_func): DotProductProject(
+        (dropout): DropoutWrapper()
+        (proj_1): Linear(in_features=2436, out_features=128, bias=False)
+        (proj_2): Linear(in_features=2436, out_features=128, bias=False)
+      )
+    )
+  )
+  (doc_mem_gen): OneLayerBRNN(
+    (dropout): DropoutWrapper()
+    (rnn): LSTM(512, 128, bidirectional=True)
+  )
+  (query_sum_attn): SelfAttnWrapper(
+    (att): LinearSelfAttn(
+      (linear): Linear(in_features=256, out_features=1, bias=True)
+      (dropout): DropoutWrapper()
+    )
+  )
+  (decoder): SAN(
+    (attn_b): FlatSimilarityWrapper(
+      (att_dropout): DropoutWrapper()
+      (score_func): BilinearFlatSim(
+        (linear): Linear(in_features=256, out_features=256, bias=True)
+        (dropout): DropoutWrapper()
+      )
+    )
+    (attn_e): FlatSimilarityWrapper(
+      (att_dropout): DropoutWrapper()
+      (score_func): BilinearFlatSim(
+        (linear): Linear(in_features=256, out_features=256, bias=True)
+        (dropout): DropoutWrapper()
+      )
+    )
+    (rnn): GRUCell(256, 256)
+    (dropout): DropoutWrapper()
+  )
+)
+]
+2018-08-25 02:45:14 [main        ] INFO     [Total number of params: 9194034]
+2018-08-25 02:45:16 [main        ] WARNING  [At epoch 0]
+2018-08-25 02:46:21 [main        ] INFO     [scheduler_type ms]
+2018-08-25 02:46:25 [main        ] INFO     [Saved the new best model and prediction]
+2018-08-25 02:46:25 [main        ] WARNING  [Epoch 0 - dev EM: 0.341 F1: 4.229 (best EM: 0.341 F1: 4.229)]
+2018-08-25 02:46:25 [main        ] WARNING  [At epoch 1]
+2018-08-25 02:46:52 [main        ] INFO     [Launching the SAN]
+2018-08-25 02:46:52 [main        ] INFO     [Loading data]
+2018-08-25 02:47:28 [main        ] INFO     [
+############# Model Arch of SAN #############
+DNetwork(
+  (dropout): DropoutWrapper()
+  (lexicon_encoder): LexiconEncoder(
+    (dropout): DropoutWrapper()
+    (dropout_emb): DropoutWrapper()
+    (dropout_cove): DropoutWrapper()
+    (embedding): Embedding(90981, 300, padding_idx=0)
+    (ContextualEmbed): ContextualEmbed(
+      (embedding): Embedding(90981, 300, padding_idx=0)
+      (rnn1): LSTM(300, 300, bidirectional=True)
+      (rnn2): LSTM(600, 300, bidirectional=True)
+    )
+    (prealign): AttentionWrapper(
+      (score_func): SimilarityWrapper(
+        (score_func): DotProductProject(
+          (dropout): DropoutWrapper()
+          (proj_1): Linear(in_features=300, out_features=128, bias=False)
+          (proj_2): Linear(in_features=300, out_features=128, bias=False)
+        )
+      )
+    )
+    (pos_embedding): Embedding(54, 12, padding_idx=0)
+    (ner_embedding): Embedding(41, 8, padding_idx=0)
+    (doc_pwnn): PositionwiseNN(
+      (w_0): Conv1d(1224, 256, kernel_size=(1,), stride=(1,))
+      (w_1): Conv1d(256, 256, kernel_size=(1,), stride=(1,))
+      (dropout): DropoutWrapper()
+    )
+    (que_pwnn): PositionwiseNN(
+      (w_0): Conv1d(900, 256, kernel_size=(1,), stride=(1,))
+      (w_1): Conv1d(256, 256, kernel_size=(1,), stride=(1,))
+      (dropout): DropoutWrapper()
+    )
+  )
+  (doc_encoder_low): OneLayerBRNN(
+    (dropout): DropoutWrapper()
+    (rnn): LSTM(856, 128, bidirectional=True)
+  )
+  (doc_encoder_high): OneLayerBRNN(
+    (dropout): DropoutWrapper()
+    (rnn): LSTM(856, 128, bidirectional=True)
+  )
+  (query_encoder_low): OneLayerBRNN(
+    (dropout): DropoutWrapper()
+    (rnn): LSTM(856, 128, bidirectional=True)
+  )
+  (query_encoder_high): OneLayerBRNN(
+    (dropout): DropoutWrapper()
+    (rnn): LSTM(856, 128, bidirectional=True)
+  )
+  (query_understand): OneLayerBRNN(
+    (dropout): DropoutWrapper()
+    (rnn): LSTM(512, 128, bidirectional=True)
+  )
+  (deep_attn): DeepAttentionWrapper(
+    (dropout): DropoutWrapper()
+    (attn_list): ModuleList(
+      (0): AttentionWrapper(
+        (score_func): SimilarityWrapper(
+          (score_func): DotProductProject(
+            (dropout): DropoutWrapper()
+            (proj_1): Linear(in_features=1412, out_features=128, bias=False)
+            (proj_2): Linear(in_features=1412, out_features=128, bias=False)
+          )
+        )
+      )
+      (1): AttentionWrapper(
+        (score_func): SimilarityWrapper(
+          (score_func): DotProductProject(
+            (dropout): DropoutWrapper()
+            (proj_1): Linear(in_features=1412, out_features=128, bias=False)
+            (proj_2): Linear(in_features=1412, out_features=128, bias=False)
+          )
+        )
+      )
+      (2): AttentionWrapper(
+        (score_func): SimilarityWrapper(
+          (score_func): DotProductProject(
+            (dropout): DropoutWrapper()
+            (proj_1): Linear(in_features=1412, out_features=128, bias=False)
+            (proj_2): Linear(in_features=1412, out_features=128, bias=False)
+          )
+        )
+      )
+    )
+  )
+  (doc_understand): OneLayerBRNN(
+    (dropout): DropoutWrapper()
+    (rnn): LSTM(1280, 128, bidirectional=True)
+  )
+  (doc_self_attn): AttentionWrapper(
+    (score_func): SimilarityWrapper(
+      (score_func): DotProductProject(
+        (dropout): DropoutWrapper()
+        (proj_1): Linear(in_features=2436, out_features=128, bias=False)
+        (proj_2): Linear(in_features=2436, out_features=128, bias=False)
+      )
+    )
+  )
+  (doc_mem_gen): OneLayerBRNN(
+    (dropout): DropoutWrapper()
+    (rnn): LSTM(512, 128, bidirectional=True)
+  )
+  (query_sum_attn): SelfAttnWrapper(
+    (att): LinearSelfAttn(
+      (linear): Linear(in_features=256, out_features=1, bias=True)
+      (dropout): DropoutWrapper()
+    )
+  )
+  (decoder): SAN(
+    (attn_b): FlatSimilarityWrapper(
+      (att_dropout): DropoutWrapper()
+      (score_func): BilinearFlatSim(
+        (linear): Linear(in_features=256, out_features=256, bias=True)
+        (dropout): DropoutWrapper()
+      )
+    )
+    (attn_e): FlatSimilarityWrapper(
+      (att_dropout): DropoutWrapper()
+      (score_func): BilinearFlatSim(
+        (linear): Linear(in_features=256, out_features=256, bias=True)
+        (dropout): DropoutWrapper()
+      )
+    )
+    (rnn): GRUCell(256, 256)
+    (dropout): DropoutWrapper()
+  )
+)
+]
+2018-08-25 02:47:29 [main        ] INFO     [Total number of params: 9194034]
+2018-08-25 02:47:30 [main        ] WARNING  [At epoch 0]
+2018-08-25 02:47:31 [main        ] INFO     [#updates[     1] train loss[10.12599] remaining[0:36:13]]
+2018-08-25 02:48:03 [main        ] INFO     [#updates[   100] train loss[8.80597] remaining[0:14:24]]
+2018-08-25 02:48:37 [main        ] INFO     [#updates[   200] train loss[8.20795] remaining[0:14:02]]
+2018-08-25 02:49:10 [main        ] INFO     [#updates[   300] train loss[7.76049] remaining[0:13:26]]
+2018-08-25 02:49:41 [main        ] INFO     [#updates[   400] train loss[7.49142] remaining[0:12:44]]
+2018-08-25 02:50:14 [main        ] INFO     [#updates[   500] train loss[7.29831] remaining[0:12:12]]
+2018-08-25 02:50:46 [main        ] INFO     [#updates[   600] train loss[7.15101] remaining[0:11:38]]
+2018-08-25 02:51:19 [main        ] INFO     [#updates[   700] train loss[7.01092] remaining[0:11:05]]
+2018-08-25 02:51:51 [main        ] INFO     [#updates[   800] train loss[6.88930] remaining[0:10:31]]
+2018-08-25 02:52:24 [main        ] INFO     [#updates[   900] train loss[6.80200] remaining[0:09:58]]
+2018-08-25 02:52:56 [main        ] INFO     [#updates[  1000] train loss[6.70596] remaining[0:09:26]]
+2018-08-25 02:53:29 [main        ] INFO     [#updates[  1100] train loss[6.63247] remaining[0:08:53]]
+2018-08-25 02:54:01 [main        ] INFO     [#updates[  1200] train loss[6.55972] remaining[0:08:20]]
+2018-08-25 02:54:33 [main        ] INFO     [#updates[  1300] train loss[6.49342] remaining[0:07:47]]
+2018-08-25 02:55:06 [main        ] INFO     [#updates[  1400] train loss[6.44046] remaining[0:07:15]]
+2018-08-25 02:55:38 [main        ] INFO     [#updates[  1500] train loss[6.39031] remaining[0:06:42]]
+2018-08-25 02:56:10 [main        ] INFO     [#updates[  1600] train loss[6.34501] remaining[0:06:10]]
+2018-08-25 02:56:42 [main        ] INFO     [#updates[  1700] train loss[6.29788] remaining[0:05:37]]
+2018-08-25 02:57:16 [main        ] INFO     [#updates[  1800] train loss[6.25719] remaining[0:05:05]]
+2018-08-25 02:57:49 [main        ] INFO     [#updates[  1900] train loss[6.21906] remaining[0:04:32]]
+2018-08-25 02:58:23 [main        ] INFO     [#updates[  2000] train loss[6.17179] remaining[0:04:00]]
+2018-08-25 02:58:55 [main        ] INFO     [#updates[  2100] train loss[6.13853] remaining[0:03:28]]
+2018-08-25 02:59:27 [main        ] INFO     [#updates[  2200] train loss[6.09256] remaining[0:02:55]]
+2018-08-25 02:59:58 [main        ] INFO     [#updates[  2300] train loss[6.05426] remaining[0:02:22]]
+2018-08-25 03:00:31 [main        ] INFO     [#updates[  2400] train loss[6.01302] remaining[0:01:49]]
+2018-08-25 03:01:04 [main        ] INFO     [#updates[  2500] train loss[5.97835] remaining[0:01:17]]
+2018-08-25 03:01:36 [main        ] INFO     [#updates[  2600] train loss[5.94200] remaining[0:00:44]]
+2018-08-25 03:02:10 [main        ] INFO     [#updates[  2700] train loss[5.91285] remaining[0:00:12]]
+2018-08-25 03:03:30 [main        ] INFO     [scheduler_type ms]
+2018-08-25 03:03:35 [main        ] INFO     [Saved the new best model and prediction]
+2018-08-25 03:03:35 [main        ] WARNING  [Epoch 0 - dev EM: 53.822 F1: 64.053 (best EM: 53.822 F1: 64.053)]
+2018-08-25 03:03:35 [main        ] WARNING  [At epoch 1]
+2018-08-25 03:03:36 [main        ] INFO     [#updates[  2739] train loss[5.90174] remaining[0:17:33]]
+2018-08-25 03:03:55 [main        ] INFO     [#updates[  2800] train loss[5.87696] remaining[0:14:12]]
+2018-08-25 03:04:28 [main        ] INFO     [#updates[  2900] train loss[5.84610] remaining[0:14:01]]
+2018-08-25 03:05:02 [main        ] INFO     [#updates[  3000] train loss[5.81204] remaining[0:13:35]]
+2018-08-25 03:05:34 [main        ] INFO     [#updates[  3100] train loss[5.77992] remaining[0:12:55]]
+2018-08-25 03:06:05 [main        ] INFO     [#updates[  3200] train loss[5.74818] remaining[0:12:19]]
+2018-08-25 03:06:38 [main        ] INFO     [#updates[  3300] train loss[5.71517] remaining[0:11:46]]
+2018-08-25 03:18:55 [main        ] INFO     [Launching the SAN]
+2018-08-25 03:18:55 [main        ] INFO     [Loading data]
+2018-08-25 03:19:33 [main        ] INFO     [
+############# Model Arch of SAN #############
+DNetwork(
+  (dropout): DropoutWrapper()
+  (lexicon_encoder): LexiconEncoder(
+    (dropout): DropoutWrapper()
+    (dropout_emb): DropoutWrapper()
+    (dropout_cove): DropoutWrapper()
+    (embedding): Embedding(90981, 300, padding_idx=0)
+    (ContextualEmbed): ContextualEmbed(
+      (embedding): Embedding(90981, 300, padding_idx=0)
+      (rnn1): LSTM(300, 300, bidirectional=True)
+      (rnn2): LSTM(600, 300, bidirectional=True)
+    )
+    (prealign): AttentionWrapper(
+      (score_func): SimilarityWrapper(
+        (score_func): DotProductProject(
+          (dropout): DropoutWrapper()
+          (proj_1): Linear(in_features=300, out_features=128, bias=False)
+          (proj_2): Linear(in_features=300, out_features=128, bias=False)
+        )
+      )
+    )
+    (pos_embedding): Embedding(54, 12, padding_idx=0)
+    (ner_embedding): Embedding(41, 8, padding_idx=0)
+    (doc_pwnn): PositionwiseNN(
+      (w_0): Conv1d(1224, 256, kernel_size=(1,), stride=(1,))
+      (w_1): Conv1d(256, 256, kernel_size=(1,), stride=(1,))
+      (dropout): DropoutWrapper()
+    )
+    (que_pwnn): PositionwiseNN(
+      (w_0): Conv1d(900, 256, kernel_size=(1,), stride=(1,))
+      (w_1): Conv1d(256, 256, kernel_size=(1,), stride=(1,))
+      (dropout): DropoutWrapper()
+    )
+  )
+  (doc_encoder_low): OneLayerBRNN(
+    (dropout): DropoutWrapper()
+    (rnn): LSTM(856, 128, bidirectional=True)
+  )
+  (doc_encoder_high): OneLayerBRNN(
+    (dropout): DropoutWrapper()
+    (rnn): LSTM(856, 128, bidirectional=True)
+  )
+  (query_encoder_low): OneLayerBRNN(
+    (dropout): DropoutWrapper()
+    (rnn): LSTM(856, 128, bidirectional=True)
+  )
+  (query_encoder_high): OneLayerBRNN(
+    (dropout): DropoutWrapper()
+    (rnn): LSTM(856, 128, bidirectional=True)
+  )
+  (query_understand): OneLayerBRNN(
+    (dropout): DropoutWrapper()
+    (rnn): LSTM(512, 128, bidirectional=True)
+  )
+  (deep_attn): DeepAttentionWrapper(
+    (dropout): DropoutWrapper()
+    (attn_list): ModuleList(
+      (0): AttentionWrapper(
+        (score_func): SimilarityWrapper(
+          (score_func): DotProductProject(
+            (dropout): DropoutWrapper()
+            (proj_1): Linear(in_features=1412, out_features=128, bias=False)
+            (proj_2): Linear(in_features=1412, out_features=128, bias=False)
+          )
+        )
+      )
+      (1): AttentionWrapper(
+        (score_func): SimilarityWrapper(
+          (score_func): DotProductProject(
+            (dropout): DropoutWrapper()
+            (proj_1): Linear(in_features=1412, out_features=128, bias=False)
+            (proj_2): Linear(in_features=1412, out_features=128, bias=False)
+          )
+        )
+      )
+      (2): AttentionWrapper(
+        (score_func): SimilarityWrapper(
+          (score_func): DotProductProject(
+            (dropout): DropoutWrapper()
+            (proj_1): Linear(in_features=1412, out_features=128, bias=False)
+            (proj_2): Linear(in_features=1412, out_features=128, bias=False)
+          )
+        )
+      )
+    )
+  )
+  (doc_understand): OneLayerBRNN(
+    (dropout): DropoutWrapper()
+    (rnn): LSTM(1280, 128, bidirectional=True)
+  )
+  (doc_self_attn): AttentionWrapper(
+    (score_func): SimilarityWrapper(
+      (score_func): DotProductProject(
+        (dropout): DropoutWrapper()
+        (proj_1): Linear(in_features=2436, out_features=128, bias=False)
+        (proj_2): Linear(in_features=2436, out_features=128, bias=False)
+      )
+    )
+  )
+  (doc_mem_gen): OneLayerBRNN(
+    (dropout): DropoutWrapper()
+    (rnn): LSTM(512, 128, bidirectional=True)
+  )
+  (query_sum_attn): SelfAttnWrapper(
+    (att): LinearSelfAttn(
+      (linear): Linear(in_features=256, out_features=1, bias=True)
+      (dropout): DropoutWrapper()
+    )
+  )
+  (decoder): SAN(
+    (attn_b): FlatSimilarityWrapper(
+      (att_dropout): DropoutWrapper()
+      (score_func): BilinearFlatSim(
+        (linear): Linear(in_features=256, out_features=256, bias=True)
+        (dropout): DropoutWrapper()
+      )
+    )
+    (attn_e): FlatSimilarityWrapper(
+      (att_dropout): DropoutWrapper()
+      (score_func): BilinearFlatSim(
+        (linear): Linear(in_features=256, out_features=256, bias=True)
+        (dropout): DropoutWrapper()
+      )
+    )
+    (rnn): GRUCell(256, 256)
+    (dropout): DropoutWrapper()
+  )
+)
+]
+2018-08-25 03:19:33 [main        ] INFO     [Total number of params: 9194034]
+2018-08-25 03:19:35 [main        ] WARNING  [At epoch 0]
+2018-08-25 03:19:36 [main        ] INFO     [#updates[     1] train loss[10.12298] remaining[0:35:56]]
+2018-08-25 03:20:09 [main        ] INFO     [#updates[   100] train loss[8.75332] remaining[0:15:01]]
+2018-08-25 03:20:44 [main        ] INFO     [#updates[   200] train loss[8.22711] remaining[0:14:33]]
+2018-08-25 03:21:18 [main        ] INFO     [#updates[   300] train loss[7.78528] remaining[0:13:58]]
+2018-08-25 03:21:52 [main        ] INFO     [#updates[   400] train loss[7.50866] remaining[0:13:22]]
+2018-08-25 03:22:26 [main        ] INFO     [#updates[   500] train loss[7.30894] remaining[0:12:47]]
+2018-08-25 03:23:01 [main        ] INFO     [#updates[   600] train loss[7.16450] remaining[0:12:12]]
+2018-08-25 03:23:35 [main        ] INFO     [#updates[   700] train loss[7.02247] remaining[0:11:39]]
+2018-08-25 03:24:09 [main        ] INFO     [#updates[   800] train loss[6.90500] remaining[0:11:04]]
+2018-08-25 03:24:43 [main        ] INFO     [#updates[   900] train loss[6.82426] remaining[0:10:29]]
+2018-08-25 03:25:17 [main        ] INFO     [#updates[  1000] train loss[6.72791] remaining[0:09:55]]
+2018-08-25 03:25:52 [main        ] INFO     [#updates[  1100] train loss[6.65094] remaining[0:09:20]]
+2018-08-25 03:26:26 [main        ] INFO     [#updates[  1200] train loss[6.57609] remaining[0:08:46]]
+2018-08-25 03:26:59 [main        ] INFO     [#updates[  1300] train loss[6.50526] remaining[0:08:11]]
+2018-08-25 03:27:34 [main        ] INFO     [#updates[  1400] train loss[6.45236] remaining[0:07:37]]
+2018-08-25 03:28:09 [main        ] INFO     [#updates[  1500] train loss[6.40265] remaining[0:07:04]]
+2018-08-25 03:28:43 [main        ] INFO     [#updates[  1600] train loss[6.35527] remaining[0:06:29]]
+2018-08-25 03:29:16 [main        ] INFO     [#updates[  1700] train loss[6.30736] remaining[0:05:55]]
+2018-08-25 03:29:51 [main        ] INFO     [#updates[  1800] train loss[6.26809] remaining[0:05:21]]
+2018-08-25 03:30:26 [main        ] INFO     [#updates[  1900] train loss[6.22399] remaining[0:04:46]]
+2018-08-25 03:31:00 [main        ] INFO     [#updates[  2000] train loss[6.17303] remaining[0:04:12]]
+2018-08-25 03:31:34 [main        ] INFO     [#updates[  2100] train loss[6.13298] remaining[0:03:38]]
+2018-08-25 03:32:07 [main        ] INFO     [#updates[  2200] train loss[6.08235] remaining[0:03:03]]
+2018-08-25 03:32:40 [main        ] INFO     [#updates[  2300] train loss[6.04140] remaining[0:02:29]]
+2018-08-25 03:33:14 [main        ] INFO     [#updates[  2400] train loss[5.99597] remaining[0:01:55]]
+2018-08-25 03:33:48 [main        ] INFO     [#updates[  2500] train loss[5.95635] remaining[0:01:21]]
+2018-08-25 03:34:23 [main        ] INFO     [#updates[  2600] train loss[5.91822] remaining[0:00:47]]
+2018-08-25 03:34:57 [main        ] INFO     [#updates[  2700] train loss[5.88483] remaining[0:00:12]]
+2018-08-25 03:36:16 [main        ] INFO     [scheduler_type ms]
+2018-08-25 03:36:20 [main        ] INFO     [Saved the new best model and prediction]
+2018-08-25 03:36:20 [main        ] WARNING  [Epoch 0 - dev EM: 55.781 F1: 65.674 (best EM: 55.781 F1: 65.674)]
+2018-08-25 03:36:20 [main        ] WARNING  [At epoch 1]
+2018-08-25 03:36:21 [main        ] INFO     [#updates[  2739] train loss[5.87273] remaining[0:20:50]]
+2018-08-25 03:36:42 [main        ] INFO     [#updates[  2800] train loss[5.84832] remaining[0:15:48]]
+2018-08-25 03:37:17 [main        ] INFO     [#updates[  2900] train loss[5.80905] remaining[0:15:04]]
+2018-08-25 03:37:51 [main        ] INFO     [#updates[  3000] train loss[5.77916] remaining[0:14:21]]
+2018-08-25 03:38:25 [main        ] INFO     [#updates[  3100] train loss[5.73844] remaining[0:13:38]]
+2018-08-25 03:38:59 [main        ] INFO     [#updates[  3200] train loss[5.71053] remaining[0:13:03]]
+2018-08-25 03:39:33 [main        ] INFO     [#updates[  3300] train loss[5.68012] remaining[0:12:26]]
+2018-08-25 03:40:08 [main        ] INFO     [#updates[  3400] train loss[5.64599] remaining[0:11:53]]
+2018-08-25 03:40:41 [main        ] INFO     [#updates[  3500] train loss[5.61492] remaining[0:11:16]]
+2018-08-25 03:41:15 [main        ] INFO     [#updates[  3600] train loss[5.58488] remaining[0:10:42]]
+2018-08-25 03:41:49 [main        ] INFO     [#updates[  3700] train loss[5.55861] remaining[0:10:07]]
+2018-08-25 03:42:24 [main        ] INFO     [#updates[  3800] train loss[5.53021] remaining[0:09:33]]
+2018-08-25 03:42:57 [main        ] INFO     [#updates[  3900] train loss[5.49709] remaining[0:08:58]]
+2018-08-25 03:43:32 [main        ] INFO     [#updates[  4000] train loss[5.46491] remaining[0:08:24]]
+2018-08-25 03:44:05 [main        ] INFO     [#updates[  4100] train loss[5.43608] remaining[0:07:50]]
+2018-08-25 03:44:39 [main        ] INFO     [#updates[  4200] train loss[5.41103] remaining[0:07:15]]
+2018-08-25 03:45:12 [main        ] INFO     [#updates[  4300] train loss[5.38612] remaining[0:06:40]]
+2018-08-25 03:45:47 [main        ] INFO     [#updates[  4400] train loss[5.35978] remaining[0:06:06]]
+2018-08-25 03:46:21 [main        ] INFO     [#updates[  4500] train loss[5.33410] remaining[0:05:32]]
+2018-08-25 03:46:55 [main        ] INFO     [#updates[  4600] train loss[5.31201] remaining[0:04:58]]
+2018-08-25 03:47:29 [main        ] INFO     [#updates[  4700] train loss[5.28759] remaining[0:04:24]]
+2018-08-25 03:48:03 [main        ] INFO     [#updates[  4800] train loss[5.25948] remaining[0:03:50]]
+2018-08-25 03:48:38 [main        ] INFO     [#updates[  4900] train loss[5.23513] remaining[0:03:16]]
+2018-08-25 03:49:11 [main        ] INFO     [#updates[  5000] train loss[5.21395] remaining[0:02:42]]
+2018-08-25 03:49:46 [main        ] INFO     [#updates[  5100] train loss[5.19093] remaining[0:02:08]]
+2018-08-25 03:50:20 [main        ] INFO     [#updates[  5200] train loss[5.16371] remaining[0:01:34]]
+2018-08-25 03:50:55 [main        ] INFO     [#updates[  5300] train loss[5.13845] remaining[0:01:00]]
+2018-08-25 03:51:29 [main        ] INFO     [#updates[  5400] train loss[5.11540] remaining[0:00:25]]
+2018-08-25 03:53:04 [main        ] INFO     [scheduler_type ms]
+2018-08-25 03:53:08 [main        ] INFO     [Saved the new best model and prediction]
+2018-08-25 03:53:08 [main        ] WARNING  [Epoch 1 - dev EM: 63.614 F1: 72.870 (best EM: 63.614 F1: 72.870)]
+2018-08-25 03:53:08 [main        ] WARNING  [At epoch 2]
+2018-08-25 03:53:09 [main        ] INFO     [#updates[  5477] train loss[5.09532] remaining[0:18:25]]
+2018-08-25 03:53:17 [main        ] INFO     [#updates[  5500] train loss[5.09024] remaining[0:16:27]]
+2018-08-25 03:53:51 [main        ] INFO     [#updates[  5600] train loss[5.06516] remaining[0:15:06]]
+2018-08-25 03:54:26 [main        ] INFO     [#updates[  5700] train loss[5.04308] remaining[0:14:29]]
+2018-08-25 03:55:01 [main        ] INFO     [#updates[  5800] train loss[5.02099] remaining[0:13:57]]
+2018-08-25 03:55:36 [main        ] INFO     [#updates[  5900] train loss[4.99914] remaining[0:13:24]]
+2018-08-25 03:56:10 [main        ] INFO     [#updates[  6000] train loss[4.97975] remaining[0:12:48]]
+2018-08-25 03:56:44 [main        ] INFO     [#updates[  6100] train loss[4.96097] remaining[0:12:12]]
+2018-08-25 03:57:19 [main        ] INFO     [#updates[  6200] train loss[4.94296] remaining[0:11:36]]
+2018-08-25 03:57:54 [main        ] INFO     [#updates[  6300] train loss[4.92424] remaining[0:11:03]]
+2018-08-25 03:58:28 [main        ] INFO     [#updates[  6400] train loss[4.90623] remaining[0:10:27]]
+2018-08-25 03:59:02 [main        ] INFO     [#updates[  6500] train loss[4.88999] remaining[0:09:52]]
+2018-08-25 03:59:37 [main        ] INFO     [#updates[  6600] train loss[4.87370] remaining[0:09:18]]
+2018-08-25 04:00:10 [main        ] INFO     [#updates[  6700] train loss[4.85836] remaining[0:08:41]]
+2018-08-25 04:00:43 [main        ] INFO     [#updates[  6800] train loss[4.83910] remaining[0:08:06]]
+2018-08-25 04:01:18 [main        ] INFO     [#updates[  6900] train loss[4.82275] remaining[0:07:31]]
+2018-08-25 04:01:53 [main        ] INFO     [#updates[  7000] train loss[4.80628] remaining[0:06:57]]
+2018-08-25 04:02:27 [main        ] INFO     [#updates[  7100] train loss[4.79062] remaining[0:06:23]]
+2018-08-25 04:03:00 [main        ] INFO     [#updates[  7200] train loss[4.77415] remaining[0:05:48]]
+2018-08-25 04:03:34 [main        ] INFO     [#updates[  7300] train loss[4.76052] remaining[0:05:13]]
+2018-08-25 04:04:09 [main        ] INFO     [#updates[  7400] train loss[4.74633] remaining[0:04:39]]
+2018-08-25 04:04:44 [main        ] INFO     [#updates[  7500] train loss[4.73286] remaining[0:04:05]]
+2018-08-25 04:05:17 [main        ] INFO     [#updates[  7600] train loss[4.71792] remaining[0:03:30]]
+2018-08-25 04:05:51 [main        ] INFO     [#updates[  7700] train loss[4.70321] remaining[0:02:56]]
+2018-08-25 04:06:25 [main        ] INFO     [#updates[  7800] train loss[4.68817] remaining[0:02:22]]
+2018-08-25 04:07:00 [main        ] INFO     [#updates[  7900] train loss[4.67424] remaining[0:01:47]]
+2018-08-25 04:07:33 [main        ] INFO     [#updates[  8000] train loss[4.65909] remaining[0:01:13]]
+2018-08-25 04:08:07 [main        ] INFO     [#updates[  8100] train loss[4.64440] remaining[0:00:39]]
+2018-08-25 04:08:41 [main        ] INFO     [#updates[  8200] train loss[4.62959] remaining[0:00:04]]
+2018-08-25 04:09:53 [main        ] INFO     [scheduler_type ms]
+2018-08-25 04:09:58 [main        ] INFO     [Saved the new best model and prediction]
+2018-08-25 04:09:58 [main        ] WARNING  [Epoch 2 - dev EM: 66.689 F1: 76.099 (best EM: 66.689 F1: 76.099)]
+2018-08-25 04:09:58 [main        ] WARNING  [At epoch 3]
+2018-08-25 04:09:58 [main        ] INFO     [#updates[  8215] train loss[4.62802] remaining[0:14:24]]
+2018-08-25 04:10:27 [main        ] INFO     [#updates[  8300] train loss[4.61616] remaining[0:14:50]]
+2018-08-25 04:11:01 [main        ] INFO     [#updates[  8400] train loss[4.60345] remaining[0:14:27]]
+2018-08-25 04:11:35 [main        ] INFO     [#updates[  8500] train loss[4.59229] remaining[0:13:55]]
+2018-08-25 04:12:10 [main        ] INFO     [#updates[  8600] train loss[4.58066] remaining[0:13:22]]
+2018-08-25 04:12:44 [main        ] INFO     [#updates[  8700] train loss[4.56908] remaining[0:12:51]]
+2018-08-25 04:13:19 [main        ] INFO     [#updates[  8800] train loss[4.55936] remaining[0:12:19]]
+2018-08-25 04:13:53 [main        ] INFO     [#updates[  8900] train loss[4.54537] remaining[0:11:44]]
+2018-08-25 04:14:26 [main        ] INFO     [#updates[  9000] train loss[4.53196] remaining[0:11:06]]
+2018-08-25 04:15:01 [main        ] INFO     [#updates[  9100] train loss[4.52115] remaining[0:10:34]]
+2018-08-25 04:15:35 [main        ] INFO     [#updates[  9200] train loss[4.50849] remaining[0:09:59]]
+2018-08-25 04:16:10 [main        ] INFO     [#updates[  9300] train loss[4.49761] remaining[0:09:25]]
+2018-08-25 04:16:44 [main        ] INFO     [#updates[  9400] train loss[4.48602] remaining[0:08:51]]
+2018-08-25 04:17:17 [main        ] INFO     [#updates[  9500] train loss[4.47404] remaining[0:08:16]]
+2018-08-25 04:17:50 [main        ] INFO     [#updates[  9600] train loss[4.46208] remaining[0:07:40]]
+2018-08-25 04:18:24 [main        ] INFO     [#updates[  9700] train loss[4.45064] remaining[0:07:06]]
+2018-08-25 04:18:59 [main        ] INFO     [#updates[  9800] train loss[4.44003] remaining[0:06:32]]
+2018-08-25 04:19:32 [main        ] INFO     [#updates[  9900] train loss[4.42889] remaining[0:05:58]]
+2018-08-25 04:20:07 [main        ] INFO     [#updates[ 10000] train loss[4.41743] remaining[0:05:24]]
+2018-08-25 04:20:40 [main        ] INFO     [#updates[ 10100] train loss[4.40580] remaining[0:04:50]]
+2018-08-25 04:21:14 [main        ] INFO     [#updates[ 10200] train loss[4.39573] remaining[0:04:15]]
+2018-08-25 04:21:48 [main        ] INFO     [#updates[ 10300] train loss[4.38550] remaining[0:03:42]]
+2018-08-25 04:22:22 [main        ] INFO     [#updates[ 10400] train loss[4.37528] remaining[0:03:07]]
+2018-08-25 04:22:55 [main        ] INFO     [#updates[ 10500] train loss[4.36502] remaining[0:02:33]]
+2018-08-25 04:23:29 [main        ] INFO     [#updates[ 10600] train loss[4.35580] remaining[0:01:59]]
+2018-08-25 04:24:03 [main        ] INFO     [#updates[ 10700] train loss[4.34626] remaining[0:01:25]]
+2018-08-25 04:24:36 [main        ] INFO     [#updates[ 10800] train loss[4.33593] remaining[0:00:51]]
+2018-08-25 04:25:10 [main        ] INFO     [#updates[ 10900] train loss[4.32766] remaining[0:00:17]]
+2018-08-25 04:26:37 [main        ] INFO     [scheduler_type ms]
+2018-08-25 04:26:41 [main        ] INFO     [Saved the new best model and prediction]
+2018-08-25 04:26:41 [main        ] WARNING  [Epoch 3 - dev EM: 68.638 F1: 77.631 (best EM: 68.638 F1: 77.631)]
+2018-08-25 04:26:41 [main        ] WARNING  [At epoch 4]
+2018-08-25 04:26:42 [main        ] INFO     [#updates[ 10953] train loss[4.32289] remaining[0:15:41]]
+2018-08-25 04:26:57 [main        ] INFO     [#updates[ 11000] train loss[4.31722] remaining[0:14:26]]
+2018-08-25 04:27:31 [main        ] INFO     [#updates[ 11100] train loss[4.30717] remaining[0:14:22]]
+2018-08-25 04:28:04 [main        ] INFO     [#updates[ 11200] train loss[4.29850] remaining[0:13:50]]
+2018-08-25 04:28:39 [main        ] INFO     [#updates[ 11300] train loss[4.29022] remaining[0:13:25]]
+2018-08-25 04:29:13 [main        ] INFO     [#updates[ 11400] train loss[4.28036] remaining[0:12:55]]
+2018-08-25 04:29:48 [main        ] INFO     [#updates[ 11500] train loss[4.27200] remaining[0:12:25]]
+2018-08-25 04:30:21 [main        ] INFO     [#updates[ 11600] train loss[4.26344] remaining[0:11:49]]
+2018-08-25 04:30:55 [main        ] INFO     [#updates[ 11700] train loss[4.25461] remaining[0:11:15]]
+2018-08-25 04:31:28 [main        ] INFO     [#updates[ 11800] train loss[4.24760] remaining[0:10:39]]
+2018-08-25 04:32:02 [main        ] INFO     [#updates[ 11900] train loss[4.23904] remaining[0:10:05]]
+2018-08-25 04:32:36 [main        ] INFO     [#updates[ 12000] train loss[4.23100] remaining[0:09:31]]
+2018-08-25 04:33:09 [main        ] INFO     [#updates[ 12100] train loss[4.22192] remaining[0:08:57]]
+2018-08-25 04:33:42 [main        ] INFO     [#updates[ 12200] train loss[4.21392] remaining[0:08:22]]
+2018-08-25 04:34:16 [main        ] INFO     [#updates[ 12300] train loss[4.20604] remaining[0:07:48]]
+2018-08-25 04:34:49 [main        ] INFO     [#updates[ 12400] train loss[4.19872] remaining[0:07:14]]
+2018-08-25 04:35:24 [main        ] INFO     [#updates[ 12500] train loss[4.19076] remaining[0:06:41]]
+2018-08-25 04:35:58 [main        ] INFO     [#updates[ 12600] train loss[4.18210] remaining[0:06:08]]
+2018-08-25 04:36:32 [main        ] INFO     [#updates[ 12700] train loss[4.17269] remaining[0:05:34]]
+2018-08-25 04:37:06 [main        ] INFO     [#updates[ 12800] train loss[4.16470] remaining[0:05:00]]
+2018-08-25 04:37:40 [main        ] INFO     [#updates[ 12900] train loss[4.15693] remaining[0:04:26]]
+2018-08-25 04:38:14 [main        ] INFO     [#updates[ 13000] train loss[4.14861] remaining[0:03:53]]
+2018-08-25 04:38:47 [main        ] INFO     [#updates[ 13100] train loss[4.14015] remaining[0:03:19]]
+2018-08-25 04:39:21 [main        ] INFO     [#updates[ 13200] train loss[4.13238] remaining[0:02:45]]
+2018-08-25 04:39:56 [main        ] INFO     [#updates[ 13300] train loss[4.12599] remaining[0:02:11]]
+2018-08-25 04:40:30 [main        ] INFO     [#updates[ 13400] train loss[4.11957] remaining[0:01:38]]
+2018-08-25 04:41:05 [main        ] INFO     [#updates[ 13500] train loss[4.11181] remaining[0:01:04]]
+2018-08-25 04:41:39 [main        ] INFO     [#updates[ 13600] train loss[4.10549] remaining[0:00:30]]
+2018-08-25 04:43:20 [main        ] INFO     [scheduler_type ms]
+2018-08-25 04:43:25 [main        ] INFO     [Saved the new best model and prediction]
+2018-08-25 04:43:25 [main        ] WARNING  [Epoch 4 - dev EM: 69.395 F1: 79.011 (best EM: 69.395 F1: 79.011)]
+2018-08-25 04:43:25 [main        ] WARNING  [At epoch 5]
+2018-08-25 04:43:25 [main        ] INFO     [#updates[ 13691] train loss[4.09863] remaining[0:16:03]]
+2018-08-25 04:43:28 [main        ] INFO     [#updates[ 13700] train loss[4.09786] remaining[0:15:13]]
+2018-08-25 04:44:02 [main        ] INFO     [#updates[ 13800] train loss[4.08938] remaining[0:14:48]]
+2018-08-25 04:44:36 [main        ] INFO     [#updates[ 13900] train loss[4.08204] remaining[0:14:14]]
+2018-08-25 04:45:10 [main        ] INFO     [#updates[ 14000] train loss[4.07562] remaining[0:13:44]]
+2018-08-25 04:45:43 [main        ] INFO     [#updates[ 14100] train loss[4.06923] remaining[0:13:05]]
+2018-08-25 04:46:17 [main        ] INFO     [#updates[ 14200] train loss[4.06144] remaining[0:12:31]]
+2018-08-25 04:46:49 [main        ] INFO     [#updates[ 14300] train loss[4.05398] remaining[0:11:52]]
+2018-08-25 04:47:23 [main        ] INFO     [#updates[ 14400] train loss[4.04860] remaining[0:11:20]]
+2018-08-25 04:47:57 [main        ] INFO     [#updates[ 14500] train loss[4.04306] remaining[0:10:48]]
+2018-08-25 04:48:31 [main        ] INFO     [#updates[ 14600] train loss[4.03622] remaining[0:10:14]]
+2018-08-25 04:49:05 [main        ] INFO     [#updates[ 14700] train loss[4.03012] remaining[0:09:42]]
+2018-08-25 04:49:39 [main        ] INFO     [#updates[ 14800] train loss[4.02367] remaining[0:09:09]]
+2018-08-25 04:50:13 [main        ] INFO     [#updates[ 14900] train loss[4.01716] remaining[0:08:35]]
+2018-08-25 04:50:47 [main        ] INFO     [#updates[ 15000] train loss[4.01040] remaining[0:08:01]]
+2018-08-25 04:51:20 [main        ] INFO     [#updates[ 15100] train loss[4.00446] remaining[0:07:27]]
+2018-08-25 04:51:55 [main        ] INFO     [#updates[ 15200] train loss[3.99938] remaining[0:06:54]]
+2018-08-25 04:52:29 [main        ] INFO     [#updates[ 15300] train loss[3.99384] remaining[0:06:20]]
+2018-08-25 04:53:02 [main        ] INFO     [#updates[ 15400] train loss[3.98709] remaining[0:05:46]]
+2018-08-25 04:53:37 [main        ] INFO     [#updates[ 15500] train loss[3.98064] remaining[0:05:13]]
+2018-08-25 04:54:12 [main        ] INFO     [#updates[ 15600] train loss[3.97369] remaining[0:04:40]]
+2018-08-25 04:54:46 [main        ] INFO     [#updates[ 15700] train loss[3.96731] remaining[0:04:06]]
+2018-08-25 04:55:21 [main        ] INFO     [#updates[ 15800] train loss[3.96073] remaining[0:03:32]]
+2018-08-25 04:55:55 [main        ] INFO     [#updates[ 15900] train loss[3.95553] remaining[0:02:59]]
+2018-08-25 04:56:29 [main        ] INFO     [#updates[ 16000] train loss[3.95020] remaining[0:02:25]]
+2018-08-25 04:57:03 [main        ] INFO     [#updates[ 16100] train loss[3.94511] remaining[0:01:51]]
+2018-08-25 04:57:38 [main        ] INFO     [#updates[ 16200] train loss[3.93925] remaining[0:01:17]]
+2018-08-25 04:58:11 [main        ] INFO     [#updates[ 16300] train loss[3.93342] remaining[0:00:43]]
+2018-08-25 04:58:45 [main        ] INFO     [#updates[ 16400] train loss[3.92813] remaining[0:00:09]]
+2018-08-25 05:00:05 [main        ] INFO     [scheduler_type ms]
+2018-08-25 05:00:09 [main        ] INFO     [Saved the new best model and prediction]
+2018-08-25 05:00:09 [main        ] WARNING  [Epoch 5 - dev EM: 71.239 F1: 79.857 (best EM: 71.239 F1: 79.857)]
+2018-08-25 05:00:09 [main        ] WARNING  [At epoch 6]
+2018-08-25 05:00:10 [main        ] INFO     [#updates[ 16429] train loss[3.92677] remaining[0:12:43]]
+2018-08-25 05:00:33 [main        ] INFO     [#updates[ 16500] train loss[3.92205] remaining[0:14:52]]
+2018-08-25 05:01:07 [main        ] INFO     [#updates[ 16600] train loss[3.91515] remaining[0:14:24]]
+2018-08-25 05:01:41 [main        ] INFO     [#updates[ 16700] train loss[3.90976] remaining[0:13:55]]
+2018-08-25 05:02:15 [main        ] INFO     [#updates[ 16800] train loss[3.90429] remaining[0:13:18]]
+2018-08-25 05:02:49 [main        ] INFO     [#updates[ 16900] train loss[3.89858] remaining[0:12:48]]
+2018-08-25 05:03:24 [main        ] INFO     [#updates[ 17000] train loss[3.89362] remaining[0:12:15]]
+2018-08-25 05:03:57 [main        ] INFO     [#updates[ 17100] train loss[3.88720] remaining[0:11:41]]
+2018-08-25 05:04:32 [main        ] INFO     [#updates[ 17200] train loss[3.88294] remaining[0:11:09]]
+2018-08-25 05:05:06 [main        ] INFO     [#updates[ 17300] train loss[3.87615] remaining[0:10:35]]
+2018-08-25 05:05:40 [main        ] INFO     [#updates[ 17400] train loss[3.87075] remaining[0:10:00]]
+2018-08-25 05:06:14 [main        ] INFO     [#updates[ 17500] train loss[3.86526] remaining[0:09:26]]
+2018-08-25 05:06:48 [main        ] INFO     [#updates[ 17600] train loss[3.86044] remaining[0:08:52]]
+2018-08-25 05:07:22 [main        ] INFO     [#updates[ 17700] train loss[3.85373] remaining[0:08:18]]
+2018-08-25 05:07:56 [main        ] INFO     [#updates[ 17800] train loss[3.84859] remaining[0:07:44]]
+2018-08-25 05:08:31 [main        ] INFO     [#updates[ 17900] train loss[3.84391] remaining[0:07:11]]
+2018-08-25 05:09:05 [main        ] INFO     [#updates[ 18000] train loss[3.83915] remaining[0:06:37]]
+2018-08-25 05:09:38 [main        ] INFO     [#updates[ 18100] train loss[3.83364] remaining[0:06:02]]
+2018-08-25 05:10:12 [main        ] INFO     [#updates[ 18200] train loss[3.82894] remaining[0:05:28]]
+2018-08-25 05:10:46 [main        ] INFO     [#updates[ 18300] train loss[3.82447] remaining[0:04:54]]
+2018-08-25 05:11:20 [main        ] INFO     [#updates[ 18400] train loss[3.82054] remaining[0:04:20]]
+2018-08-25 05:11:54 [main        ] INFO     [#updates[ 18500] train loss[3.81534] remaining[0:03:46]]
+2018-08-25 05:12:28 [main        ] INFO     [#updates[ 18600] train loss[3.81075] remaining[0:03:12]]
+2018-08-25 05:13:02 [main        ] INFO     [#updates[ 18700] train loss[3.80631] remaining[0:02:38]]
+2018-08-25 05:13:37 [main        ] INFO     [#updates[ 18800] train loss[3.80163] remaining[0:02:04]]
+2018-08-25 05:14:13 [main        ] INFO     [#updates[ 18900] train loss[3.79739] remaining[0:01:30]]
+2018-08-25 05:14:48 [main        ] INFO     [#updates[ 19000] train loss[3.79275] remaining[0:00:56]]
+2018-08-25 05:15:21 [main        ] INFO     [#updates[ 19100] train loss[3.78849] remaining[0:00:22]]
+2018-08-25 05:16:56 [main        ] INFO     [scheduler_type ms]
+2018-08-25 05:17:00 [main        ] INFO     [Saved the new best model and prediction]
+2018-08-25 05:17:00 [main        ] WARNING  [Epoch 6 - dev EM: 72.441 F1: 80.868 (best EM: 72.441 F1: 80.868)]
+2018-08-25 05:17:00 [main        ] WARNING  [At epoch 7]
+2018-08-25 05:17:00 [main        ] INFO     [#updates[ 19167] train loss[3.78559] remaining[0:14:35]]
+2018-08-25 05:17:11 [main        ] INFO     [#updates[ 19200] train loss[3.78370] remaining[0:15:08]]
+2018-08-25 05:17:46 [main        ] INFO     [#updates[ 19300] train loss[3.77921] remaining[0:14:47]]
+2018-08-25 05:18:19 [main        ] INFO     [#updates[ 19400] train loss[3.77517] remaining[0:14:07]]
+2018-08-25 05:18:53 [main        ] INFO     [#updates[ 19500] train loss[3.77094] remaining[0:13:33]]
+2018-08-25 05:19:27 [main        ] INFO     [#updates[ 19600] train loss[3.76574] remaining[0:12:57]]
+2018-08-25 05:20:01 [main        ] INFO     [#updates[ 19700] train loss[3.76052] remaining[0:12:26]]
+2018-08-25 05:20:35 [main        ] INFO     [#updates[ 19800] train loss[3.75647] remaining[0:11:53]]
+2018-08-25 05:21:09 [main        ] INFO     [#updates[ 19900] train loss[3.75161] remaining[0:11:20]]
+2018-08-25 05:21:43 [main        ] INFO     [#updates[ 20000] train loss[3.74784] remaining[0:10:46]]
+2018-08-25 05:22:17 [main        ] INFO     [#updates[ 20100] train loss[3.74421] remaining[0:10:11]]
+2018-08-25 05:22:51 [main        ] INFO     [#updates[ 20200] train loss[3.74068] remaining[0:09:38]]
+2018-08-25 05:23:25 [main        ] INFO     [#updates[ 20300] train loss[3.73581] remaining[0:09:05]]
+2018-08-25 05:24:00 [main        ] INFO     [#updates[ 20400] train loss[3.73053] remaining[0:08:31]]
+2018-08-25 05:24:33 [main        ] INFO     [#updates[ 20500] train loss[3.72524] remaining[0:07:57]]
+2018-08-25 05:25:08 [main        ] INFO     [#updates[ 20600] train loss[3.72119] remaining[0:07:23]]
+2018-08-25 05:25:42 [main        ] INFO     [#updates[ 20700] train loss[3.71692] remaining[0:06:49]]
+2018-08-25 05:26:17 [main        ] INFO     [#updates[ 20800] train loss[3.71258] remaining[0:06:16]]
+2018-08-25 05:26:52 [main        ] INFO     [#updates[ 20900] train loss[3.70885] remaining[0:05:42]]
+2018-08-25 05:27:26 [main        ] INFO     [#updates[ 21000] train loss[3.70477] remaining[0:05:08]]
+2018-08-25 05:28:00 [main        ] INFO     [#updates[ 21100] train loss[3.70068] remaining[0:04:34]]
+2018-08-25 05:28:34 [main        ] INFO     [#updates[ 21200] train loss[3.69664] remaining[0:04:00]]
+2018-08-25 05:29:08 [main        ] INFO     [#updates[ 21300] train loss[3.69257] remaining[0:03:26]]
+2018-08-25 05:29:43 [main        ] INFO     [#updates[ 21400] train loss[3.68875] remaining[0:02:52]]
+2018-08-25 05:30:17 [main        ] INFO     [#updates[ 21500] train loss[3.68502] remaining[0:02:17]]
+2018-08-25 05:30:50 [main        ] INFO     [#updates[ 21600] train loss[3.68195] remaining[0:01:43]]
+2018-08-25 05:31:25 [main        ] INFO     [#updates[ 21700] train loss[3.67773] remaining[0:01:09]]
+2018-08-25 05:31:59 [main        ] INFO     [#updates[ 21800] train loss[3.67317] remaining[0:00:35]]
+2018-08-25 05:32:32 [main        ] INFO     [#updates[ 21900] train loss[3.66934] remaining[0:00:01]]
+2018-08-25 05:33:44 [main        ] INFO     [scheduler_type ms]
+2018-08-25 05:33:47 [main        ] WARNING  [Epoch 7 - dev EM: 72.034 F1: 80.404 (best EM: 72.441 F1: 80.868)]
+2018-08-25 05:33:47 [main        ] WARNING  [At epoch 8]
+2018-08-25 05:33:47 [main        ] INFO     [#updates[ 21905] train loss[3.66927] remaining[0:14:05]]
+2018-08-25 05:34:19 [main        ] INFO     [#updates[ 22000] train loss[3.66577] remaining[0:14:31]]
+2018-08-25 05:34:53 [main        ] INFO     [#updates[ 22100] train loss[3.66136] remaining[0:14:14]]
+2018-08-25 05:35:27 [main        ] INFO     [#updates[ 22200] train loss[3.65715] remaining[0:13:41]]
+2018-08-25 05:36:00 [main        ] INFO     [#updates[ 22300] train loss[3.65268] remaining[0:13:06]]
+2018-08-25 05:36:34 [main        ] INFO     [#updates[ 22400] train loss[3.64968] remaining[0:12:32]]
+2018-08-25 05:37:08 [main        ] INFO     [#updates[ 22500] train loss[3.64644] remaining[0:12:01]]
+2018-08-25 05:37:42 [main        ] INFO     [#updates[ 22600] train loss[3.64340] remaining[0:11:28]]
+2018-08-25 05:38:16 [main        ] INFO     [#updates[ 22700] train loss[3.64058] remaining[0:10:56]]
+2018-08-25 05:38:52 [main        ] INFO     [#updates[ 22800] train loss[3.63678] remaining[0:10:27]]
+2018-08-25 05:39:27 [main        ] INFO     [#updates[ 22900] train loss[3.63271] remaining[0:09:54]]
+2018-08-25 05:40:02 [main        ] INFO     [#updates[ 23000] train loss[3.62837] remaining[0:09:21]]
+2018-08-25 05:40:37 [main        ] INFO     [#updates[ 23100] train loss[3.62497] remaining[0:08:48]]
+2018-08-25 05:41:11 [main        ] INFO     [#updates[ 23200] train loss[3.62108] remaining[0:08:14]]
+2018-08-25 05:41:45 [main        ] INFO     [#updates[ 23300] train loss[3.61750] remaining[0:07:39]]
+2018-08-25 05:42:19 [main        ] INFO     [#updates[ 23400] train loss[3.61461] remaining[0:07:04]]
+2018-08-25 05:42:53 [main        ] INFO     [#updates[ 23500] train loss[3.61059] remaining[0:06:30]]
+2018-08-25 05:43:29 [main        ] INFO     [#updates[ 23600] train loss[3.60700] remaining[0:05:57]]
+2018-08-25 05:44:03 [main        ] INFO     [#updates[ 23700] train loss[3.60338] remaining[0:05:23]]
+2018-08-25 05:44:37 [main        ] INFO     [#updates[ 23800] train loss[3.59984] remaining[0:04:48]]
+2018-08-25 05:45:11 [main        ] INFO     [#updates[ 23900] train loss[3.59656] remaining[0:04:14]]
+2018-08-25 05:45:45 [main        ] INFO     [#updates[ 24000] train loss[3.59310] remaining[0:03:39]]
+2018-08-25 05:46:19 [main        ] INFO     [#updates[ 24100] train loss[3.58949] remaining[0:03:05]]
+2018-08-25 05:46:53 [main        ] INFO     [#updates[ 24200] train loss[3.58555] remaining[0:02:31]]
+2018-08-25 05:47:26 [main        ] INFO     [#updates[ 24300] train loss[3.58254] remaining[0:01:56]]
+2018-08-25 05:47:59 [main        ] INFO     [#updates[ 24400] train loss[3.57895] remaining[0:01:22]]
+2018-08-25 05:48:34 [main        ] INFO     [#updates[ 24500] train loss[3.57525] remaining[0:00:48]]
+2018-08-25 05:49:07 [main        ] INFO     [#updates[ 24600] train loss[3.57104] remaining[0:00:14]]
+2018-08-25 05:50:29 [main        ] INFO     [scheduler_type ms]
+2018-08-25 05:50:33 [main        ] INFO     [Saved the new best model and prediction]
+2018-08-25 05:50:33 [main        ] WARNING  [Epoch 8 - dev EM: 72.867 F1: 81.510 (best EM: 72.867 F1: 81.510)]
+2018-08-25 05:50:33 [main        ] WARNING  [At epoch 9]
+2018-08-25 05:50:34 [main        ] INFO     [#updates[ 24643] train loss[3.56976] remaining[0:17:58]]
+2018-08-25 05:50:53 [main        ] INFO     [#updates[ 24700] train loss[3.56760] remaining[0:15:04]]
+2018-08-25 05:51:28 [main        ] INFO     [#updates[ 24800] train loss[3.56440] remaining[0:14:43]]
+2018-08-25 05:52:01 [main        ] INFO     [#updates[ 24900] train loss[3.56125] remaining[0:14:04]]
+2018-08-25 05:52:35 [main        ] INFO     [#updates[ 25000] train loss[3.55804] remaining[0:13:26]]
+2018-08-25 05:53:09 [main        ] INFO     [#updates[ 25100] train loss[3.55414] remaining[0:12:52]]
+2018-08-25 05:53:43 [main        ] INFO     [#updates[ 25200] train loss[3.55102] remaining[0:12:19]]
+2018-08-25 05:54:17 [main        ] INFO     [#updates[ 25300] train loss[3.54761] remaining[0:11:46]]
+2018-08-25 05:54:51 [main        ] INFO     [#updates[ 25400] train loss[3.54436] remaining[0:11:13]]
+2018-08-25 05:55:26 [main        ] INFO     [#updates[ 25500] train loss[3.54041] remaining[0:10:40]]
+2018-08-25 05:55:59 [main        ] INFO     [#updates[ 25600] train loss[3.53731] remaining[0:10:05]]
+2018-08-25 05:56:33 [main        ] INFO     [#updates[ 25700] train loss[3.53374] remaining[0:09:31]]
+2018-08-25 05:57:08 [main        ] INFO     [#updates[ 25800] train loss[3.53089] remaining[0:08:58]]
+2018-08-25 05:57:44 [main        ] INFO     [#updates[ 25900] train loss[3.52757] remaining[0:08:26]]
+2018-08-25 05:58:19 [main        ] INFO     [#updates[ 26000] train loss[3.52476] remaining[0:07:52]]
+2018-08-25 05:58:53 [main        ] INFO     [#updates[ 26100] train loss[3.52189] remaining[0:07:18]]
+2018-08-25 05:59:27 [main        ] INFO     [#updates[ 26200] train loss[3.51847] remaining[0:06:44]]
+2018-08-25 06:00:01 [main        ] INFO     [#updates[ 26300] train loss[3.51469] remaining[0:06:09]]
+2018-08-25 06:00:35 [main        ] INFO     [#updates[ 26400] train loss[3.51157] remaining[0:05:35]]
+2018-08-25 06:01:09 [main        ] INFO     [#updates[ 26500] train loss[3.50930] remaining[0:05:00]]
+2018-08-25 06:01:42 [main        ] INFO     [#updates[ 26600] train loss[3.50727] remaining[0:04:26]]
+2018-08-25 06:02:15 [main        ] INFO     [#updates[ 26700] train loss[3.50391] remaining[0:03:51]]
+2018-08-25 06:02:49 [main        ] INFO     [#updates[ 26800] train loss[3.50038] remaining[0:03:17]]
+2018-08-25 06:03:23 [main        ] INFO     [#updates[ 26900] train loss[3.49744] remaining[0:02:43]]
+2018-08-25 06:03:57 [main        ] INFO     [#updates[ 27000] train loss[3.49402] remaining[0:02:09]]
+2018-08-25 06:04:30 [main        ] INFO     [#updates[ 27100] train loss[3.49119] remaining[0:01:35]]
+2018-08-25 06:05:03 [main        ] INFO     [#updates[ 27200] train loss[3.48780] remaining[0:01:01]]
+2018-08-25 06:05:36 [main        ] INFO     [#updates[ 27300] train loss[3.48477] remaining[0:00:27]]
+2018-08-25 06:07:13 [main        ] INFO     [scheduler_type ms]
+2018-08-25 06:07:17 [main        ] INFO     [Saved the new best model and prediction]
+2018-08-25 06:07:17 [main        ] WARNING  [Epoch 9 - dev EM: 72.999 F1: 81.899 (best EM: 72.999 F1: 81.899)]
+2018-08-25 06:07:17 [main        ] WARNING  [At epoch 10]
+2018-08-25 06:07:17 [main        ] INFO     [#updates[ 27381] train loss[3.48253] remaining[0:20:20]]
+2018-08-25 06:07:24 [main        ] INFO     [#updates[ 27400] train loss[3.48199] remaining[0:15:28]]
+2018-08-25 06:07:57 [main        ] INFO     [#updates[ 27500] train loss[3.47852] remaining[0:14:34]]
+2018-08-25 06:08:31 [main        ] INFO     [#updates[ 27600] train loss[3.47524] remaining[0:14:12]]
+2018-08-25 06:09:05 [main        ] INFO     [#updates[ 27700] train loss[3.47283] remaining[0:13:37]]
+2018-08-25 06:09:38 [main        ] INFO     [#updates[ 27800] train loss[3.46969] remaining[0:12:59]]
+2018-08-25 06:10:12 [main        ] INFO     [#updates[ 27900] train loss[3.46658] remaining[0:12:28]]
+2018-08-25 06:10:46 [main        ] INFO     [#updates[ 28000] train loss[3.46427] remaining[0:11:53]]
+2018-08-25 06:11:20 [main        ] INFO     [#updates[ 28100] train loss[3.46131] remaining[0:11:21]]
+2018-08-25 06:11:54 [main        ] INFO     [#updates[ 28200] train loss[3.45857] remaining[0:10:47]]
+2018-08-25 06:12:27 [main        ] INFO     [#updates[ 28300] train loss[3.45562] remaining[0:10:13]]
+2018-08-25 06:13:00 [main        ] INFO     [#updates[ 28400] train loss[3.45301] remaining[0:09:38]]
+2018-08-25 06:13:34 [main        ] INFO     [#updates[ 28500] train loss[3.44996] remaining[0:09:04]]
+2018-08-25 06:14:07 [main        ] INFO     [#updates[ 28600] train loss[3.44690] remaining[0:08:29]]
+2018-08-25 06:14:40 [main        ] INFO     [#updates[ 28700] train loss[3.44335] remaining[0:07:55]]
+2018-08-25 06:15:13 [main        ] INFO     [#updates[ 28800] train loss[3.44071] remaining[0:07:22]]
+2018-08-25 06:15:46 [main        ] INFO     [#updates[ 28900] train loss[3.43802] remaining[0:06:48]]
+2018-08-25 06:16:20 [main        ] INFO     [#updates[ 29000] train loss[3.43489] remaining[0:06:14]]
+2018-08-25 06:16:54 [main        ] INFO     [#updates[ 29100] train loss[3.43240] remaining[0:05:41]]
+2018-08-25 06:17:27 [main        ] INFO     [#updates[ 29200] train loss[3.43046] remaining[0:05:07]]
+2018-08-25 06:18:00 [main        ] INFO     [#updates[ 29300] train loss[3.42766] remaining[0:04:34]]
+2018-08-25 06:18:34 [main        ] INFO     [#updates[ 29400] train loss[3.42429] remaining[0:04:00]]
+2018-08-25 06:19:07 [main        ] INFO     [#updates[ 29500] train loss[3.42111] remaining[0:03:26]]
+2018-08-25 06:19:40 [main        ] INFO     [#updates[ 29600] train loss[3.41850] remaining[0:02:53]]
+2018-08-25 06:20:14 [main        ] INFO     [#updates[ 29700] train loss[3.41661] remaining[0:02:20]]
+2018-08-25 06:20:48 [main        ] INFO     [#updates[ 29800] train loss[3.41367] remaining[0:01:46]]
+2018-08-25 06:21:21 [main        ] INFO     [#updates[ 29900] train loss[3.41084] remaining[0:01:13]]
+2018-08-25 06:21:55 [main        ] INFO     [#updates[ 30000] train loss[3.40799] remaining[0:00:39]]
+2018-08-25 06:22:29 [main        ] INFO     [#updates[ 30100] train loss[3.40590] remaining[0:00:06]]
+2018-08-25 06:23:42 [main        ] INFO     [scheduler_type ms]
+2018-08-25 06:23:47 [main        ] INFO     [Saved the new best model and prediction]
+2018-08-25 06:23:47 [main        ] WARNING  [Epoch 10 - dev EM: 73.652 F1: 81.932 (best EM: 73.652 F1: 81.932)]
+2018-08-25 06:23:47 [main        ] WARNING  [At epoch 11]
+2018-08-25 06:23:47 [main        ] INFO     [#updates[ 30119] train loss[3.40525] remaining[0:15:46]]
+2018-08-25 06:24:14 [main        ] INFO     [#updates[ 30200] train loss[3.40256] remaining[0:14:31]]
+2018-08-25 06:24:48 [main        ] INFO     [#updates[ 30300] train loss[3.39974] remaining[0:14:15]]
+2018-08-25 06:25:21 [main        ] INFO     [#updates[ 30400] train loss[3.39728] remaining[0:13:45]]
+2018-08-25 06:25:54 [main        ] INFO     [#updates[ 30500] train loss[3.39430] remaining[0:13:06]]
+2018-08-25 06:26:28 [main        ] INFO     [#updates[ 30600] train loss[3.39177] remaining[0:12:34]]
+2018-08-25 06:27:01 [main        ] INFO     [#updates[ 30700] train loss[3.38884] remaining[0:12:01]]
+2018-08-25 06:27:35 [main        ] INFO     [#updates[ 30800] train loss[3.38627] remaining[0:11:27]]
+2018-08-25 06:28:07 [main        ] INFO     [#updates[ 30900] train loss[3.38303] remaining[0:10:52]]
+2018-08-25 06:28:41 [main        ] INFO     [#updates[ 31000] train loss[3.38047] remaining[0:10:19]]
+2018-08-25 06:29:15 [main        ] INFO     [#updates[ 31100] train loss[3.37759] remaining[0:09:46]]
+2018-08-25 06:29:48 [main        ] INFO     [#updates[ 31200] train loss[3.37513] remaining[0:09:13]]
+2018-08-25 06:30:23 [main        ] INFO     [#updates[ 31300] train loss[3.37222] remaining[0:08:41]]
+2018-08-25 06:30:56 [main        ] INFO     [#updates[ 31400] train loss[3.36959] remaining[0:08:07]]
+2018-08-25 06:31:29 [main        ] INFO     [#updates[ 31500] train loss[3.36676] remaining[0:07:33]]
+2018-08-25 06:32:03 [main        ] INFO     [#updates[ 31600] train loss[3.36428] remaining[0:07:00]]
+2018-08-25 06:32:36 [main        ] INFO     [#updates[ 31700] train loss[3.36133] remaining[0:06:26]]
+2018-08-25 06:33:09 [main        ] INFO     [#updates[ 31800] train loss[3.35852] remaining[0:05:53]]
+2018-08-25 06:33:44 [main        ] INFO     [#updates[ 31900] train loss[3.35615] remaining[0:05:20]]
+2018-08-25 06:34:18 [main        ] INFO     [#updates[ 32000] train loss[3.35322] remaining[0:04:47]]
+2018-08-25 06:34:51 [main        ] INFO     [#updates[ 32100] train loss[3.35062] remaining[0:04:13]]
+2018-08-25 06:35:25 [main        ] INFO     [#updates[ 32200] train loss[3.34734] remaining[0:03:39]]
+2018-08-25 06:35:58 [main        ] INFO     [#updates[ 32300] train loss[3.34513] remaining[0:03:06]]
+2018-08-25 06:36:32 [main        ] INFO     [#updates[ 32400] train loss[3.34222] remaining[0:02:32]]
+2018-08-25 06:37:04 [main        ] INFO     [#updates[ 32500] train loss[3.33926] remaining[0:01:59]]
+2018-08-25 06:37:38 [main        ] INFO     [#updates[ 32600] train loss[3.33678] remaining[0:01:25]]
+2018-08-25 06:38:11 [main        ] INFO     [#updates[ 32700] train loss[3.33454] remaining[0:00:52]]
+2018-08-25 06:38:45 [main        ] INFO     [#updates[ 32800] train loss[3.33175] remaining[0:00:18]]
+2018-08-25 06:40:09 [main        ] INFO     [scheduler_type ms]
+2018-08-25 06:40:13 [main        ] INFO     [Saved the new best model and prediction]
+2018-08-25 06:40:13 [main        ] WARNING  [Epoch 11 - dev EM: 74.645 F1: 82.624 (best EM: 74.645 F1: 82.624)]
+2018-08-25 06:40:13 [main        ] WARNING  [At epoch 12]
+2018-08-25 06:40:14 [main        ] INFO     [#updates[ 32857] train loss[3.33010] remaining[0:21:42]]
+2018-08-25 06:40:28 [main        ] INFO     [#updates[ 32900] train loss[3.32893] remaining[0:15:30]]
+2018-08-25 06:41:02 [main        ] INFO     [#updates[ 33000] train loss[3.32613] remaining[0:14:41]]
+2018-08-25 06:41:36 [main        ] INFO     [#updates[ 33100] train loss[3.32334] remaining[0:14:03]]
+2018-08-25 06:42:09 [main        ] INFO     [#updates[ 33200] train loss[3.32056] remaining[0:13:26]]
+2018-08-25 06:42:42 [main        ] INFO     [#updates[ 33300] train loss[3.31758] remaining[0:12:48]]
+2018-08-25 06:43:15 [main        ] INFO     [#updates[ 33400] train loss[3.31522] remaining[0:12:12]]
+2018-08-25 06:43:49 [main        ] INFO     [#updates[ 33500] train loss[3.31303] remaining[0:11:41]]
+2018-08-25 06:44:23 [main        ] INFO     [#updates[ 33600] train loss[3.31012] remaining[0:11:09]]
+2018-08-25 06:44:56 [main        ] INFO     [#updates[ 33700] train loss[3.30764] remaining[0:10:34]]
+2018-08-25 06:45:29 [main        ] INFO     [#updates[ 33800] train loss[3.30517] remaining[0:10:00]]
+2018-08-25 06:46:03 [main        ] INFO     [#updates[ 33900] train loss[3.30310] remaining[0:09:27]]
+2018-08-25 06:46:35 [main        ] INFO     [#updates[ 34000] train loss[3.30024] remaining[0:08:52]]
+2018-08-25 06:47:09 [main        ] INFO     [#updates[ 34100] train loss[3.29784] remaining[0:08:19]]
+2018-08-25 06:47:44 [main        ] INFO     [#updates[ 34200] train loss[3.29533] remaining[0:07:47]]
+2018-08-25 06:48:17 [main        ] INFO     [#updates[ 34300] train loss[3.29263] remaining[0:07:13]]
+2018-08-25 06:48:51 [main        ] INFO     [#updates[ 34400] train loss[3.29006] remaining[0:06:40]]
+2018-08-25 06:49:25 [main        ] INFO     [#updates[ 34500] train loss[3.28772] remaining[0:06:07]]
+2018-08-25 06:49:59 [main        ] INFO     [#updates[ 34600] train loss[3.28504] remaining[0:05:34]]
+2018-08-25 06:50:32 [main        ] INFO     [#updates[ 34700] train loss[3.28297] remaining[0:05:00]]
+2018-08-25 06:51:05 [main        ] INFO     [#updates[ 34800] train loss[3.28038] remaining[0:04:26]]
+2018-08-25 06:51:39 [main        ] INFO     [#updates[ 34900] train loss[3.27831] remaining[0:03:52]]
+2018-08-25 06:52:11 [main        ] INFO     [#updates[ 35000] train loss[3.27626] remaining[0:03:18]]
+2018-08-25 06:52:44 [main        ] INFO     [#updates[ 35100] train loss[3.27405] remaining[0:02:45]]
+2018-08-25 06:53:16 [main        ] INFO     [#updates[ 35200] train loss[3.27132] remaining[0:02:11]]
+2018-08-25 06:53:50 [main        ] INFO     [#updates[ 35300] train loss[3.26916] remaining[0:01:38]]
+2018-08-25 06:54:23 [main        ] INFO     [#updates[ 35400] train loss[3.26670] remaining[0:01:04]]
+2018-08-25 06:54:56 [main        ] INFO     [#updates[ 35500] train loss[3.26441] remaining[0:00:31]]
+2018-08-25 06:56:29 [main        ] INFO     [scheduler_type ms]
+2018-08-25 06:56:33 [main        ] WARNING  [Epoch 12 - dev EM: 74.560 F1: 82.508 (best EM: 74.645 F1: 82.624)]
+2018-08-25 06:56:33 [main        ] WARNING  [At epoch 13]
+2018-08-25 06:56:34 [main        ] INFO     [#updates[ 35595] train loss[3.26137] remaining[0:16:49]]
+2018-08-25 06:56:35 [main        ] INFO     [#updates[ 35600] train loss[3.26128] remaining[0:15:00]]
+2018-08-25 06:57:08 [main        ] INFO     [#updates[ 35700] train loss[3.25869] remaining[0:14:25]]
+2018-08-25 06:57:41 [main        ] INFO     [#updates[ 35800] train loss[3.25673] remaining[0:13:54]]
+2018-08-25 06:58:15 [main        ] INFO     [#updates[ 35900] train loss[3.25440] remaining[0:13:30]]
+2018-08-25 06:58:49 [main        ] INFO     [#updates[ 36000] train loss[3.25179] remaining[0:12:56]]
+2018-08-25 06:59:22 [main        ] INFO     [#updates[ 36100] train loss[3.24981] remaining[0:12:25]]
+2018-08-25 06:59:55 [main        ] INFO     [#updates[ 36200] train loss[3.24793] remaining[0:11:51]]
+2018-08-25 07:00:29 [main        ] INFO     [#updates[ 36300] train loss[3.24535] remaining[0:11:18]]
+2018-08-25 07:01:02 [main        ] INFO     [#updates[ 36400] train loss[3.24319] remaining[0:10:45]]
+2018-08-25 07:01:36 [main        ] INFO     [#updates[ 36500] train loss[3.24113] remaining[0:10:11]]
+2018-08-25 07:02:09 [main        ] INFO     [#updates[ 36600] train loss[3.23872] remaining[0:09:37]]
+2018-08-25 07:02:42 [main        ] INFO     [#updates[ 36700] train loss[3.23635] remaining[0:09:04]]
+2018-08-25 07:03:16 [main        ] INFO     [#updates[ 36800] train loss[3.23346] remaining[0:08:31]]
+2018-08-25 07:03:50 [main        ] INFO     [#updates[ 36900] train loss[3.23094] remaining[0:07:59]]
+2018-08-25 07:04:24 [main        ] INFO     [#updates[ 37000] train loss[3.22897] remaining[0:07:25]]
+2018-08-25 07:04:57 [main        ] INFO     [#updates[ 37100] train loss[3.22656] remaining[0:06:51]]
+2018-08-25 07:05:31 [main        ] INFO     [#updates[ 37200] train loss[3.22450] remaining[0:06:19]]
+2018-08-25 07:06:06 [main        ] INFO     [#updates[ 37300] train loss[3.22208] remaining[0:05:46]]
+2018-08-25 07:06:39 [main        ] INFO     [#updates[ 37400] train loss[3.21961] remaining[0:05:12]]
+2018-08-25 07:07:13 [main        ] INFO     [#updates[ 37500] train loss[3.21713] remaining[0:04:39]]
+2018-08-25 07:07:46 [main        ] INFO     [#updates[ 37600] train loss[3.21487] remaining[0:04:05]]
+2018-08-25 07:08:20 [main        ] INFO     [#updates[ 37700] train loss[3.21268] remaining[0:03:32]]
+2018-08-25 07:08:54 [main        ] INFO     [#updates[ 37800] train loss[3.21063] remaining[0:02:58]]
+2018-08-25 07:09:29 [main        ] INFO     [#updates[ 37900] train loss[3.20811] remaining[0:02:25]]
+2018-08-25 07:10:03 [main        ] INFO     [#updates[ 38000] train loss[3.20587] remaining[0:01:51]]
+2018-08-25 07:10:37 [main        ] INFO     [#updates[ 38100] train loss[3.20389] remaining[0:01:18]]
+2018-08-25 07:11:10 [main        ] INFO     [#updates[ 38200] train loss[3.20198] remaining[0:00:44]]
+2018-08-25 07:11:44 [main        ] INFO     [#updates[ 38300] train loss[3.19973] remaining[0:00:10]]
+2018-08-25 07:13:03 [main        ] INFO     [scheduler_type ms]
+2018-08-25 07:13:08 [main        ] INFO     [Saved the new best model and prediction]
+2018-08-25 07:13:08 [main        ] WARNING  [Epoch 13 - dev EM: 74.948 F1: 82.760 (best EM: 74.948 F1: 82.760)]
+2018-08-25 07:13:08 [main        ] WARNING  [At epoch 14]
+2018-08-25 07:13:08 [main        ] INFO     [#updates[ 38333] train loss[3.19890] remaining[0:13:54]]
+2018-08-25 07:13:29 [main        ] INFO     [#updates[ 38400] train loss[3.19772] remaining[0:14:14]]
+2018-08-25 07:14:02 [main        ] INFO     [#updates[ 38500] train loss[3.19537] remaining[0:13:50]]
+2018-08-25 07:14:36 [main        ] INFO     [#updates[ 38600] train loss[3.19311] remaining[0:13:30]]
+2018-08-25 07:15:08 [main        ] INFO     [#updates[ 38700] train loss[3.19107] remaining[0:12:57]]
+2018-08-25 07:15:42 [main        ] INFO     [#updates[ 38800] train loss[3.18909] remaining[0:12:27]]
+2018-08-25 07:16:15 [main        ] INFO     [#updates[ 38900] train loss[3.18701] remaining[0:11:56]]
+2018-08-25 07:16:48 [main        ] INFO     [#updates[ 39000] train loss[3.18478] remaining[0:11:23]]
+2018-08-25 07:17:22 [main        ] INFO     [#updates[ 39100] train loss[3.18287] remaining[0:10:52]]
+2018-08-25 07:17:56 [main        ] INFO     [#updates[ 39200] train loss[3.18044] remaining[0:10:21]]
+2018-08-25 07:18:29 [main        ] INFO     [#updates[ 39300] train loss[3.17814] remaining[0:09:47]]
+2018-08-25 07:19:03 [main        ] INFO     [#updates[ 39400] train loss[3.17628] remaining[0:09:15]]
+2018-08-25 07:19:36 [main        ] INFO     [#updates[ 39500] train loss[3.17398] remaining[0:08:42]]
+2018-08-25 07:20:11 [main        ] INFO     [#updates[ 39600] train loss[3.17188] remaining[0:08:10]]
+2018-08-25 07:20:44 [main        ] INFO     [#updates[ 39700] train loss[3.16958] remaining[0:07:36]]
+2018-08-25 07:21:17 [main        ] INFO     [#updates[ 39800] train loss[3.16767] remaining[0:07:03]]
+2018-08-25 07:21:51 [main        ] INFO     [#updates[ 39900] train loss[3.16566] remaining[0:06:30]]
+2018-08-25 07:22:25 [main        ] INFO     [#updates[ 40000] train loss[3.16375] remaining[0:05:57]]
+2018-08-25 07:22:59 [main        ] INFO     [#updates[ 40100] train loss[3.16149] remaining[0:05:24]]
+2018-08-25 07:23:32 [main        ] INFO     [#updates[ 40200] train loss[3.15945] remaining[0:04:51]]
+2018-08-25 07:24:06 [main        ] INFO     [#updates[ 40300] train loss[3.15767] remaining[0:04:17]]
+2018-08-25 07:24:40 [main        ] INFO     [#updates[ 40400] train loss[3.15538] remaining[0:03:44]]
+2018-08-25 07:25:13 [main        ] INFO     [#updates[ 40500] train loss[3.15349] remaining[0:03:10]]
+2018-08-25 07:25:47 [main        ] INFO     [#updates[ 40600] train loss[3.15148] remaining[0:02:37]]
+2018-08-25 07:26:19 [main        ] INFO     [#updates[ 40700] train loss[3.14905] remaining[0:02:03]]
+2018-08-25 07:26:53 [main        ] INFO     [#updates[ 40800] train loss[3.14702] remaining[0:01:30]]
+2018-08-25 07:27:26 [main        ] INFO     [#updates[ 40900] train loss[3.14544] remaining[0:00:56]]
+2018-08-25 07:27:59 [main        ] INFO     [#updates[ 41000] train loss[3.14390] remaining[0:00:23]]
+2018-08-25 07:29:30 [main        ] INFO     [scheduler_type ms]
+2018-08-25 07:29:35 [main        ] INFO     [Saved the new best model and prediction]
+2018-08-25 07:29:35 [main        ] WARNING  [Epoch 14 - dev EM: 75.052 F1: 83.381 (best EM: 75.052 F1: 83.381)]
+2018-08-25 07:29:35 [main        ] WARNING  [At epoch 15]
+2018-08-25 07:29:35 [main        ] INFO     [#updates[ 41071] train loss[3.14268] remaining[0:15:38]]
+2018-08-25 07:29:45 [main        ] INFO     [#updates[ 41100] train loss[3.14220] remaining[0:15:21]]
+2018-08-25 07:30:18 [main        ] INFO     [#updates[ 41200] train loss[3.14039] remaining[0:14:29]]
+2018-08-25 07:30:52 [main        ] INFO     [#updates[ 41300] train loss[3.13888] remaining[0:14:01]]
+2018-08-25 07:31:26 [main        ] INFO     [#updates[ 41400] train loss[3.13674] remaining[0:13:30]]
+2018-08-25 07:31:59 [main        ] INFO     [#updates[ 41500] train loss[3.13441] remaining[0:12:54]]
+2018-08-25 07:32:33 [main        ] INFO     [#updates[ 41600] train loss[3.13215] remaining[0:12:23]]
+2018-08-25 07:33:06 [main        ] INFO     [#updates[ 41700] train loss[3.12980] remaining[0:11:47]]
+2018-08-25 07:33:39 [main        ] INFO     [#updates[ 41800] train loss[3.12764] remaining[0:11:12]]
+2018-08-25 07:34:13 [main        ] INFO     [#updates[ 41900] train loss[3.12582] remaining[0:10:39]]
+2018-08-25 07:34:46 [main        ] INFO     [#updates[ 42000] train loss[3.12413] remaining[0:10:04]]
+2018-08-25 07:35:19 [main        ] INFO     [#updates[ 42100] train loss[3.12265] remaining[0:09:31]]
+2018-08-25 07:35:52 [main        ] INFO     [#updates[ 42200] train loss[3.12103] remaining[0:08:57]]
+2018-08-25 07:36:26 [main        ] INFO     [#updates[ 42300] train loss[3.11938] remaining[0:08:23]]
+2018-08-25 07:36:59 [main        ] INFO     [#updates[ 42400] train loss[3.11787] remaining[0:07:50]]
+2018-08-25 07:37:33 [main        ] INFO     [#updates[ 42500] train loss[3.11582] remaining[0:07:17]]
+2018-08-25 07:38:06 [main        ] INFO     [#updates[ 42600] train loss[3.11408] remaining[0:06:44]]
+2018-08-25 07:38:39 [main        ] INFO     [#updates[ 42700] train loss[3.11205] remaining[0:06:10]]
+2018-08-25 07:39:13 [main        ] INFO     [#updates[ 42800] train loss[3.11021] remaining[0:05:36]]
+2018-08-25 07:39:46 [main        ] INFO     [#updates[ 42900] train loss[3.10816] remaining[0:05:03]]
+2018-08-25 07:40:20 [main        ] INFO     [#updates[ 43000] train loss[3.10639] remaining[0:04:30]]
+2018-08-25 07:40:53 [main        ] INFO     [#updates[ 43100] train loss[3.10466] remaining[0:03:56]]
+2018-08-25 07:41:27 [main        ] INFO     [#updates[ 43200] train loss[3.10298] remaining[0:03:23]]
+2018-08-25 07:42:00 [main        ] INFO     [#updates[ 43300] train loss[3.10109] remaining[0:02:49]]
+2018-08-25 07:42:34 [main        ] INFO     [#updates[ 43400] train loss[3.09953] remaining[0:02:16]]
+2018-08-25 07:43:07 [main        ] INFO     [#updates[ 43500] train loss[3.09780] remaining[0:01:42]]
+2018-08-25 07:43:41 [main        ] INFO     [#updates[ 43600] train loss[3.09593] remaining[0:01:09]]
+2018-08-25 07:44:15 [main        ] INFO     [#updates[ 43700] train loss[3.09385] remaining[0:00:36]]
+2018-08-25 07:44:49 [main        ] INFO     [#updates[ 43800] train loss[3.09191] remaining[0:00:02]]
+2018-08-25 07:45:56 [main        ] INFO     [scheduler_type ms]
+2018-08-25 07:46:00 [main        ] INFO     [Saved the new best model and prediction]
+2018-08-25 07:46:00 [main        ] WARNING  [Epoch 15 - dev EM: 75.497 F1: 83.302 (best EM: 75.497 F1: 83.302)]
+2018-08-25 07:46:00 [main        ] WARNING  [At epoch 16]
+2018-08-25 07:46:01 [main        ] INFO     [#updates[ 43809] train loss[3.09171] remaining[0:15:27]]
+2018-08-25 07:46:31 [main        ] INFO     [#updates[ 43900] train loss[3.08979] remaining[0:14:45]]
+2018-08-25 07:47:05 [main        ] INFO     [#updates[ 44000] train loss[3.08776] remaining[0:14:18]]
+2018-08-25 07:47:40 [main        ] INFO     [#updates[ 44100] train loss[3.08616] remaining[0:13:52]]
+2018-08-25 07:48:13 [main        ] INFO     [#updates[ 44200] train loss[3.08457] remaining[0:13:11]]
+2018-08-25 07:48:47 [main        ] INFO     [#updates[ 44300] train loss[3.08281] remaining[0:12:39]]
+2018-08-25 07:49:20 [main        ] INFO     [#updates[ 44400] train loss[3.08097] remaining[0:12:02]]
+2018-08-25 07:49:53 [main        ] INFO     [#updates[ 44500] train loss[3.07935] remaining[0:11:28]]
+2018-08-25 07:50:27 [main        ] INFO     [#updates[ 44600] train loss[3.07743] remaining[0:10:54]]
+2018-08-25 07:51:00 [main        ] INFO     [#updates[ 44700] train loss[3.07542] remaining[0:10:19]]
+2018-08-25 07:51:34 [main        ] INFO     [#updates[ 44800] train loss[3.07380] remaining[0:09:46]]
+2018-08-25 07:52:07 [main        ] INFO     [#updates[ 44900] train loss[3.07210] remaining[0:09:12]]
+2018-08-25 07:52:40 [main        ] INFO     [#updates[ 45000] train loss[3.07021] remaining[0:08:38]]
+2018-08-25 07:53:14 [main        ] INFO     [#updates[ 45100] train loss[3.06849] remaining[0:08:04]]
+2018-08-25 07:53:46 [main        ] INFO     [#updates[ 45200] train loss[3.06642] remaining[0:07:30]]
+2018-08-25 07:54:20 [main        ] INFO     [#updates[ 45300] train loss[3.06484] remaining[0:06:56]]
+2018-08-25 07:54:53 [main        ] INFO     [#updates[ 45400] train loss[3.06341] remaining[0:06:23]]
+2018-08-25 07:55:27 [main        ] INFO     [#updates[ 45500] train loss[3.06174] remaining[0:05:49]]
+2018-08-25 07:56:00 [main        ] INFO     [#updates[ 45600] train loss[3.06020] remaining[0:05:16]]
+2018-08-25 07:56:33 [main        ] INFO     [#updates[ 45700] train loss[3.05870] remaining[0:04:42]]
+2018-08-25 07:57:06 [main        ] INFO     [#updates[ 45800] train loss[3.05673] remaining[0:04:09]]
+2018-08-25 07:57:38 [main        ] INFO     [#updates[ 45900] train loss[3.05516] remaining[0:03:35]]
+2018-08-25 07:58:12 [main        ] INFO     [#updates[ 46000] train loss[3.05381] remaining[0:03:02]]
+2018-08-25 07:58:45 [main        ] INFO     [#updates[ 46100] train loss[3.05203] remaining[0:02:28]]
+2018-08-25 07:59:18 [main        ] INFO     [#updates[ 46200] train loss[3.05022] remaining[0:01:55]]
+2018-08-25 07:59:53 [main        ] INFO     [#updates[ 46300] train loss[3.04875] remaining[0:01:22]]
+2018-08-25 08:00:26 [main        ] INFO     [#updates[ 46400] train loss[3.04689] remaining[0:00:48]]
+2018-08-25 08:00:59 [main        ] INFO     [#updates[ 46500] train loss[3.04545] remaining[0:00:15]]
+2018-08-25 08:02:23 [main        ] INFO     [scheduler_type ms]
+2018-08-25 08:02:31 [main        ] WARNING  [Epoch 16 - dev EM: 75.345 F1: 83.317 (best EM: 75.497 F1: 83.302)]
+2018-08-25 08:02:31 [main        ] WARNING  [At epoch 17]
+2018-08-25 08:02:32 [main        ] INFO     [#updates[ 46547] train loss[3.04465] remaining[0:15:41]]
+2018-08-25 08:02:50 [main        ] INFO     [#updates[ 46600] train loss[3.04383] remaining[0:15:02]]
+2018-08-25 08:03:22 [main        ] INFO     [#updates[ 46700] train loss[3.04193] remaining[0:14:07]]
+2018-08-25 08:03:54 [main        ] INFO     [#updates[ 46800] train loss[3.03982] remaining[0:13:28]]
+2018-08-25 08:04:27 [main        ] INFO     [#updates[ 46900] train loss[3.03827] remaining[0:12:55]]
+2018-08-25 08:04:58 [main        ] INFO     [#updates[ 47000] train loss[3.03651] remaining[0:12:18]]
+2018-08-25 08:05:30 [main        ] INFO     [#updates[ 47100] train loss[3.03508] remaining[0:11:44]]
+2018-08-25 08:06:02 [main        ] INFO     [#updates[ 47200] train loss[3.03360] remaining[0:11:11]]
+2018-08-25 08:06:35 [main        ] INFO     [#updates[ 47300] train loss[3.03172] remaining[0:10:41]]
+2018-08-25 08:07:08 [main        ] INFO     [#updates[ 47400] train loss[3.03012] remaining[0:10:09]]
+2018-08-25 08:07:39 [main        ] INFO     [#updates[ 47500] train loss[3.02826] remaining[0:09:35]]
+2018-08-25 08:08:11 [main        ] INFO     [#updates[ 47600] train loss[3.02643] remaining[0:09:02]]
+2018-08-25 08:08:43 [main        ] INFO     [#updates[ 47700] train loss[3.02477] remaining[0:08:29]]
+2018-08-25 08:09:14 [main        ] INFO     [#updates[ 47800] train loss[3.02323] remaining[0:07:56]]
+2018-08-25 08:09:46 [main        ] INFO     [#updates[ 47900] train loss[3.02154] remaining[0:07:24]]
+2018-08-25 08:10:18 [main        ] INFO     [#updates[ 48000] train loss[3.02032] remaining[0:06:52]]
+2018-08-25 08:10:51 [main        ] INFO     [#updates[ 48100] train loss[3.01892] remaining[0:06:20]]
+2018-08-25 08:11:23 [main        ] INFO     [#updates[ 48200] train loss[3.01709] remaining[0:05:48]]
+2018-08-25 08:11:57 [main        ] INFO     [#updates[ 48300] train loss[3.01552] remaining[0:05:17]]
+2018-08-25 08:12:30 [main        ] INFO     [#updates[ 48400] train loss[3.01413] remaining[0:04:45]]
+2018-08-25 08:13:04 [main        ] INFO     [#updates[ 48500] train loss[3.01258] remaining[0:04:13]]
+2018-08-25 08:13:36 [main        ] INFO     [#updates[ 48600] train loss[3.01077] remaining[0:03:41]]
+2018-08-25 08:14:09 [main        ] INFO     [#updates[ 48700] train loss[3.00940] remaining[0:03:09]]
+2018-08-25 08:14:41 [main        ] INFO     [#updates[ 48800] train loss[3.00791] remaining[0:02:36]]
+2018-08-25 08:15:13 [main        ] INFO     [#updates[ 48900] train loss[3.00655] remaining[0:02:04]]
+2018-08-25 08:15:47 [main        ] INFO     [#updates[ 49000] train loss[3.00507] remaining[0:01:32]]
+2018-08-25 08:16:19 [main        ] INFO     [#updates[ 49100] train loss[3.00345] remaining[0:00:59]]
+2018-08-25 08:16:52 [main        ] INFO     [#updates[ 49200] train loss[3.00195] remaining[0:00:27]]
+2018-08-25 08:18:27 [main        ] INFO     [scheduler_type ms]
+2018-08-25 08:18:30 [main        ] WARNING  [Epoch 17 - dev EM: 75.298 F1: 83.306 (best EM: 75.497 F1: 83.302)]
+2018-08-25 08:18:30 [main        ] WARNING  [At epoch 18]
+2018-08-25 08:18:30 [main        ] INFO     [#updates[ 49285] train loss[3.00107] remaining[0:15:08]]
+2018-08-25 08:18:35 [main        ] INFO     [#updates[ 49300] train loss[3.00082] remaining[0:14:33]]
+2018-08-25 08:19:08 [main        ] INFO     [#updates[ 49400] train loss[2.99901] remaining[0:14:11]]
+2018-08-25 08:19:41 [main        ] INFO     [#updates[ 49500] train loss[2.99734] remaining[0:13:49]]
+2018-08-25 08:20:14 [main        ] INFO     [#updates[ 49600] train loss[2.99565] remaining[0:13:17]]
+2018-08-25 08:20:46 [main        ] INFO     [#updates[ 49700] train loss[2.99419] remaining[0:12:40]]
+2018-08-25 08:21:20 [main        ] INFO     [#updates[ 49800] train loss[2.99277] remaining[0:12:11]]
+2018-08-25 08:21:52 [main        ] INFO     [#updates[ 49900] train loss[2.99114] remaining[0:11:36]]
+2018-08-25 08:22:25 [main        ] INFO     [#updates[ 50000] train loss[2.98967] remaining[0:11:04]]
+2018-08-25 08:22:58 [main        ] INFO     [#updates[ 50100] train loss[2.98814] remaining[0:10:30]]
+2018-08-25 08:23:30 [main        ] INFO     [#updates[ 50200] train loss[2.98666] remaining[0:09:55]]
+2018-08-25 08:24:02 [main        ] INFO     [#updates[ 50300] train loss[2.98528] remaining[0:09:22]]
+2018-08-25 08:24:34 [main        ] INFO     [#updates[ 50400] train loss[2.98420] remaining[0:08:48]]
+2018-08-25 08:25:07 [main        ] INFO     [#updates[ 50500] train loss[2.98278] remaining[0:08:16]]
+2018-08-25 08:25:39 [main        ] INFO     [#updates[ 50600] train loss[2.98121] remaining[0:07:43]]
+2018-08-25 08:26:12 [main        ] INFO     [#updates[ 50700] train loss[2.97945] remaining[0:07:10]]
+2018-08-25 08:26:46 [main        ] INFO     [#updates[ 50800] train loss[2.97800] remaining[0:06:39]]
+2018-08-25 08:27:19 [main        ] INFO     [#updates[ 50900] train loss[2.97642] remaining[0:06:06]]
+2018-08-25 08:27:52 [main        ] INFO     [#updates[ 51000] train loss[2.97521] remaining[0:05:34]]
+2018-08-25 08:28:25 [main        ] INFO     [#updates[ 51100] train loss[2.97378] remaining[0:05:02]]
+2018-08-25 08:29:01 [main        ] INFO     [#updates[ 51200] train loss[2.97211] remaining[0:04:30]]
+2018-08-25 08:29:37 [main        ] INFO     [#updates[ 51300] train loss[2.97101] remaining[0:03:58]]
+2018-08-25 08:30:13 [main        ] INFO     [#updates[ 51400] train loss[2.96949] remaining[0:03:26]]
+2018-08-25 08:30:50 [main        ] INFO     [#updates[ 51500] train loss[2.96823] remaining[0:02:54]]
+2018-08-25 08:31:28 [main        ] INFO     [#updates[ 51600] train loss[2.96694] remaining[0:02:21]]
+2018-08-25 08:32:04 [main        ] INFO     [#updates[ 51700] train loss[2.96565] remaining[0:01:48]]
+2018-08-25 08:32:41 [main        ] INFO     [#updates[ 51800] train loss[2.96403] remaining[0:01:15]]
+2018-08-25 08:33:18 [main        ] INFO     [#updates[ 51900] train loss[2.96252] remaining[0:00:41]]
+2018-08-25 08:33:55 [main        ] INFO     [#updates[ 52000] train loss[2.96093] remaining[0:00:07]]
+2018-08-25 08:35:13 [main        ] INFO     [scheduler_type ms]
+2018-08-25 08:35:18 [main        ] INFO     [Saved the new best model and prediction]
+2018-08-25 08:35:18 [main        ] WARNING  [Epoch 18 - dev EM: 75.326 F1: 83.554 (best EM: 75.326 F1: 83.554)]
+2018-08-25 08:35:18 [main        ] WARNING  [At epoch 19]
+2018-08-25 08:35:18 [main        ] INFO     [#updates[ 52023] train loss[2.96059] remaining[0:15:17]]
+2018-08-25 08:35:46 [main        ] INFO     [#updates[ 52100] train loss[2.95933] remaining[0:15:56]]
+2018-08-25 08:36:24 [main        ] INFO     [#updates[ 52200] train loss[2.95783] remaining[0:15:46]]
+2018-08-25 08:37:02 [main        ] INFO     [#updates[ 52300] train loss[2.95673] remaining[0:15:16]]
+2018-08-25 08:37:39 [main        ] INFO     [#updates[ 52400] train loss[2.95520] remaining[0:14:37]]
+2018-08-25 08:38:15 [main        ] INFO     [#updates[ 52500] train loss[2.95376] remaining[0:13:58]]
+2018-08-25 08:38:53 [main        ] INFO     [#updates[ 52600] train loss[2.95204] remaining[0:13:23]]
+2018-08-25 08:39:30 [main        ] INFO     [#updates[ 52700] train loss[2.95073] remaining[0:12:44]]
+2018-08-25 08:40:05 [main        ] INFO     [#updates[ 52800] train loss[2.94923] remaining[0:12:01]]
+2018-08-25 08:40:40 [main        ] INFO     [#updates[ 52900] train loss[2.94778] remaining[0:11:21]]
+2018-08-25 08:41:14 [main        ] INFO     [#updates[ 53000] train loss[2.94645] remaining[0:10:39]]
+2018-08-25 08:41:48 [main        ] INFO     [#updates[ 53100] train loss[2.94504] remaining[0:10:00]]
+2018-08-25 08:42:22 [main        ] INFO     [#updates[ 53200] train loss[2.94355] remaining[0:09:21]]
+2018-08-25 08:42:56 [main        ] INFO     [#updates[ 53300] train loss[2.94207] remaining[0:08:43]]
+2018-08-25 08:43:31 [main        ] INFO     [#updates[ 53400] train loss[2.94072] remaining[0:08:06]]
+2018-08-25 08:44:06 [main        ] INFO     [#updates[ 53500] train loss[2.93932] remaining[0:07:30]]
+2018-08-25 08:44:40 [main        ] INFO     [#updates[ 53600] train loss[2.93819] remaining[0:06:53]]
+2018-08-25 08:45:15 [main        ] INFO     [#updates[ 53700] train loss[2.93686] remaining[0:06:16]]
+2018-08-25 08:45:50 [main        ] INFO     [#updates[ 53800] train loss[2.93538] remaining[0:05:41]]
+2018-08-25 08:46:24 [main        ] INFO     [#updates[ 53900] train loss[2.93422] remaining[0:05:04]]
+2018-08-25 08:46:59 [main        ] INFO     [#updates[ 54000] train loss[2.93299] remaining[0:04:29]]
+2018-08-25 08:47:33 [main        ] INFO     [#updates[ 54100] train loss[2.93158] remaining[0:03:53]]
+2018-08-25 08:48:08 [main        ] INFO     [#updates[ 54200] train loss[2.93009] remaining[0:03:17]]
+2018-08-25 08:48:43 [main        ] INFO     [#updates[ 54300] train loss[2.92849] remaining[0:02:42]]
+2018-08-25 08:49:18 [main        ] INFO     [#updates[ 54400] train loss[2.92722] remaining[0:02:07]]
+2018-08-25 08:49:54 [main        ] INFO     [#updates[ 54500] train loss[2.92614] remaining[0:01:31]]
+2018-08-25 08:50:28 [main        ] INFO     [#updates[ 54600] train loss[2.92512] remaining[0:00:56]]
+2018-08-25 08:51:03 [main        ] INFO     [#updates[ 54700] train loss[2.92374] remaining[0:00:21]]
+2018-08-25 08:52:35 [main        ] INFO     [scheduler_type ms]
+2018-08-25 08:52:39 [main        ] INFO     [Saved the new best model and prediction]
+2018-08-25 08:52:39 [main        ] WARNING  [Epoch 19 - dev EM: 75.856 F1: 83.645 (best EM: 75.856 F1: 83.645)]
+2018-08-25 08:52:39 [main        ] WARNING  [At epoch 20]
+2018-08-25 08:52:40 [main        ] INFO     [#updates[ 54761] train loss[2.92301] remaining[0:16:52]]
+2018-08-25 08:52:53 [main        ] INFO     [#updates[ 54800] train loss[2.92264] remaining[0:15:44]]
+2018-08-25 08:53:28 [main        ] INFO     [#updates[ 54900] train loss[2.92119] remaining[0:15:00]]
+2018-08-25 08:54:03 [main        ] INFO     [#updates[ 55000] train loss[2.91982] remaining[0:14:31]]
+2018-08-25 08:54:38 [main        ] INFO     [#updates[ 55100] train loss[2.91831] remaining[0:14:00]]
+2018-08-25 08:55:12 [main        ] INFO     [#updates[ 55200] train loss[2.91668] remaining[0:13:17]]
+2018-08-25 08:55:47 [main        ] INFO     [#updates[ 55300] train loss[2.91529] remaining[0:12:43]]
+2018-08-25 08:56:22 [main        ] INFO     [#updates[ 55400] train loss[2.91413] remaining[0:12:09]]
+2018-08-25 08:56:56 [main        ] INFO     [#updates[ 55500] train loss[2.91271] remaining[0:11:33]]
+2018-08-25 08:57:30 [main        ] INFO     [#updates[ 55600] train loss[2.91149] remaining[0:10:58]]
+2018-08-25 08:58:05 [main        ] INFO     [#updates[ 55700] train loss[2.90998] remaining[0:10:23]]
+2018-08-25 08:58:42 [main        ] INFO     [#updates[ 55800] train loss[2.90863] remaining[0:09:51]]
+2018-08-25 08:59:17 [main        ] INFO     [#updates[ 55900] train loss[2.90726] remaining[0:09:17]]
+2018-08-25 08:59:53 [main        ] INFO     [#updates[ 56000] train loss[2.90597] remaining[0:08:43]]
+2018-08-25 09:00:28 [main        ] INFO     [#updates[ 56100] train loss[2.90445] remaining[0:08:08]]
+2018-08-25 09:01:03 [main        ] INFO     [#updates[ 56200] train loss[2.90327] remaining[0:07:34]]
+2018-08-25 09:01:37 [main        ] INFO     [#updates[ 56300] train loss[2.90208] remaining[0:06:57]]
+2018-08-25 09:02:10 [main        ] INFO     [#updates[ 56400] train loss[2.90096] remaining[0:06:21]]
+2018-08-25 09:02:43 [main        ] INFO     [#updates[ 56500] train loss[2.89981] remaining[0:05:46]]
+2018-08-25 09:03:17 [main        ] INFO     [#updates[ 56600] train loss[2.89870] remaining[0:05:11]]
+2018-08-25 09:03:51 [main        ] INFO     [#updates[ 56700] train loss[2.89761] remaining[0:04:36]]
+2018-08-25 09:04:24 [main        ] INFO     [#updates[ 56800] train loss[2.89630] remaining[0:04:01]]
+2018-08-25 09:04:58 [main        ] INFO     [#updates[ 56900] train loss[2.89517] remaining[0:03:26]]
+2018-08-25 09:05:31 [main        ] INFO     [#updates[ 57000] train loss[2.89401] remaining[0:02:51]]
+2018-08-25 09:06:05 [main        ] INFO     [#updates[ 57100] train loss[2.89266] remaining[0:02:17]]
+2018-08-25 09:06:38 [main        ] INFO     [#updates[ 57200] train loss[2.89139] remaining[0:01:42]]
+2018-08-25 09:07:11 [main        ] INFO     [#updates[ 57300] train loss[2.89009] remaining[0:01:07]]
+2018-08-25 09:07:45 [main        ] INFO     [#updates[ 57400] train loss[2.88892] remaining[0:00:33]]
+2018-08-25 09:09:29 [main        ] INFO     [scheduler_type ms]
+2018-08-25 09:09:32 [main        ] WARNING  [Epoch 20 - dev EM: 75.355 F1: 83.384 (best EM: 75.856 F1: 83.645)]
+2018-08-25 09:09:32 [main        ] WARNING  [At epoch 21]
+2018-08-25 09:09:33 [main        ] INFO     [#updates[ 57499] train loss[2.88781] remaining[0:14:08]]
+2018-08-25 09:09:33 [main        ] INFO     [#updates[ 57500] train loss[2.88780] remaining[0:14:05]]
+2018-08-25 09:10:07 [main        ] INFO     [#updates[ 57600] train loss[2.88658] remaining[0:14:49]]
+2018-08-25 09:10:40 [main        ] INFO     [#updates[ 57700] train loss[2.88547] remaining[0:14:08]]
+2018-08-25 09:11:14 [main        ] INFO     [#updates[ 57800] train loss[2.88413] remaining[0:13:41]]
+2018-08-25 09:11:49 [main        ] INFO     [#updates[ 57900] train loss[2.88283] remaining[0:13:11]]
+2018-08-25 09:12:22 [main        ] INFO     [#updates[ 58000] train loss[2.88167] remaining[0:12:35]]
+2018-08-25 09:12:56 [main        ] INFO     [#updates[ 58100] train loss[2.88059] remaining[0:12:00]]
+2018-08-25 09:13:29 [main        ] INFO     [#updates[ 58200] train loss[2.87928] remaining[0:11:26]]
+2018-08-25 09:14:03 [main        ] INFO     [#updates[ 58300] train loss[2.87792] remaining[0:10:52]]
+2018-08-25 09:14:37 [main        ] INFO     [#updates[ 58400] train loss[2.87657] remaining[0:10:19]]
+2018-08-25 09:15:11 [main        ] INFO     [#updates[ 58500] train loss[2.87511] remaining[0:09:46]]
+2018-08-25 09:15:44 [main        ] INFO     [#updates[ 58600] train loss[2.87359] remaining[0:09:11]]
+2018-08-25 09:16:16 [main        ] INFO     [#updates[ 58700] train loss[2.87221] remaining[0:08:36]]
+2018-08-25 09:16:51 [main        ] INFO     [#updates[ 58800] train loss[2.87080] remaining[0:08:03]]
+2018-08-25 09:17:27 [main        ] INFO     [#updates[ 58900] train loss[2.86953] remaining[0:07:32]]
+2018-08-25 09:18:04 [main        ] INFO     [#updates[ 59000] train loss[2.86810] remaining[0:07:01]]
+2018-08-25 09:18:39 [main        ] INFO     [#updates[ 59100] train loss[2.86670] remaining[0:06:27]]
+2018-08-25 09:19:13 [main        ] INFO     [#updates[ 59200] train loss[2.86538] remaining[0:05:53]]
+2018-08-25 09:19:50 [main        ] INFO     [#updates[ 59300] train loss[2.86407] remaining[0:05:20]]
+2018-08-25 09:20:25 [main        ] INFO     [#updates[ 59400] train loss[2.86285] remaining[0:04:46]]
+2018-08-25 09:20:59 [main        ] INFO     [#updates[ 59500] train loss[2.86177] remaining[0:04:12]]
+2018-08-25 09:21:33 [main        ] INFO     [#updates[ 59600] train loss[2.86054] remaining[0:03:38]]
+2018-08-25 09:22:07 [main        ] INFO     [#updates[ 59700] train loss[2.85949] remaining[0:03:03]]
+2018-08-25 09:22:43 [main        ] INFO     [#updates[ 59800] train loss[2.85800] remaining[0:02:29]]
+2018-08-25 09:23:18 [main        ] INFO     [#updates[ 59900] train loss[2.85676] remaining[0:01:55]]
+2018-08-25 09:23:54 [main        ] INFO     [#updates[ 60000] train loss[2.85553] remaining[0:01:21]]
+2018-08-25 09:24:29 [main        ] INFO     [#updates[ 60100] train loss[2.85435] remaining[0:00:46]]
+2018-08-25 09:25:03 [main        ] INFO     [#updates[ 60200] train loss[2.85315] remaining[0:00:12]]
+2018-08-25 09:26:28 [main        ] INFO     [scheduler_type ms]
+2018-08-25 09:26:31 [main        ] WARNING  [Epoch 21 - dev EM: 75.771 F1: 83.670 (best EM: 75.856 F1: 83.645)]
+2018-08-25 09:26:31 [main        ] WARNING  [At epoch 22]
+2018-08-25 09:26:32 [main        ] INFO     [#updates[ 60237] train loss[2.85285] remaining[0:14:13]]
+2018-08-25 09:26:54 [main        ] INFO     [#updates[ 60300] train loss[2.85219] remaining[0:15:23]]
+2018-08-25 09:27:28 [main        ] INFO     [#updates[ 60400] train loss[2.85071] remaining[0:14:54]]
+2018-08-25 09:28:04 [main        ] INFO     [#updates[ 60500] train loss[2.84993] remaining[0:14:26]]
+2018-08-25 09:28:39 [main        ] INFO     [#updates[ 60600] train loss[2.84868] remaining[0:13:51]]
+2018-08-25 09:29:14 [main        ] INFO     [#updates[ 60700] train loss[2.84749] remaining[0:13:15]]
+2018-08-25 09:29:49 [main        ] INFO     [#updates[ 60800] train loss[2.84611] remaining[0:12:41]]
+2018-08-25 09:30:24 [main        ] INFO     [#updates[ 60900] train loss[2.84492] remaining[0:12:07]]
+2018-08-25 09:30:59 [main        ] INFO     [#updates[ 61000] train loss[2.84367] remaining[0:11:31]]
+2018-08-25 09:31:34 [main        ] INFO     [#updates[ 61100] train loss[2.84238] remaining[0:10:57]]
+2018-08-25 09:32:10 [main        ] INFO     [#updates[ 61200] train loss[2.84112] remaining[0:10:22]]
+2018-08-25 09:32:44 [main        ] INFO     [#updates[ 61300] train loss[2.83980] remaining[0:09:45]]
+2018-08-25 09:33:20 [main        ] INFO     [#updates[ 61400] train loss[2.83827] remaining[0:09:11]]
+2018-08-25 09:33:55 [main        ] INFO     [#updates[ 61500] train loss[2.83695] remaining[0:08:37]]
+2018-08-25 09:34:29 [main        ] INFO     [#updates[ 61600] train loss[2.83560] remaining[0:08:00]]
+2018-08-25 09:35:03 [main        ] INFO     [#updates[ 61700] train loss[2.83464] remaining[0:07:25]]
+2018-08-25 09:35:39 [main        ] INFO     [#updates[ 61800] train loss[2.83340] remaining[0:06:50]]
+2018-08-25 09:36:13 [main        ] INFO     [#updates[ 61900] train loss[2.83217] remaining[0:06:15]]
+2018-08-25 09:36:47 [main        ] INFO     [#updates[ 62000] train loss[2.83112] remaining[0:05:40]]
+2018-08-25 09:37:21 [main        ] INFO     [#updates[ 62100] train loss[2.83002] remaining[0:05:04]]
+2018-08-25 09:37:56 [main        ] INFO     [#updates[ 62200] train loss[2.82875] remaining[0:04:29]]
+2018-08-25 09:38:30 [main        ] INFO     [#updates[ 62300] train loss[2.82748] remaining[0:03:54]]
+2018-08-25 09:39:03 [main        ] INFO     [#updates[ 62400] train loss[2.82627] remaining[0:03:19]]
+2018-08-25 09:39:36 [main        ] INFO     [#updates[ 62500] train loss[2.82522] remaining[0:02:44]]
+2018-08-25 09:40:11 [main        ] INFO     [#updates[ 62600] train loss[2.82411] remaining[0:02:09]]
+2018-08-25 09:40:44 [main        ] INFO     [#updates[ 62700] train loss[2.82323] remaining[0:01:34]]
+2018-08-25 09:41:18 [main        ] INFO     [#updates[ 62800] train loss[2.82192] remaining[0:01:00]]
+2018-08-25 09:41:53 [main        ] INFO     [#updates[ 62900] train loss[2.82043] remaining[0:00:25]]
+2018-08-25 09:43:30 [main        ] INFO     [scheduler_type ms]
+2018-08-25 09:43:34 [main        ] INFO     [Saved the new best model and prediction]
+2018-08-25 09:43:34 [main        ] WARNING  [Epoch 22 - dev EM: 75.837 F1: 83.748 (best EM: 75.837 F1: 83.748)]
+2018-08-25 09:43:34 [main        ] WARNING  [At epoch 23]
+2018-08-25 09:43:35 [main        ] INFO     [#updates[ 62975] train loss[2.81960] remaining[0:21:40]]
+2018-08-25 09:43:43 [main        ] INFO     [#updates[ 63000] train loss[2.81927] remaining[0:15:50]]
+2018-08-25 09:44:17 [main        ] INFO     [#updates[ 63100] train loss[2.81817] remaining[0:14:58]]
+2018-08-25 09:44:52 [main        ] INFO     [#updates[ 63200] train loss[2.81697] remaining[0:14:27]]
+2018-08-25 09:45:28 [main        ] INFO     [#updates[ 63300] train loss[2.81580] remaining[0:13:58]]
+2018-08-25 09:46:02 [main        ] INFO     [#updates[ 63400] train loss[2.81456] remaining[0:13:20]]
+2018-08-25 09:46:35 [main        ] INFO     [#updates[ 63500] train loss[2.81355] remaining[0:12:40]]
+2018-08-25 09:47:09 [main        ] INFO     [#updates[ 63600] train loss[2.81212] remaining[0:12:03]]
+2018-08-25 09:47:42 [main        ] INFO     [#updates[ 63700] train loss[2.81083] remaining[0:11:27]]
+2018-08-25 09:48:17 [main        ] INFO     [#updates[ 63800] train loss[2.80982] remaining[0:10:54]]
+2018-08-25 09:48:51 [main        ] INFO     [#updates[ 63900] train loss[2.80871] remaining[0:10:20]]
+2018-08-25 09:49:26 [main        ] INFO     [#updates[ 64000] train loss[2.80786] remaining[0:09:46]]
+2018-08-25 09:50:01 [main        ] INFO     [#updates[ 64100] train loss[2.80675] remaining[0:09:13]]
+2018-08-25 09:50:36 [main        ] INFO     [#updates[ 64200] train loss[2.80585] remaining[0:08:40]]
+2018-08-25 09:51:11 [main        ] INFO     [#updates[ 64300] train loss[2.80468] remaining[0:08:06]]
+2018-08-25 09:51:46 [main        ] INFO     [#updates[ 64400] train loss[2.80346] remaining[0:07:32]]
+2018-08-25 09:52:22 [main        ] INFO     [#updates[ 64500] train loss[2.80239] remaining[0:06:58]]
+2018-08-25 09:52:55 [main        ] INFO     [#updates[ 64600] train loss[2.80130] remaining[0:06:23]]
+2018-08-25 09:53:29 [main        ] INFO     [#updates[ 64700] train loss[2.80012] remaining[0:05:48]]
+2018-08-25 09:54:03 [main        ] INFO     [#updates[ 64800] train loss[2.79894] remaining[0:05:14]]
+2018-08-25 09:54:37 [main        ] INFO     [#updates[ 64900] train loss[2.79778] remaining[0:04:39]]
+2018-08-25 09:55:11 [main        ] INFO     [#updates[ 65000] train loss[2.79657] remaining[0:04:04]]
+2018-08-25 09:55:44 [main        ] INFO     [#updates[ 65100] train loss[2.79553] remaining[0:03:30]]
+2018-08-25 09:56:18 [main        ] INFO     [#updates[ 65200] train loss[2.79421] remaining[0:02:55]]
+2018-08-25 09:56:52 [main        ] INFO     [#updates[ 65300] train loss[2.79345] remaining[0:02:21]]
+2018-08-25 09:57:26 [main        ] INFO     [#updates[ 65400] train loss[2.79217] remaining[0:01:47]]
+2018-08-25 09:58:01 [main        ] INFO     [#updates[ 65500] train loss[2.79121] remaining[0:01:12]]
+2018-08-25 09:58:36 [main        ] INFO     [#updates[ 65600] train loss[2.79006] remaining[0:00:38]]
+2018-08-25 09:59:10 [main        ] INFO     [#updates[ 65700] train loss[2.78889] remaining[0:00:04]]
+2018-08-25 10:00:24 [main        ] INFO     [scheduler_type ms]
+2018-08-25 10:00:27 [main        ] WARNING  [Epoch 23 - dev EM: 75.563 F1: 83.540 (best EM: 75.837 F1: 83.748)]
+2018-08-25 10:00:27 [main        ] WARNING  [At epoch 24]
+2018-08-25 10:00:28 [main        ] INFO     [#updates[ 65713] train loss[2.78866] remaining[0:17:09]]
+2018-08-25 10:00:58 [main        ] INFO     [#updates[ 65800] train loss[2.78797] remaining[0:15:15]]
+2018-08-25 10:01:32 [main        ] INFO     [#updates[ 65900] train loss[2.78686] remaining[0:14:40]]
+2018-08-25 10:02:06 [main        ] INFO     [#updates[ 66000] train loss[2.78552] remaining[0:13:59]]
+2018-08-25 10:02:41 [main        ] INFO     [#updates[ 66100] train loss[2.78445] remaining[0:13:28]]
+2018-08-25 10:03:14 [main        ] INFO     [#updates[ 66200] train loss[2.78354] remaining[0:12:50]]
+2018-08-25 10:03:48 [main        ] INFO     [#updates[ 66300] train loss[2.78235] remaining[0:12:15]]
+2018-08-25 10:04:23 [main        ] INFO     [#updates[ 66400] train loss[2.78134] remaining[0:11:41]]
+2018-08-25 10:04:58 [main        ] INFO     [#updates[ 66500] train loss[2.78030] remaining[0:11:09]]
+2018-08-25 10:05:32 [main        ] INFO     [#updates[ 66600] train loss[2.77894] remaining[0:10:34]]
+2018-08-25 10:06:06 [main        ] INFO     [#updates[ 66700] train loss[2.77817] remaining[0:10:00]]
+2018-08-25 10:06:40 [main        ] INFO     [#updates[ 66800] train loss[2.77719] remaining[0:09:25]]
+2018-08-25 10:07:15 [main        ] INFO     [#updates[ 66900] train loss[2.77607] remaining[0:08:51]]
+2018-08-25 10:07:48 [main        ] INFO     [#updates[ 67000] train loss[2.77498] remaining[0:08:16]]
+2018-08-25 10:08:22 [main        ] INFO     [#updates[ 67100] train loss[2.77363] remaining[0:07:42]]
+2018-08-25 10:08:57 [main        ] INFO     [#updates[ 67200] train loss[2.77249] remaining[0:07:08]]
+2018-08-25 10:09:32 [main        ] INFO     [#updates[ 67300] train loss[2.77139] remaining[0:06:34]]
+2018-08-25 10:10:06 [main        ] INFO     [#updates[ 67400] train loss[2.77041] remaining[0:05:59]]
+2018-08-25 10:10:40 [main        ] INFO     [#updates[ 67500] train loss[2.76940] remaining[0:05:25]]
+2018-08-25 10:11:13 [main        ] INFO     [#updates[ 67600] train loss[2.76835] remaining[0:04:50]]
+2018-08-25 10:11:47 [main        ] INFO     [#updates[ 67700] train loss[2.76727] remaining[0:04:16]]
+2018-08-25 10:12:20 [main        ] INFO     [#updates[ 67800] train loss[2.76603] remaining[0:03:41]]
+2018-08-25 10:12:55 [main        ] INFO     [#updates[ 67900] train loss[2.76489] remaining[0:03:07]]
+2018-08-25 10:13:29 [main        ] INFO     [#updates[ 68000] train loss[2.76377] remaining[0:02:33]]
+2018-08-25 10:14:02 [main        ] INFO     [#updates[ 68100] train loss[2.76284] remaining[0:01:59]]
+2018-08-25 10:14:36 [main        ] INFO     [#updates[ 68200] train loss[2.76183] remaining[0:01:25]]
+2018-08-25 10:15:09 [main        ] INFO     [#updates[ 68300] train loss[2.76079] remaining[0:00:51]]
+2018-08-25 10:15:44 [main        ] INFO     [#updates[ 68400] train loss[2.75988] remaining[0:00:17]]
+2018-08-25 10:17:10 [main        ] INFO     [scheduler_type ms]
+2018-08-25 10:17:13 [main        ] WARNING  [Epoch 24 - dev EM: 75.885 F1: 83.593 (best EM: 75.837 F1: 83.748)]
+2018-08-25 10:17:13 [main        ] WARNING  [At epoch 25]
+2018-08-25 10:17:14 [main        ] INFO     [#updates[ 68451] train loss[2.75927] remaining[0:12:07]]
+2018-08-25 10:17:30 [main        ] INFO     [#updates[ 68500] train loss[2.75857] remaining[0:15:04]]
+2018-08-25 10:18:04 [main        ] INFO     [#updates[ 68600] train loss[2.75744] remaining[0:14:27]]
+2018-08-25 10:18:37 [main        ] INFO     [#updates[ 68700] train loss[2.75636] remaining[0:13:55]]
+2018-08-25 10:19:11 [main        ] INFO     [#updates[ 68800] train loss[2.75514] remaining[0:13:21]]
+2018-08-25 10:19:45 [main        ] INFO     [#updates[ 68900] train loss[2.75421] remaining[0:12:50]]
+2018-08-25 10:20:18 [main        ] INFO     [#updates[ 69000] train loss[2.75306] remaining[0:12:16]]
+2018-08-25 10:20:53 [main        ] INFO     [#updates[ 69100] train loss[2.75191] remaining[0:11:44]]
+2018-08-25 10:21:26 [main        ] INFO     [#updates[ 69200] train loss[2.75088] remaining[0:11:10]]
+2018-08-25 10:22:01 [main        ] INFO     [#updates[ 69300] train loss[2.75009] remaining[0:10:38]]
+2018-08-25 10:22:35 [main        ] INFO     [#updates[ 69400] train loss[2.74894] remaining[0:10:04]]
+2018-08-25 10:23:09 [main        ] INFO     [#updates[ 69500] train loss[2.74794] remaining[0:09:32]]
+2018-08-25 10:23:43 [main        ] INFO     [#updates[ 69600] train loss[2.74694] remaining[0:08:58]]
+2018-08-25 10:24:18 [main        ] INFO     [#updates[ 69700] train loss[2.74592] remaining[0:08:24]]
+2018-08-25 10:24:52 [main        ] INFO     [#updates[ 69800] train loss[2.74489] remaining[0:07:51]]
+2018-08-25 10:25:26 [main        ] INFO     [#updates[ 69900] train loss[2.74391] remaining[0:07:17]]
+2018-08-25 10:26:00 [main        ] INFO     [#updates[ 70000] train loss[2.74300] remaining[0:06:43]]
+2018-08-25 10:26:34 [main        ] INFO     [#updates[ 70100] train loss[2.74203] remaining[0:06:09]]
+2018-08-25 10:27:07 [main        ] INFO     [#updates[ 70200] train loss[2.74109] remaining[0:05:35]]
+2018-08-25 10:27:41 [main        ] INFO     [#updates[ 70300] train loss[2.74022] remaining[0:05:01]]
+2018-08-25 10:28:14 [main        ] INFO     [#updates[ 70400] train loss[2.73940] remaining[0:04:27]]
+2018-08-25 10:28:48 [main        ] INFO     [#updates[ 70500] train loss[2.73857] remaining[0:03:53]]
+2018-08-25 10:29:23 [main        ] INFO     [#updates[ 70600] train loss[2.73777] remaining[0:03:19]]
+2018-08-25 10:29:57 [main        ] INFO     [#updates[ 70700] train loss[2.73680] remaining[0:02:45]]
+2018-08-25 10:30:31 [main        ] INFO     [#updates[ 70800] train loss[2.73558] remaining[0:02:11]]
+2018-08-25 10:31:05 [main        ] INFO     [#updates[ 70900] train loss[2.73452] remaining[0:01:37]]
+2018-08-25 10:31:39 [main        ] INFO     [#updates[ 71000] train loss[2.73375] remaining[0:01:03]]
+2018-08-25 10:32:12 [main        ] INFO     [#updates[ 71100] train loss[2.73265] remaining[0:00:29]]
+2018-08-25 10:33:54 [main        ] INFO     [scheduler_type ms]
+2018-08-25 10:33:58 [main        ] INFO     [Saved the new best model and prediction]
+2018-08-25 10:33:58 [main        ] WARNING  [Epoch 25 - dev EM: 76.225 F1: 83.860 (best EM: 76.225 F1: 83.860)]
+2018-08-25 10:33:58 [main        ] WARNING  [At epoch 26]
+2018-08-25 10:33:58 [main        ] INFO     [#updates[ 71189] train loss[2.73177] remaining[0:15:30]]
+2018-08-25 10:34:02 [main        ] INFO     [#updates[ 71200] train loss[2.73159] remaining[0:15:51]]
+2018-08-25 10:34:35 [main        ] INFO     [#updates[ 71300] train loss[2.73056] remaining[0:14:24]]
+2018-08-25 10:35:09 [main        ] INFO     [#updates[ 71400] train loss[2.72953] remaining[0:14:09]]
+2018-08-25 10:35:44 [main        ] INFO     [#updates[ 71500] train loss[2.72851] remaining[0:13:42]]
+2018-08-25 10:36:17 [main        ] INFO     [#updates[ 71600] train loss[2.72764] remaining[0:13:07]]
+2018-08-25 10:36:51 [main        ] INFO     [#updates[ 71700] train loss[2.72660] remaining[0:12:33]]
+2018-08-25 10:37:26 [main        ] INFO     [#updates[ 71800] train loss[2.72564] remaining[0:12:02]]
+2018-08-25 10:37:59 [main        ] INFO     [#updates[ 71900] train loss[2.72441] remaining[0:11:26]]
+2018-08-25 10:38:33 [main        ] INFO     [#updates[ 72000] train loss[2.72358] remaining[0:10:51]]
+2018-08-25 10:39:06 [main        ] INFO     [#updates[ 72100] train loss[2.72254] remaining[0:10:16]]
+2018-08-25 10:39:41 [main        ] INFO     [#updates[ 72200] train loss[2.72179] remaining[0:09:44]]
+2018-08-25 10:40:15 [main        ] INFO     [#updates[ 72300] train loss[2.72091] remaining[0:09:10]]
+2018-08-25 10:40:49 [main        ] INFO     [#updates[ 72400] train loss[2.71974] remaining[0:08:37]]
+2018-08-25 10:41:24 [main        ] INFO     [#updates[ 72500] train loss[2.71871] remaining[0:08:04]]
+2018-08-25 10:41:58 [main        ] INFO     [#updates[ 72600] train loss[2.71760] remaining[0:07:30]]
+2018-08-25 10:42:33 [main        ] INFO     [#updates[ 72700] train loss[2.71672] remaining[0:06:57]]
+2018-08-25 10:43:06 [main        ] INFO     [#updates[ 72800] train loss[2.71581] remaining[0:06:23]]
+2018-08-25 10:43:40 [main        ] INFO     [#updates[ 72900] train loss[2.71488] remaining[0:05:48]]
+2018-08-25 10:44:15 [main        ] INFO     [#updates[ 73000] train loss[2.71408] remaining[0:05:15]]
+2018-08-25 10:44:50 [main        ] INFO     [#updates[ 73100] train loss[2.71314] remaining[0:04:41]]
+2018-08-25 10:45:25 [main        ] INFO     [#updates[ 73200] train loss[2.71240] remaining[0:04:07]]
+2018-08-25 10:45:59 [main        ] INFO     [#updates[ 73300] train loss[2.71143] remaining[0:03:33]]
+2018-08-25 10:46:32 [main        ] INFO     [#updates[ 73400] train loss[2.71022] remaining[0:02:59]]
+2018-08-25 10:47:05 [main        ] INFO     [#updates[ 73500] train loss[2.70941] remaining[0:02:25]]
+2018-08-25 10:47:39 [main        ] INFO     [#updates[ 73600] train loss[2.70838] remaining[0:01:50]]
+2018-08-25 10:48:12 [main        ] INFO     [#updates[ 73700] train loss[2.70740] remaining[0:01:16]]
+2018-08-25 10:48:48 [main        ] INFO     [#updates[ 73800] train loss[2.70652] remaining[0:00:42]]
+2018-08-25 10:49:22 [main        ] INFO     [#updates[ 73900] train loss[2.70555] remaining[0:00:08]]
+2018-08-25 10:50:38 [main        ] INFO     [scheduler_type ms]
+2018-08-25 10:50:41 [main        ] WARNING  [Epoch 26 - dev EM: 75.752 F1: 83.608 (best EM: 76.225 F1: 83.860)]
+2018-08-25 10:50:41 [main        ] WARNING  [At epoch 27]
+2018-08-25 10:50:41 [main        ] INFO     [#updates[ 73927] train loss[2.70526] remaining[0:15:44]]
+2018-08-25 10:51:06 [main        ] INFO     [#updates[ 74000] train loss[2.70463] remaining[0:14:52]]
+2018-08-25 10:51:40 [main        ] INFO     [#updates[ 74100] train loss[2.70356] remaining[0:14:27]]
+2018-08-25 10:52:13 [main        ] INFO     [#updates[ 74200] train loss[2.70268] remaining[0:13:43]]
+2018-08-25 10:52:46 [main        ] INFO     [#updates[ 74300] train loss[2.70161] remaining[0:13:09]]
+2018-08-25 10:53:20 [main        ] INFO     [#updates[ 74400] train loss[2.70076] remaining[0:12:39]]
+2018-08-25 10:53:53 [main        ] INFO     [#updates[ 74500] train loss[2.69984] remaining[0:12:05]]
+2018-08-25 10:54:27 [main        ] INFO     [#updates[ 74600] train loss[2.69898] remaining[0:11:31]]
+2018-08-25 10:55:00 [main        ] INFO     [#updates[ 74700] train loss[2.69816] remaining[0:10:57]]
+2018-08-25 10:55:34 [main        ] INFO     [#updates[ 74800] train loss[2.69718] remaining[0:10:25]]
+2018-08-25 10:56:08 [main        ] INFO     [#updates[ 74900] train loss[2.69629] remaining[0:09:52]]
+2018-08-25 10:56:42 [main        ] INFO     [#updates[ 75000] train loss[2.69519] remaining[0:09:19]]
+2018-08-25 10:57:15 [main        ] INFO     [#updates[ 75100] train loss[2.69421] remaining[0:08:45]]
+2018-08-25 10:57:49 [main        ] INFO     [#updates[ 75200] train loss[2.69333] remaining[0:08:12]]
+2018-08-25 10:58:22 [main        ] INFO     [#updates[ 75300] train loss[2.69245] remaining[0:07:37]]
+2018-08-25 10:58:57 [main        ] INFO     [#updates[ 75400] train loss[2.69166] remaining[0:07:05]]
+2018-08-25 10:59:30 [main        ] INFO     [#updates[ 75500] train loss[2.69080] remaining[0:06:31]]
+2018-08-25 11:00:04 [main        ] INFO     [#updates[ 75600] train loss[2.68969] remaining[0:05:58]]
+2018-08-25 11:00:38 [main        ] INFO     [#updates[ 75700] train loss[2.68890] remaining[0:05:24]]
+2018-08-25 11:01:12 [main        ] INFO     [#updates[ 75800] train loss[2.68794] remaining[0:04:50]]
+2018-08-25 11:01:44 [main        ] INFO     [#updates[ 75900] train loss[2.68709] remaining[0:04:16]]
+2018-08-25 11:02:18 [main        ] INFO     [#updates[ 76000] train loss[2.68636] remaining[0:03:43]]
+2018-08-25 11:02:52 [main        ] INFO     [#updates[ 76100] train loss[2.68538] remaining[0:03:09]]
+2018-08-25 11:03:26 [main        ] INFO     [#updates[ 76200] train loss[2.68456] remaining[0:02:36]]
+2018-08-25 11:04:00 [main        ] INFO     [#updates[ 76300] train loss[2.68365] remaining[0:02:02]]
+2018-08-25 11:04:33 [main        ] INFO     [#updates[ 76400] train loss[2.68267] remaining[0:01:28]]
+2018-08-25 11:05:06 [main        ] INFO     [#updates[ 76500] train loss[2.68187] remaining[0:00:55]]
+2018-08-25 11:05:40 [main        ] INFO     [#updates[ 76600] train loss[2.68092] remaining[0:00:21]]
+2018-08-25 11:07:11 [main        ] INFO     [scheduler_type ms]
+2018-08-25 11:07:14 [main        ] WARNING  [Epoch 27 - dev EM: 75.705 F1: 83.698 (best EM: 76.225 F1: 83.860)]
+2018-08-25 11:07:14 [main        ] WARNING  [At epoch 28]
+2018-08-25 11:07:14 [main        ] INFO     [#updates[ 76665] train loss[2.68051] remaining[0:14:57]]
+2018-08-25 11:07:26 [main        ] INFO     [#updates[ 76700] train loss[2.68011] remaining[0:14:59]]
+2018-08-25 11:07:59 [main        ] INFO     [#updates[ 76800] train loss[2.67932] remaining[0:14:34]]
+2018-08-25 11:08:33 [main        ] INFO     [#updates[ 76900] train loss[2.67843] remaining[0:13:57]]
+2018-08-25 11:09:08 [main        ] INFO     [#updates[ 77000] train loss[2.67744] remaining[0:13:37]]
+2018-08-25 11:09:42 [main        ] INFO     [#updates[ 77100] train loss[2.67657] remaining[0:13:03]]
+2018-08-25 11:10:15 [main        ] INFO     [#updates[ 77200] train loss[2.67565] remaining[0:12:25]]
+2018-08-25 11:10:48 [main        ] INFO     [#updates[ 77300] train loss[2.67459] remaining[0:11:49]]
+2018-08-25 11:11:22 [main        ] INFO     [#updates[ 77400] train loss[2.67366] remaining[0:11:14]]
+2018-08-25 11:11:55 [main        ] INFO     [#updates[ 77500] train loss[2.67282] remaining[0:10:40]]
+2018-08-25 11:12:29 [main        ] INFO     [#updates[ 77600] train loss[2.67188] remaining[0:10:06]]
+2018-08-25 11:13:02 [main        ] INFO     [#updates[ 77700] train loss[2.67099] remaining[0:09:32]]
+2018-08-25 11:13:36 [main        ] INFO     [#updates[ 77800] train loss[2.67016] remaining[0:08:58]]
+2018-08-25 11:14:10 [main        ] INFO     [#updates[ 77900] train loss[2.66943] remaining[0:08:26]]
+2018-08-25 11:14:46 [main        ] INFO     [#updates[ 78000] train loss[2.66850] remaining[0:07:54]]
+2018-08-25 11:15:20 [main        ] INFO     [#updates[ 78100] train loss[2.66761] remaining[0:07:20]]
+2018-08-25 11:15:54 [main        ] INFO     [#updates[ 78200] train loss[2.66694] remaining[0:06:46]]
+2018-08-25 11:16:27 [main        ] INFO     [#updates[ 78300] train loss[2.66615] remaining[0:06:12]]
+2018-08-25 11:17:01 [main        ] INFO     [#updates[ 78400] train loss[2.66521] remaining[0:05:39]]
+2018-08-25 11:17:36 [main        ] INFO     [#updates[ 78500] train loss[2.66444] remaining[0:05:05]]
+2018-08-25 11:18:10 [main        ] INFO     [#updates[ 78600] train loss[2.66354] remaining[0:04:31]]
+2018-08-25 11:18:44 [main        ] INFO     [#updates[ 78700] train loss[2.66270] remaining[0:03:58]]
+2018-08-25 11:19:19 [main        ] INFO     [#updates[ 78800] train loss[2.66168] remaining[0:03:24]]
+2018-08-25 11:19:53 [main        ] INFO     [#updates[ 78900] train loss[2.66063] remaining[0:02:50]]
+2018-08-25 11:20:27 [main        ] INFO     [#updates[ 79000] train loss[2.65976] remaining[0:02:16]]
+2018-08-25 11:21:02 [main        ] INFO     [#updates[ 79100] train loss[2.65895] remaining[0:01:42]]
+2018-08-25 11:21:36 [main        ] INFO     [#updates[ 79200] train loss[2.65791] remaining[0:01:08]]
+2018-08-25 11:22:09 [main        ] INFO     [#updates[ 79300] train loss[2.65711] remaining[0:00:34]]
+2018-08-25 11:22:44 [main        ] INFO     [#updates[ 79400] train loss[2.65642] remaining[0:00:00]]
+2018-08-25 11:23:56 [main        ] INFO     [scheduler_type ms]
+2018-08-25 11:23:59 [main        ] WARNING  [Epoch 28 - dev EM: 75.620 F1: 83.727 (best EM: 76.225 F1: 83.860)]
+2018-08-25 11:23:59 [main        ] WARNING  [At epoch 29]
+2018-08-25 11:24:00 [main        ] INFO     [#updates[ 79403] train loss[2.65641] remaining[0:13:00]]
+2018-08-25 11:24:32 [main        ] INFO     [#updates[ 79500] train loss[2.65549] remaining[0:14:32]]
+2018-08-25 11:25:06 [main        ] INFO     [#updates[ 79600] train loss[2.65467] remaining[0:14:12]]
+2018-08-25 11:25:40 [main        ] INFO     [#updates[ 79700] train loss[2.65380] remaining[0:13:42]]
+2018-08-25 11:26:13 [main        ] INFO     [#updates[ 79800] train loss[2.65311] remaining[0:13:03]]
+2018-08-25 11:26:46 [main        ] INFO     [#updates[ 79900] train loss[2.65247] remaining[0:12:31]]
+2018-08-25 11:27:21 [main        ] INFO     [#updates[ 80000] train loss[2.65151] remaining[0:11:59]]
+2018-08-25 11:27:54 [main        ] INFO     [#updates[ 80100] train loss[2.65069] remaining[0:11:25]]
+2018-08-25 11:28:29 [main        ] INFO     [#updates[ 80200] train loss[2.64975] remaining[0:10:56]]
+2018-08-25 11:29:05 [main        ] INFO     [#updates[ 80300] train loss[2.64893] remaining[0:10:25]]
+2018-08-25 11:29:39 [main        ] INFO     [#updates[ 80400] train loss[2.64815] remaining[0:09:52]]
+2018-08-25 11:30:14 [main        ] INFO     [#updates[ 80500] train loss[2.64733] remaining[0:09:19]]
+2018-08-25 11:30:48 [main        ] INFO     [#updates[ 80600] train loss[2.64654] remaining[0:08:44]]
+2018-08-25 11:31:22 [main        ] INFO     [#updates[ 80700] train loss[2.64575] remaining[0:08:11]]
+2018-08-25 11:31:57 [main        ] INFO     [#updates[ 80800] train loss[2.64493] remaining[0:07:37]]
+2018-08-25 11:32:32 [main        ] INFO     [#updates[ 80900] train loss[2.64403] remaining[0:07:04]]
+2018-08-25 11:33:06 [main        ] INFO     [#updates[ 81000] train loss[2.64325] remaining[0:06:29]]
+2018-08-25 11:33:41 [main        ] INFO     [#updates[ 81100] train loss[2.64242] remaining[0:05:56]]
+2018-08-25 11:34:16 [main        ] INFO     [#updates[ 81200] train loss[2.64157] remaining[0:05:22]]
+2018-08-25 11:34:50 [main        ] INFO     [#updates[ 81300] train loss[2.64066] remaining[0:04:48]]
+2018-08-25 11:35:25 [main        ] INFO     [#updates[ 81400] train loss[2.63975] remaining[0:04:13]]
+2018-08-25 11:35:58 [main        ] INFO     [#updates[ 81500] train loss[2.63883] remaining[0:03:39]]
+2018-08-25 11:36:31 [main        ] INFO     [#updates[ 81600] train loss[2.63805] remaining[0:03:04]]
+2018-08-25 11:37:05 [main        ] INFO     [#updates[ 81700] train loss[2.63723] remaining[0:02:30]]
+2018-08-25 11:37:39 [main        ] INFO     [#updates[ 81800] train loss[2.63643] remaining[0:01:56]]
+2018-08-25 11:38:13 [main        ] INFO     [#updates[ 81900] train loss[2.63560] remaining[0:01:22]]
+2018-08-25 11:38:47 [main        ] INFO     [#updates[ 82000] train loss[2.63475] remaining[0:00:47]]
+2018-08-25 11:39:21 [main        ] INFO     [#updates[ 82100] train loss[2.63392] remaining[0:00:13]]
+2018-08-25 11:40:48 [main        ] INFO     [scheduler_type ms]
+2018-08-25 11:40:51 [main        ] WARNING  [Epoch 29 - dev EM: 76.197 F1: 83.882 (best EM: 76.225 F1: 83.860)]
+2018-08-25 11:40:51 [main        ] WARNING  [At epoch 30]
+2018-08-25 11:40:51 [main        ] INFO     [#updates[ 82141] train loss[2.63362] remaining[0:16:33]]
+2018-08-25 11:41:11 [main        ] INFO     [#updates[ 82200] train loss[2.63316] remaining[0:15:31]]
+2018-08-25 11:41:45 [main        ] INFO     [#updates[ 82300] train loss[2.63235] remaining[0:14:44]]
+2018-08-25 11:42:20 [main        ] INFO     [#updates[ 82400] train loss[2.63140] remaining[0:14:09]]
+2018-08-25 11:42:54 [main        ] INFO     [#updates[ 82500] train loss[2.63063] remaining[0:13:34]]
+2018-08-25 11:43:28 [main        ] INFO     [#updates[ 82600] train loss[2.62991] remaining[0:12:58]]
+2018-08-25 11:44:01 [main        ] INFO     [#updates[ 82700] train loss[2.62926] remaining[0:12:22]]
+2018-08-25 11:44:35 [main        ] INFO     [#updates[ 82800] train loss[2.62846] remaining[0:11:46]]
+2018-08-25 11:45:08 [main        ] INFO     [#updates[ 82900] train loss[2.62754] remaining[0:11:09]]
+2018-08-25 11:45:42 [main        ] INFO     [#updates[ 83000] train loss[2.62657] remaining[0:10:37]]
+2018-08-25 11:46:16 [main        ] INFO     [#updates[ 83100] train loss[2.62572] remaining[0:10:02]]
+2018-08-25 11:46:49 [main        ] INFO     [#updates[ 83200] train loss[2.62499] remaining[0:09:28]]
+2018-08-25 11:47:23 [main        ] INFO     [#updates[ 83300] train loss[2.62408] remaining[0:08:53]]
+2018-08-25 11:47:56 [main        ] INFO     [#updates[ 83400] train loss[2.62315] remaining[0:08:19]]
+2018-08-25 11:48:30 [main        ] INFO     [#updates[ 83500] train loss[2.62234] remaining[0:07:45]]
+2018-08-25 11:49:04 [main        ] INFO     [#updates[ 83600] train loss[2.62163] remaining[0:07:12]]
+2018-08-25 11:49:37 [main        ] INFO     [#updates[ 83700] train loss[2.62076] remaining[0:06:37]]
+2018-08-25 11:50:11 [main        ] INFO     [#updates[ 83800] train loss[2.61994] remaining[0:06:03]]
+2018-08-25 11:50:44 [main        ] INFO     [#updates[ 83900] train loss[2.61915] remaining[0:05:29]]
+2018-08-25 11:51:18 [main        ] INFO     [#updates[ 84000] train loss[2.61849] remaining[0:04:55]]
+2018-08-25 11:51:52 [main        ] INFO     [#updates[ 84100] train loss[2.61769] remaining[0:04:22]]
+2018-08-25 11:52:26 [main        ] INFO     [#updates[ 84200] train loss[2.61697] remaining[0:03:48]]
+2018-08-25 11:52:59 [main        ] INFO     [#updates[ 84300] train loss[2.61615] remaining[0:03:14]]
+2018-08-25 11:53:33 [main        ] INFO     [#updates[ 84400] train loss[2.61552] remaining[0:02:41]]
+2018-08-25 11:54:07 [main        ] INFO     [#updates[ 84500] train loss[2.61468] remaining[0:02:07]]
+2018-08-25 11:54:41 [main        ] INFO     [#updates[ 84600] train loss[2.61406] remaining[0:01:33]]
+2018-08-25 11:55:14 [main        ] INFO     [#updates[ 84700] train loss[2.61334] remaining[0:01:00]]
+2018-08-25 11:55:48 [main        ] INFO     [#updates[ 84800] train loss[2.61256] remaining[0:00:26]]
+2018-08-25 11:57:24 [main        ] INFO     [scheduler_type ms]
+2018-08-25 11:57:26 [main        ] WARNING  [Epoch 30 - dev EM: 75.904 F1: 83.767 (best EM: 76.225 F1: 83.860)]
+2018-08-25 11:57:26 [main        ] WARNING  [At epoch 31]
+2018-08-25 11:57:27 [main        ] INFO     [#updates[ 84879] train loss[2.61181] remaining[0:13:57]]
+2018-08-25 11:57:34 [main        ] INFO     [#updates[ 84900] train loss[2.61163] remaining[0:15:44]]
+2018-08-25 11:58:08 [main        ] INFO     [#updates[ 85000] train loss[2.61090] remaining[0:14:47]]
+2018-08-25 11:58:41 [main        ] INFO     [#updates[ 85100] train loss[2.61000] remaining[0:14:07]]
+2018-08-25 11:59:15 [main        ] INFO     [#updates[ 85200] train loss[2.60914] remaining[0:13:36]]
+2018-08-25 11:59:49 [main        ] INFO     [#updates[ 85300] train loss[2.60842] remaining[0:12:59]]
+2018-08-26 12:00:22 [main        ] INFO     [#updates[ 85400] train loss[2.60748] remaining[0:12:25]]
+2018-08-26 12:00:55 [main        ] INFO     [#updates[ 85500] train loss[2.60669] remaining[0:11:50]]
+2018-08-26 12:01:30 [main        ] INFO     [#updates[ 85600] train loss[2.60617] remaining[0:11:20]]
+2018-08-26 12:02:03 [main        ] INFO     [#updates[ 85700] train loss[2.60549] remaining[0:10:45]]
+2018-08-26 12:02:37 [main        ] INFO     [#updates[ 85800] train loss[2.60470] remaining[0:10:10]]
+2018-08-26 12:03:11 [main        ] INFO     [#updates[ 85900] train loss[2.60415] remaining[0:09:38]]
+2018-08-26 12:03:45 [main        ] INFO     [#updates[ 86000] train loss[2.60340] remaining[0:09:05]]
+2018-08-26 12:04:19 [main        ] INFO     [#updates[ 86100] train loss[2.60264] remaining[0:08:31]]
+2018-08-26 12:04:53 [main        ] INFO     [#updates[ 86200] train loss[2.60191] remaining[0:07:58]]
+2018-08-26 12:05:27 [main        ] INFO     [#updates[ 86300] train loss[2.60110] remaining[0:07:24]]
+2018-08-26 12:06:02 [main        ] INFO     [#updates[ 86400] train loss[2.60044] remaining[0:06:52]]
+2018-08-26 12:06:37 [main        ] INFO     [#updates[ 86500] train loss[2.59956] remaining[0:06:18]]
+2018-08-26 12:07:11 [main        ] INFO     [#updates[ 86600] train loss[2.59884] remaining[0:05:44]]
+2018-08-26 12:07:45 [main        ] INFO     [#updates[ 86700] train loss[2.59798] remaining[0:05:10]]
+2018-08-26 12:08:19 [main        ] INFO     [#updates[ 86800] train loss[2.59717] remaining[0:04:37]]
+2018-08-26 12:08:52 [main        ] INFO     [#updates[ 86900] train loss[2.59634] remaining[0:04:02]]
+2018-08-26 12:09:26 [main        ] INFO     [#updates[ 87000] train loss[2.59557] remaining[0:03:28]]
+2018-08-26 12:10:00 [main        ] INFO     [#updates[ 87100] train loss[2.59486] remaining[0:02:54]]
+2018-08-26 12:10:34 [main        ] INFO     [#updates[ 87200] train loss[2.59410] remaining[0:02:21]]
+2018-08-26 12:11:07 [main        ] INFO     [#updates[ 87300] train loss[2.59326] remaining[0:01:47]]
+2018-08-26 12:11:41 [main        ] INFO     [#updates[ 87400] train loss[2.59229] remaining[0:01:13]]
+2018-08-26 12:12:15 [main        ] INFO     [#updates[ 87500] train loss[2.59134] remaining[0:00:39]]
+2018-08-26 12:12:49 [main        ] INFO     [#updates[ 87600] train loss[2.59058] remaining[0:00:05]]
+2018-08-26 12:14:04 [main        ] INFO     [scheduler_type ms]
+2018-08-26 12:14:08 [main        ] WARNING  [Epoch 31 - dev EM: 75.885 F1: 83.741 (best EM: 76.225 F1: 83.860)]
+2018-08-26 12:14:08 [main        ] WARNING  [At epoch 32]
+2018-08-26 12:14:08 [main        ] INFO     [#updates[ 87617] train loss[2.59045] remaining[0:18:55]]
+2018-08-26 12:14:36 [main        ] INFO     [#updates[ 87700] train loss[2.58990] remaining[0:14:46]]
+2018-08-26 12:15:09 [main        ] INFO     [#updates[ 87800] train loss[2.58924] remaining[0:14:04]]
+2018-08-26 12:15:43 [main        ] INFO     [#updates[ 87900] train loss[2.58848] remaining[0:13:39]]
+2018-08-26 12:16:17 [main        ] INFO     [#updates[ 88000] train loss[2.58768] remaining[0:13:12]]
+2018-08-26 12:16:50 [main        ] INFO     [#updates[ 88100] train loss[2.58706] remaining[0:12:37]]
+2018-08-26 12:17:24 [main        ] INFO     [#updates[ 88200] train loss[2.58638] remaining[0:12:05]]
+2018-08-26 12:17:58 [main        ] INFO     [#updates[ 88300] train loss[2.58546] remaining[0:11:32]]
+2018-08-26 12:18:32 [main        ] INFO     [#updates[ 88400] train loss[2.58461] remaining[0:10:59]]
+2018-08-26 12:19:06 [main        ] INFO     [#updates[ 88500] train loss[2.58386] remaining[0:10:26]]
+2018-08-26 12:19:40 [main        ] INFO     [#updates[ 88600] train loss[2.58313] remaining[0:09:52]]
+2018-08-26 12:20:13 [main        ] INFO     [#updates[ 88700] train loss[2.58256] remaining[0:09:18]]
+2018-08-26 12:20:47 [main        ] INFO     [#updates[ 88800] train loss[2.58177] remaining[0:08:44]]
+2018-08-26 12:21:22 [main        ] INFO     [#updates[ 88900] train loss[2.58101] remaining[0:08:12]]
+2018-08-26 12:21:56 [main        ] INFO     [#updates[ 89000] train loss[2.58027] remaining[0:07:37]]
+2018-08-26 12:22:29 [main        ] INFO     [#updates[ 89100] train loss[2.57950] remaining[0:07:03]]
+2018-08-26 12:23:03 [main        ] INFO     [#updates[ 89200] train loss[2.57858] remaining[0:06:29]]
+2018-08-26 12:23:36 [main        ] INFO     [#updates[ 89300] train loss[2.57777] remaining[0:05:55]]
+2018-08-26 12:24:10 [main        ] INFO     [#updates[ 89400] train loss[2.57694] remaining[0:05:21]]
+2018-08-26 12:24:44 [main        ] INFO     [#updates[ 89500] train loss[2.57634] remaining[0:04:48]]
+2018-08-26 12:25:17 [main        ] INFO     [#updates[ 89600] train loss[2.57560] remaining[0:04:14]]
+2018-08-26 12:25:50 [main        ] INFO     [#updates[ 89700] train loss[2.57475] remaining[0:03:40]]
+2018-08-26 12:26:24 [main        ] INFO     [#updates[ 89800] train loss[2.57406] remaining[0:03:06]]
+2018-08-26 12:26:57 [main        ] INFO     [#updates[ 89900] train loss[2.57332] remaining[0:02:32]]
+2018-08-26 12:27:31 [main        ] INFO     [#updates[ 90000] train loss[2.57269] remaining[0:01:59]]
+2018-08-26 12:28:04 [main        ] INFO     [#updates[ 90100] train loss[2.57201] remaining[0:01:25]]
+2018-08-26 12:28:39 [main        ] INFO     [#updates[ 90200] train loss[2.57131] remaining[0:00:51]]
+2018-08-26 12:29:12 [main        ] INFO     [#updates[ 90300] train loss[2.57048] remaining[0:00:18]]
+2018-08-26 12:30:40 [main        ] INFO     [scheduler_type ms]
+2018-08-26 12:30:43 [main        ] WARNING  [Epoch 32 - dev EM: 76.131 F1: 83.858 (best EM: 76.225 F1: 83.860)]
+2018-08-26 12:30:43 [main        ] WARNING  [At epoch 33]
+2018-08-26 12:30:43 [main        ] INFO     [#updates[ 90355] train loss[2.57016] remaining[0:13:11]]
+2018-08-26 12:30:58 [main        ] INFO     [#updates[ 90400] train loss[2.56979] remaining[0:14:49]]
+2018-08-26 12:31:32 [main        ] INFO     [#updates[ 90500] train loss[2.56910] remaining[0:14:31]]
+2018-08-26 12:32:07 [main        ] INFO     [#updates[ 90600] train loss[2.56837] remaining[0:14:05]]
+2018-08-26 12:32:39 [main        ] INFO     [#updates[ 90700] train loss[2.56767] remaining[0:13:23]]
+2018-08-26 12:33:13 [main        ] INFO     [#updates[ 90800] train loss[2.56704] remaining[0:12:50]]
+2018-08-26 12:33:47 [main        ] INFO     [#updates[ 90900] train loss[2.56651] remaining[0:12:17]]
+2018-08-26 12:34:20 [main        ] INFO     [#updates[ 91000] train loss[2.56578] remaining[0:11:43]]
+2018-08-26 12:34:56 [main        ] INFO     [#updates[ 91100] train loss[2.56499] remaining[0:11:14]]
+2018-08-26 12:35:30 [main        ] INFO     [#updates[ 91200] train loss[2.56429] remaining[0:10:42]]
+2018-08-26 12:36:04 [main        ] INFO     [#updates[ 91300] train loss[2.56351] remaining[0:10:08]]
+2018-08-26 12:36:39 [main        ] INFO     [#updates[ 91400] train loss[2.56288] remaining[0:09:36]]
+2018-08-26 12:37:13 [main        ] INFO     [#updates[ 91500] train loss[2.56212] remaining[0:09:02]]
+2018-08-26 12:37:47 [main        ] INFO     [#updates[ 91600] train loss[2.56142] remaining[0:08:27]]
+2018-08-26 12:38:21 [main        ] INFO     [#updates[ 91700] train loss[2.56062] remaining[0:07:53]]
+2018-08-26 12:38:55 [main        ] INFO     [#updates[ 91800] train loss[2.55997] remaining[0:07:19]]
+2018-08-26 12:39:29 [main        ] INFO     [#updates[ 91900] train loss[2.55932] remaining[0:06:45]]
+2018-08-26 12:40:02 [main        ] INFO     [#updates[ 92000] train loss[2.55885] remaining[0:06:10]]
+2018-08-26 12:40:36 [main        ] INFO     [#updates[ 92100] train loss[2.55811] remaining[0:05:36]]
+2018-08-26 12:41:10 [main        ] INFO     [#updates[ 92200] train loss[2.55736] remaining[0:05:02]]
+2018-08-26 12:41:43 [main        ] INFO     [#updates[ 92300] train loss[2.55666] remaining[0:04:28]]
+2018-08-26 12:42:17 [main        ] INFO     [#updates[ 92400] train loss[2.55600] remaining[0:03:54]]
+2018-08-26 12:42:50 [main        ] INFO     [#updates[ 92500] train loss[2.55524] remaining[0:03:20]]
+2018-08-26 12:43:23 [main        ] INFO     [#updates[ 92600] train loss[2.55443] remaining[0:02:46]]
+2018-08-26 12:43:56 [main        ] INFO     [#updates[ 92700] train loss[2.55383] remaining[0:02:12]]
+2018-08-26 12:44:31 [main        ] INFO     [#updates[ 92800] train loss[2.55305] remaining[0:01:38]]
+2018-08-26 12:45:05 [main        ] INFO     [#updates[ 92900] train loss[2.55234] remaining[0:01:04]]
+2018-08-26 12:45:38 [main        ] INFO     [#updates[ 93000] train loss[2.55162] remaining[0:00:31]]
+2018-08-26 12:47:18 [main        ] INFO     [scheduler_type ms]
+2018-08-26 12:47:21 [main        ] WARNING  [Epoch 33 - dev EM: 75.970 F1: 83.815 (best EM: 76.225 F1: 83.860)]
+2018-08-26 12:47:21 [main        ] WARNING  [At epoch 34]
+2018-08-26 12:47:21 [main        ] INFO     [#updates[ 93093] train loss[2.55083] remaining[0:13:38]]
+2018-08-26 12:47:24 [main        ] INFO     [#updates[ 93100] train loss[2.55073] remaining[0:13:51]]
+2018-08-26 12:47:57 [main        ] INFO     [#updates[ 93200] train loss[2.54994] remaining[0:14:30]]
+2018-08-26 12:48:30 [main        ] INFO     [#updates[ 93300] train loss[2.54930] remaining[0:13:58]]
+2018-08-26 12:49:03 [main        ] INFO     [#updates[ 93400] train loss[2.54850] remaining[0:13:22]]
+2018-08-26 12:49:36 [main        ] INFO     [#updates[ 93500] train loss[2.54779] remaining[0:12:50]]
+2018-08-26 12:50:10 [main        ] INFO     [#updates[ 93600] train loss[2.54722] remaining[0:12:20]]
+2018-08-26 12:50:43 [main        ] INFO     [#updates[ 93700] train loss[2.54638] remaining[0:11:47]]
+2018-08-26 12:51:17 [main        ] INFO     [#updates[ 93800] train loss[2.54563] remaining[0:11:15]]
+2018-08-26 12:51:51 [main        ] INFO     [#updates[ 93900] train loss[2.54511] remaining[0:10:44]]
+2018-08-26 12:52:25 [main        ] INFO     [#updates[ 94000] train loss[2.54442] remaining[0:10:11]]
+2018-08-26 12:52:59 [main        ] INFO     [#updates[ 94100] train loss[2.54385] remaining[0:09:39]]
+2018-08-26 12:53:32 [main        ] INFO     [#updates[ 94200] train loss[2.54337] remaining[0:09:05]]
+2018-08-26 12:54:07 [main        ] INFO     [#updates[ 94300] train loss[2.54276] remaining[0:08:33]]
+2018-08-26 12:54:40 [main        ] INFO     [#updates[ 94400] train loss[2.54209] remaining[0:08:00]]
+2018-08-26 12:55:13 [main        ] INFO     [#updates[ 94500] train loss[2.54138] remaining[0:07:26]]
+2018-08-26 12:55:46 [main        ] INFO     [#updates[ 94600] train loss[2.54066] remaining[0:06:51]]
+2018-08-26 12:56:20 [main        ] INFO     [#updates[ 94700] train loss[2.53995] remaining[0:06:18]]
+2018-08-26 12:56:52 [main        ] INFO     [#updates[ 94800] train loss[2.53932] remaining[0:05:44]]
+2018-08-26 12:57:26 [main        ] INFO     [#updates[ 94900] train loss[2.53856] remaining[0:05:11]]
+2018-08-26 12:57:59 [main        ] INFO     [#updates[ 95000] train loss[2.53785] remaining[0:04:37]]
+2018-08-26 12:58:33 [main        ] INFO     [#updates[ 95100] train loss[2.53711] remaining[0:04:04]]
+2018-08-26 12:59:06 [main        ] INFO     [#updates[ 95200] train loss[2.53657] remaining[0:03:30]]
+2018-08-26 12:59:40 [main        ] INFO     [#updates[ 95300] train loss[2.53585] remaining[0:02:57]]
+2018-08-26 01:00:13 [main        ] INFO     [#updates[ 95400] train loss[2.53514] remaining[0:02:23]]
+2018-08-26 01:00:47 [main        ] INFO     [#updates[ 95500] train loss[2.53438] remaining[0:01:50]]
+2018-08-26 01:01:21 [main        ] INFO     [#updates[ 95600] train loss[2.53360] remaining[0:01:17]]
+2018-08-26 01:01:54 [main        ] INFO     [#updates[ 95700] train loss[2.53296] remaining[0:00:43]]
+2018-08-26 01:02:27 [main        ] INFO     [#updates[ 95800] train loss[2.53226] remaining[0:00:10]]
+2018-08-26 01:03:46 [main        ] INFO     [scheduler_type ms]
+2018-08-26 01:03:51 [main        ] INFO     [Saved the new best model and prediction]
+2018-08-26 01:03:51 [main        ] WARNING  [Epoch 34 - dev EM: 76.320 F1: 84.010 (best EM: 76.320 F1: 84.010)]
+2018-08-26 01:03:51 [main        ] WARNING  [At epoch 35]
+2018-08-26 01:03:51 [main        ] INFO     [#updates[ 95831] train loss[2.53204] remaining[0:18:55]]
+2018-08-26 01:04:15 [main        ] INFO     [#updates[ 95900] train loss[2.53156] remaining[0:15:20]]
+2018-08-26 01:04:49 [main        ] INFO     [#updates[ 96000] train loss[2.53082] remaining[0:14:33]]
+2018-08-26 01:05:23 [main        ] INFO     [#updates[ 96100] train loss[2.53014] remaining[0:14:04]]
+2018-08-26 01:05:56 [main        ] INFO     [#updates[ 96200] train loss[2.52948] remaining[0:13:22]]
+2018-08-26 01:06:30 [main        ] INFO     [#updates[ 96300] train loss[2.52876] remaining[0:12:49]]
+2018-08-26 01:07:04 [main        ] INFO     [#updates[ 96400] train loss[2.52814] remaining[0:12:13]]
+2018-08-26 01:07:37 [main        ] INFO     [#updates[ 96500] train loss[2.52749] remaining[0:11:38]]
+2018-08-26 01:08:11 [main        ] INFO     [#updates[ 96600] train loss[2.52679] remaining[0:11:04]]
+2018-08-26 01:08:44 [main        ] INFO     [#updates[ 96700] train loss[2.52615] remaining[0:10:30]]
+2018-08-26 01:09:18 [main        ] INFO     [#updates[ 96800] train loss[2.52548] remaining[0:09:56]]
+2018-08-26 01:09:52 [main        ] INFO     [#updates[ 96900] train loss[2.52489] remaining[0:09:22]]
+2018-08-26 01:10:25 [main        ] INFO     [#updates[ 97000] train loss[2.52422] remaining[0:08:48]]
+2018-08-26 01:10:59 [main        ] INFO     [#updates[ 97100] train loss[2.52365] remaining[0:08:14]]
+2018-08-26 01:11:33 [main        ] INFO     [#updates[ 97200] train loss[2.52315] remaining[0:07:41]]
+2018-08-26 01:12:06 [main        ] INFO     [#updates[ 97300] train loss[2.52248] remaining[0:07:06]]
+2018-08-26 01:12:39 [main        ] INFO     [#updates[ 97400] train loss[2.52183] remaining[0:06:33]]
+2018-08-26 01:13:12 [main        ] INFO     [#updates[ 97500] train loss[2.52125] remaining[0:05:59]]
+2018-08-26 01:13:45 [main        ] INFO     [#updates[ 97600] train loss[2.52065] remaining[0:05:25]]
+2018-08-26 01:14:19 [main        ] INFO     [#updates[ 97700] train loss[2.52006] remaining[0:04:51]]
+2018-08-26 01:14:53 [main        ] INFO     [#updates[ 97800] train loss[2.51954] remaining[0:04:17]]
+2018-08-26 01:15:26 [main        ] INFO     [#updates[ 97900] train loss[2.51900] remaining[0:03:44]]
+2018-08-26 01:16:00 [main        ] INFO     [#updates[ 98000] train loss[2.51823] remaining[0:03:10]]
+2018-08-26 01:16:34 [main        ] INFO     [#updates[ 98100] train loss[2.51763] remaining[0:02:37]]
+2018-08-26 01:17:07 [main        ] INFO     [#updates[ 98200] train loss[2.51696] remaining[0:02:03]]
+2018-08-26 01:17:41 [main        ] INFO     [#updates[ 98300] train loss[2.51618] remaining[0:01:30]]
+2018-08-26 01:18:14 [main        ] INFO     [#updates[ 98400] train loss[2.51541] remaining[0:00:56]]
+2018-08-26 01:18:47 [main        ] INFO     [#updates[ 98500] train loss[2.51466] remaining[0:00:22]]
+2018-08-26 01:20:17 [main        ] INFO     [scheduler_type ms]
+2018-08-26 01:20:21 [main        ] WARNING  [Epoch 35 - dev EM: 76.112 F1: 83.958 (best EM: 76.320 F1: 84.010)]
+2018-08-26 01:20:21 [main        ] WARNING  [At epoch 36]
+2018-08-26 01:20:21 [main        ] INFO     [#updates[ 98569] train loss[2.51430] remaining[0:15:00]]
+2018-08-26 01:20:31 [main        ] INFO     [#updates[ 98600] train loss[2.51408] remaining[0:14:27]]
+2018-08-26 01:21:03 [main        ] INFO     [#updates[ 98700] train loss[2.51335] remaining[0:13:40]]
+2018-08-26 01:21:34 [main        ] INFO     [#updates[ 98800] train loss[2.51268] remaining[0:13:08]]
+2018-08-26 01:22:06 [main        ] INFO     [#updates[ 98900] train loss[2.51207] remaining[0:12:38]]
+2018-08-26 01:22:38 [main        ] INFO     [#updates[ 99000] train loss[2.51136] remaining[0:12:11]]
+2018-08-26 01:23:09 [main        ] INFO     [#updates[ 99100] train loss[2.51080] remaining[0:11:37]]
+2018-08-26 01:23:42 [main        ] INFO     [#updates[ 99200] train loss[2.51016] remaining[0:11:08]]
+2018-08-26 01:24:13 [main        ] INFO     [#updates[ 99300] train loss[2.50948] remaining[0:10:35]]
+2018-08-26 01:24:46 [main        ] INFO     [#updates[ 99400] train loss[2.50874] remaining[0:10:07]]
+2018-08-26 01:25:19 [main        ] INFO     [#updates[ 99500] train loss[2.50812] remaining[0:09:36]]
+2018-08-26 01:25:51 [main        ] INFO     [#updates[ 99600] train loss[2.50760] remaining[0:09:05]]
+2018-08-26 01:26:23 [main        ] INFO     [#updates[ 99700] train loss[2.50695] remaining[0:08:33]]
+2018-08-26 01:26:55 [main        ] INFO     [#updates[ 99800] train loss[2.50631] remaining[0:08:02]]
+2018-08-26 01:27:27 [main        ] INFO     [#updates[ 99900] train loss[2.50568] remaining[0:07:30]]
+2018-08-26 01:28:00 [main        ] INFO     [#updates[100000] train loss[2.50497] remaining[0:06:58]]
+2018-08-26 01:28:33 [main        ] INFO     [#updates[100100] train loss[2.50443] remaining[0:06:27]]
+2018-08-26 01:29:07 [main        ] INFO     [#updates[100200] train loss[2.50376] remaining[0:05:56]]
+2018-08-26 01:29:40 [main        ] INFO     [#updates[100300] train loss[2.50318] remaining[0:05:24]]
+2018-08-26 01:30:13 [main        ] INFO     [#updates[100400] train loss[2.50242] remaining[0:04:52]]
+2018-08-26 01:30:46 [main        ] INFO     [#updates[100500] train loss[2.50184] remaining[0:04:20]]
+2018-08-26 01:31:20 [main        ] INFO     [#updates[100600] train loss[2.50110] remaining[0:03:48]]
+2018-08-26 01:31:53 [main        ] INFO     [#updates[100700] train loss[2.50052] remaining[0:03:16]]
+2018-08-26 01:32:28 [main        ] INFO     [#updates[100800] train loss[2.49986] remaining[0:02:44]]
+2018-08-26 01:33:01 [main        ] INFO     [#updates[100900] train loss[2.49928] remaining[0:02:12]]
+2018-08-26 01:33:34 [main        ] INFO     [#updates[101000] train loss[2.49871] remaining[0:01:39]]
+2018-08-26 01:34:08 [main        ] INFO     [#updates[101100] train loss[2.49820] remaining[0:01:07]]
+2018-08-26 01:34:41 [main        ] INFO     [#updates[101200] train loss[2.49763] remaining[0:00:34]]
+2018-08-26 01:35:14 [main        ] INFO     [#updates[101300] train loss[2.49720] remaining[0:00:01]]
+2018-08-26 01:36:26 [main        ] INFO     [scheduler_type ms]
+2018-08-26 01:36:29 [main        ] WARNING  [Epoch 36 - dev EM: 76.178 F1: 83.983 (best EM: 76.320 F1: 84.010)]
+2018-08-26 01:36:29 [main        ] WARNING  [At epoch 37]
+2018-08-26 01:36:29 [main        ] INFO     [#updates[101307] train loss[2.49714] remaining[0:14:19]]
+2018-08-26 01:37:00 [main        ] INFO     [#updates[101400] train loss[2.49657] remaining[0:14:36]]
+2018-08-26 01:37:35 [main        ] INFO     [#updates[101500] train loss[2.49591] remaining[0:14:17]]
+2018-08-26 01:38:08 [main        ] INFO     [#updates[101600] train loss[2.49518] remaining[0:13:42]]
+2018-08-26 01:38:41 [main        ] INFO     [#updates[101700] train loss[2.49452] remaining[0:13:06]]
+2018-08-26 01:39:15 [main        ] INFO     [#updates[101800] train loss[2.49390] remaining[0:12:34]]
+2018-08-26 01:39:49 [main        ] INFO     [#updates[101900] train loss[2.49336] remaining[0:12:03]]
+2018-08-26 01:40:24 [main        ] INFO     [#updates[102000] train loss[2.49282] remaining[0:11:30]]
+2018-08-26 01:40:58 [main        ] INFO     [#updates[102100] train loss[2.49229] remaining[0:10:57]]
+2018-08-26 01:41:32 [main        ] INFO     [#updates[102200] train loss[2.49172] remaining[0:10:24]]
+2018-08-26 01:42:05 [main        ] INFO     [#updates[102300] train loss[2.49124] remaining[0:09:49]]
+2018-08-26 01:42:39 [main        ] INFO     [#updates[102400] train loss[2.49056] remaining[0:09:15]]
+2018-08-26 01:43:11 [main        ] INFO     [#updates[102500] train loss[2.48998] remaining[0:08:40]]
+2018-08-26 01:43:45 [main        ] INFO     [#updates[102600] train loss[2.48954] remaining[0:08:06]]
+2018-08-26 01:44:18 [main        ] INFO     [#updates[102700] train loss[2.48884] remaining[0:07:32]]
+2018-08-26 01:44:52 [main        ] INFO     [#updates[102800] train loss[2.48831] remaining[0:06:58]]
+2018-08-26 01:45:26 [main        ] INFO     [#updates[102900] train loss[2.48768] remaining[0:06:25]]
+2018-08-26 01:46:01 [main        ] INFO     [#updates[103000] train loss[2.48724] remaining[0:05:52]]
+2018-08-26 01:46:34 [main        ] INFO     [#updates[103100] train loss[2.48662] remaining[0:05:18]]
+2018-08-26 01:47:07 [main        ] INFO     [#updates[103200] train loss[2.48588] remaining[0:04:44]]
+2018-08-26 01:47:40 [main        ] INFO     [#updates[103300] train loss[2.48532] remaining[0:04:10]]
+2018-08-26 01:48:13 [main        ] INFO     [#updates[103400] train loss[2.48464] remaining[0:03:36]]
+2018-08-26 01:48:47 [main        ] INFO     [#updates[103500] train loss[2.48408] remaining[0:03:03]]
+2018-08-26 01:49:20 [main        ] INFO     [#updates[103600] train loss[2.48351] remaining[0:02:29]]
+2018-08-26 01:49:54 [main        ] INFO     [#updates[103700] train loss[2.48288] remaining[0:01:55]]
+2018-08-26 01:50:27 [main        ] INFO     [#updates[103800] train loss[2.48222] remaining[0:01:21]]
+2018-08-26 01:51:01 [main        ] INFO     [#updates[103900] train loss[2.48157] remaining[0:00:48]]
+2018-08-26 01:51:34 [main        ] INFO     [#updates[104000] train loss[2.48103] remaining[0:00:14]]
+2018-08-26 01:52:59 [main        ] INFO     [scheduler_type ms]
+2018-08-26 01:53:02 [main        ] WARNING  [Epoch 37 - dev EM: 76.093 F1: 83.912 (best EM: 76.320 F1: 84.010)]
+2018-08-26 01:53:02 [main        ] WARNING  [At epoch 38]
+2018-08-26 01:53:02 [main        ] INFO     [#updates[104045] train loss[2.48082] remaining[0:12:16]]
+2018-08-26 01:53:20 [main        ] INFO     [#updates[104100] train loss[2.48045] remaining[0:14:36]]
+2018-08-26 01:53:55 [main        ] INFO     [#updates[104200] train loss[2.47976] remaining[0:14:27]]
+2018-08-26 01:54:28 [main        ] INFO     [#updates[104300] train loss[2.47906] remaining[0:13:52]]
+2018-08-26 01:55:02 [main        ] INFO     [#updates[104400] train loss[2.47840] remaining[0:13:19]]
+2018-08-26 01:55:36 [main        ] INFO     [#updates[104500] train loss[2.47779] remaining[0:12:49]]
+2018-08-26 01:56:11 [main        ] INFO     [#updates[104600] train loss[2.47731] remaining[0:12:19]]
+2018-08-26 01:56:44 [main        ] INFO     [#updates[104700] train loss[2.47677] remaining[0:11:45]]
+2018-08-26 01:57:17 [main        ] INFO     [#updates[104800] train loss[2.47621] remaining[0:11:08]]
+2018-08-26 01:57:50 [main        ] INFO     [#updates[104900] train loss[2.47565] remaining[0:10:33]]
+2018-08-26 01:58:24 [main        ] INFO     [#updates[105000] train loss[2.47490] remaining[0:09:59]]
+2018-08-26 01:58:58 [main        ] INFO     [#updates[105100] train loss[2.47428] remaining[0:09:27]]
+2018-08-26 01:59:32 [main        ] INFO     [#updates[105200] train loss[2.47361] remaining[0:08:52]]
+2018-08-26 02:00:04 [main        ] INFO     [#updates[105300] train loss[2.47312] remaining[0:08:17]]
+2018-08-26 02:00:38 [main        ] INFO     [#updates[105400] train loss[2.47260] remaining[0:07:44]]
+2018-08-26 02:01:11 [main        ] INFO     [#updates[105500] train loss[2.47208] remaining[0:07:10]]
+2018-08-26 02:01:44 [main        ] INFO     [#updates[105600] train loss[2.47150] remaining[0:06:36]]
+2018-08-26 02:02:18 [main        ] INFO     [#updates[105700] train loss[2.47104] remaining[0:06:03]]
+2018-08-26 02:02:52 [main        ] INFO     [#updates[105800] train loss[2.47043] remaining[0:05:29]]
+2018-08-26 02:03:26 [main        ] INFO     [#updates[105900] train loss[2.46985] remaining[0:04:56]]
+2018-08-26 02:04:00 [main        ] INFO     [#updates[106000] train loss[2.46924] remaining[0:04:22]]
+2018-08-26 02:04:34 [main        ] INFO     [#updates[106100] train loss[2.46884] remaining[0:03:49]]
+2018-08-26 02:05:08 [main        ] INFO     [#updates[106200] train loss[2.46824] remaining[0:03:15]]
+2018-08-26 02:05:41 [main        ] INFO     [#updates[106300] train loss[2.46767] remaining[0:02:42]]
+2018-08-26 02:06:16 [main        ] INFO     [#updates[106400] train loss[2.46713] remaining[0:02:08]]
+2018-08-26 02:06:50 [main        ] INFO     [#updates[106500] train loss[2.46665] remaining[0:01:35]]
+2018-08-26 02:07:24 [main        ] INFO     [#updates[106600] train loss[2.46604] remaining[0:01:01]]
+2018-08-26 02:07:58 [main        ] INFO     [#updates[106700] train loss[2.46549] remaining[0:00:27]]
+2018-08-26 02:09:33 [main        ] INFO     [scheduler_type ms]
+2018-08-26 02:09:37 [main        ] INFO     [Saved the new best model and prediction]
+2018-08-26 02:09:37 [main        ] WARNING  [Epoch 38 - dev EM: 76.263 F1: 84.124 (best EM: 76.263 F1: 84.124)]
+2018-08-26 02:09:37 [main        ] WARNING  [At epoch 39]
+2018-08-26 02:09:37 [main        ] INFO     [#updates[106783] train loss[2.46496] remaining[0:15:00]]
+2018-08-26 02:09:43 [main        ] INFO     [#updates[106800] train loss[2.46482] remaining[0:14:43]]
+2018-08-26 02:10:17 [main        ] INFO     [#updates[106900] train loss[2.46413] remaining[0:14:36]]
+2018-08-26 02:10:51 [main        ] INFO     [#updates[107000] train loss[2.46357] remaining[0:14:13]]
+2018-08-26 02:11:25 [main        ] INFO     [#updates[107100] train loss[2.46304] remaining[0:13:43]]
+2018-08-26 02:12:00 [main        ] INFO     [#updates[107200] train loss[2.46257] remaining[0:13:10]]
+2018-08-26 02:12:33 [main        ] INFO     [#updates[107300] train loss[2.46197] remaining[0:12:34]]
+2018-08-26 02:13:07 [main        ] INFO     [#updates[107400] train loss[2.46150] remaining[0:11:59]]
+2018-08-26 02:13:41 [main        ] INFO     [#updates[107500] train loss[2.46088] remaining[0:11:27]]
+2018-08-26 02:14:16 [main        ] INFO     [#updates[107600] train loss[2.46037] remaining[0:10:53]]
+2018-08-26 02:14:50 [main        ] INFO     [#updates[107700] train loss[2.45995] remaining[0:10:19]]
+2018-08-26 02:15:24 [main        ] INFO     [#updates[107800] train loss[2.45932] remaining[0:09:45]]
+2018-08-26 02:15:57 [main        ] INFO     [#updates[107900] train loss[2.45869] remaining[0:09:10]]
+2018-08-26 02:16:30 [main        ] INFO     [#updates[108000] train loss[2.45796] remaining[0:08:35]]
+2018-08-26 02:17:05 [main        ] INFO     [#updates[108100] train loss[2.45753] remaining[0:08:02]]
+2018-08-26 02:17:40 [main        ] INFO     [#updates[108200] train loss[2.45699] remaining[0:07:29]]
+2018-08-26 02:18:13 [main        ] INFO     [#updates[108300] train loss[2.45640] remaining[0:06:54]]
+2018-08-26 02:18:47 [main        ] INFO     [#updates[108400] train loss[2.45592] remaining[0:06:20]]
+2018-08-26 02:19:19 [main        ] INFO     [#updates[108500] train loss[2.45540] remaining[0:05:45]]
+2018-08-26 02:19:53 [main        ] INFO     [#updates[108600] train loss[2.45487] remaining[0:05:11]]
+2018-08-26 02:20:25 [main        ] INFO     [#updates[108700] train loss[2.45424] remaining[0:04:37]]
+2018-08-26 02:21:00 [main        ] INFO     [#updates[108800] train loss[2.45380] remaining[0:04:03]]
+2018-08-26 02:21:33 [main        ] INFO     [#updates[108900] train loss[2.45322] remaining[0:03:29]]
+2018-08-26 02:22:06 [main        ] INFO     [#updates[109000] train loss[2.45269] remaining[0:02:55]]
+2018-08-26 02:22:40 [main        ] INFO     [#updates[109100] train loss[2.45219] remaining[0:02:21]]
+2018-08-26 02:23:13 [main        ] INFO     [#updates[109200] train loss[2.45161] remaining[0:01:47]]
+2018-08-26 02:23:46 [main        ] INFO     [#updates[109300] train loss[2.45113] remaining[0:01:14]]
+2018-08-26 02:24:19 [main        ] INFO     [#updates[109400] train loss[2.45047] remaining[0:00:40]]
+2018-08-26 02:24:53 [main        ] INFO     [#updates[109500] train loss[2.44986] remaining[0:00:06]]
+2018-08-26 02:26:10 [main        ] INFO     [scheduler_type ms]
+2018-08-26 02:26:14 [main        ] WARNING  [Epoch 39 - dev EM: 76.178 F1: 83.866 (best EM: 76.263 F1: 84.124)]
+2018-08-26 02:26:14 [main        ] WARNING  [At epoch 40]
+2018-08-26 02:26:14 [main        ] INFO     [#updates[109521] train loss[2.44976] remaining[0:13:52]]
+2018-08-26 02:26:41 [main        ] INFO     [#updates[109600] train loss[2.44931] remaining[0:14:54]]
+2018-08-26 02:27:14 [main        ] INFO     [#updates[109700] train loss[2.44870] remaining[0:14:16]]
+2018-08-26 02:27:48 [main        ] INFO     [#updates[109800] train loss[2.44825] remaining[0:13:46]]
+2018-08-26 02:28:22 [main        ] INFO     [#updates[109900] train loss[2.44764] remaining[0:13:12]]
+2018-08-26 02:28:55 [main        ] INFO     [#updates[110000] train loss[2.44699] remaining[0:12:39]]
+2018-08-26 02:29:29 [main        ] INFO     [#updates[110100] train loss[2.44650] remaining[0:12:04]]
+2018-08-26 02:30:02 [main        ] INFO     [#updates[110200] train loss[2.44600] remaining[0:11:31]]
+2018-08-26 02:30:35 [main        ] INFO     [#updates[110300] train loss[2.44544] remaining[0:10:55]]
+2018-08-26 02:31:09 [main        ] INFO     [#updates[110400] train loss[2.44499] remaining[0:10:23]]
+2018-08-26 02:31:42 [main        ] INFO     [#updates[110500] train loss[2.44445] remaining[0:09:49]]
+2018-08-26 02:32:16 [main        ] INFO     [#updates[110600] train loss[2.44381] remaining[0:09:15]]
+2018-08-26 02:32:49 [main        ] INFO     [#updates[110700] train loss[2.44324] remaining[0:08:42]]
+2018-08-26 02:33:23 [main        ] INFO     [#updates[110800] train loss[2.44271] remaining[0:08:08]]
+2018-08-26 02:33:57 [main        ] INFO     [#updates[110900] train loss[2.44205] remaining[0:07:35]]
+2018-08-26 02:34:31 [main        ] INFO     [#updates[111000] train loss[2.44155] remaining[0:07:02]]
+2018-08-26 02:35:05 [main        ] INFO     [#updates[111100] train loss[2.44117] remaining[0:06:29]]
+2018-08-26 02:35:39 [main        ] INFO     [#updates[111200] train loss[2.44073] remaining[0:05:55]]
+2018-08-26 02:36:13 [main        ] INFO     [#updates[111300] train loss[2.44012] remaining[0:05:22]]
+2018-08-26 02:36:46 [main        ] INFO     [#updates[111400] train loss[2.43959] remaining[0:04:48]]
+2018-08-26 02:37:20 [main        ] INFO     [#updates[111500] train loss[2.43912] remaining[0:04:14]]
+2018-08-26 02:37:53 [main        ] INFO     [#updates[111600] train loss[2.43860] remaining[0:03:41]]
+2018-08-26 02:38:27 [main        ] INFO     [#updates[111700] train loss[2.43808] remaining[0:03:07]]
+2018-08-26 02:39:00 [main        ] INFO     [#updates[111800] train loss[2.43755] remaining[0:02:33]]
+2018-08-26 02:39:33 [main        ] INFO     [#updates[111900] train loss[2.43708] remaining[0:02:00]]
+2018-08-26 02:40:07 [main        ] INFO     [#updates[112000] train loss[2.43646] remaining[0:01:26]]
+2018-08-26 02:40:41 [main        ] INFO     [#updates[112100] train loss[2.43598] remaining[0:00:53]]
+2018-08-26 02:41:15 [main        ] INFO     [#updates[112200] train loss[2.43548] remaining[0:00:19]]
+2018-08-26 02:42:43 [main        ] INFO     [scheduler_type ms]
+2018-08-26 02:42:47 [main        ] WARNING  [Epoch 40 - dev EM: 76.102 F1: 84.006 (best EM: 76.263 F1: 84.124)]
+2018-08-26 02:42:47 [main        ] WARNING  [At epoch 41]
+2018-08-26 02:42:47 [main        ] INFO     [#updates[112259] train loss[2.43522] remaining[0:14:46]]
+2018-08-26 02:43:00 [main        ] INFO     [#updates[112300] train loss[2.43506] remaining[0:14:23]]
+2018-08-26 02:43:32 [main        ] INFO     [#updates[112400] train loss[2.43451] remaining[0:13:48]]
+2018-08-26 02:44:04 [main        ] INFO     [#updates[112500] train loss[2.43390] remaining[0:13:16]]
+2018-08-26 02:44:37 [main        ] INFO     [#updates[112600] train loss[2.43329] remaining[0:12:49]]
+2018-08-26 02:45:09 [main        ] INFO     [#updates[112700] train loss[2.43272] remaining[0:12:18]]
+2018-08-26 02:45:41 [main        ] INFO     [#updates[112800] train loss[2.43224] remaining[0:11:46]]
+2018-08-26 02:46:13 [main        ] INFO     [#updates[112900] train loss[2.43180] remaining[0:11:12]]
+2018-08-26 02:46:44 [main        ] INFO     [#updates[113000] train loss[2.43130] remaining[0:10:38]]
+2018-08-26 02:47:16 [main        ] INFO     [#updates[113100] train loss[2.43071] remaining[0:10:05]]
+2018-08-26 02:47:48 [main        ] INFO     [#updates[113200] train loss[2.43024] remaining[0:09:34]]
+2018-08-26 02:48:20 [main        ] INFO     [#updates[113300] train loss[2.42973] remaining[0:09:02]]
+2018-08-26 02:48:53 [main        ] INFO     [#updates[113400] train loss[2.42919] remaining[0:08:31]]
+2018-08-26 02:49:25 [main        ] INFO     [#updates[113500] train loss[2.42863] remaining[0:07:59]]
+2018-08-26 02:49:57 [main        ] INFO     [#updates[113600] train loss[2.42808] remaining[0:07:27]]
+2018-08-26 02:50:29 [main        ] INFO     [#updates[113700] train loss[2.42750] remaining[0:06:55]]
+2018-08-26 02:51:01 [main        ] INFO     [#updates[113800] train loss[2.42688] remaining[0:06:23]]
+2018-08-26 02:51:34 [main        ] INFO     [#updates[113900] train loss[2.42643] remaining[0:05:51]]
+2018-08-26 02:52:05 [main        ] INFO     [#updates[114000] train loss[2.42592] remaining[0:05:19]]
+2018-08-26 02:52:37 [main        ] INFO     [#updates[114100] train loss[2.42544] remaining[0:04:47]]
+2018-08-26 02:53:09 [main        ] INFO     [#updates[114200] train loss[2.42491] remaining[0:04:15]]
+2018-08-26 02:53:41 [main        ] INFO     [#updates[114300] train loss[2.42435] remaining[0:03:43]]
+2018-08-26 02:54:13 [main        ] INFO     [#updates[114400] train loss[2.42388] remaining[0:03:10]]
+2018-08-26 02:54:45 [main        ] INFO     [#updates[114500] train loss[2.42326] remaining[0:02:38]]
+2018-08-26 02:55:16 [main        ] INFO     [#updates[114600] train loss[2.42299] remaining[0:02:06]]
+2018-08-26 02:55:48 [main        ] INFO     [#updates[114700] train loss[2.42261] remaining[0:01:34]]
+2018-08-26 02:56:21 [main        ] INFO     [#updates[114800] train loss[2.42216] remaining[0:01:02]]
+2018-08-26 02:56:53 [main        ] INFO     [#updates[114900] train loss[2.42166] remaining[0:00:30]]
+2018-08-26 02:58:31 [main        ] INFO     [scheduler_type ms]
+2018-08-26 02:58:34 [main        ] WARNING  [Epoch 41 - dev EM: 75.989 F1: 83.902 (best EM: 76.263 F1: 84.124)]
+2018-08-26 02:58:34 [main        ] WARNING  [At epoch 42]
+2018-08-26 02:58:34 [main        ] INFO     [#updates[114997] train loss[2.42119] remaining[0:19:23]]
+2018-08-26 02:58:35 [main        ] INFO     [#updates[115000] train loss[2.42116] remaining[0:15:43]]
+2018-08-26 02:59:08 [main        ] INFO     [#updates[115100] train loss[2.42060] remaining[0:14:21]]
+2018-08-26 02:59:41 [main        ] INFO     [#updates[115200] train loss[2.42004] remaining[0:13:52]]
+2018-08-26 03:00:15 [main        ] INFO     [#updates[115300] train loss[2.41955] remaining[0:13:27]]
+2018-08-26 03:00:49 [main        ] INFO     [#updates[115400] train loss[2.41904] remaining[0:12:58]]
+2018-08-26 03:01:22 [main        ] INFO     [#updates[115500] train loss[2.41847] remaining[0:12:25]]
+2018-08-26 03:01:56 [main        ] INFO     [#updates[115600] train loss[2.41800] remaining[0:11:53]]
+2018-08-26 03:02:29 [main        ] INFO     [#updates[115700] train loss[2.41753] remaining[0:11:20]]
+2018-08-26 03:03:03 [main        ] INFO     [#updates[115800] train loss[2.41707] remaining[0:10:46]]
+2018-08-26 03:03:36 [main        ] INFO     [#updates[115900] train loss[2.41653] remaining[0:10:12]]
+2018-08-26 03:04:10 [main        ] INFO     [#updates[116000] train loss[2.41612] remaining[0:09:40]]
+2018-08-26 03:04:44 [main        ] INFO     [#updates[116100] train loss[2.41556] remaining[0:09:07]]
+2018-08-26 03:05:17 [main        ] INFO     [#updates[116200] train loss[2.41503] remaining[0:08:33]]
+2018-08-26 03:05:50 [main        ] INFO     [#updates[116300] train loss[2.41463] remaining[0:08:00]]
+2018-08-26 03:06:24 [main        ] INFO     [#updates[116400] train loss[2.41414] remaining[0:07:26]]
+2018-08-26 03:06:57 [main        ] INFO     [#updates[116500] train loss[2.41360] remaining[0:06:53]]
+2018-08-26 03:07:30 [main        ] INFO     [#updates[116600] train loss[2.41320] remaining[0:06:19]]
+2018-08-26 03:08:04 [main        ] INFO     [#updates[116700] train loss[2.41267] remaining[0:05:45]]
+2018-08-26 03:08:38 [main        ] INFO     [#updates[116800] train loss[2.41213] remaining[0:05:12]]
+2018-08-26 03:09:11 [main        ] INFO     [#updates[116900] train loss[2.41169] remaining[0:04:39]]
+2018-08-26 03:09:44 [main        ] INFO     [#updates[117000] train loss[2.41108] remaining[0:04:05]]
+2018-08-26 03:10:17 [main        ] INFO     [#updates[117100] train loss[2.41065] remaining[0:03:32]]
+2018-08-26 03:10:52 [main        ] INFO     [#updates[117200] train loss[2.41011] remaining[0:02:58]]
+2018-08-26 03:11:25 [main        ] INFO     [#updates[117300] train loss[2.40959] remaining[0:02:25]]
+2018-08-26 03:11:58 [main        ] INFO     [#updates[117400] train loss[2.40916] remaining[0:01:51]]
+2018-08-26 03:12:32 [main        ] INFO     [#updates[117500] train loss[2.40863] remaining[0:01:18]]
+2018-08-26 03:13:06 [main        ] INFO     [#updates[117600] train loss[2.40821] remaining[0:00:44]]
+2018-08-26 03:13:40 [main        ] INFO     [#updates[117700] train loss[2.40767] remaining[0:00:11]]
+2018-08-26 03:15:00 [main        ] INFO     [scheduler_type ms]
+2018-08-26 03:15:03 [main        ] WARNING  [Epoch 42 - dev EM: 76.206 F1: 84.031 (best EM: 76.263 F1: 84.124)]
+2018-08-26 03:15:03 [main        ] WARNING  [At epoch 43]
+2018-08-26 03:15:04 [main        ] INFO     [#updates[117735] train loss[2.40746] remaining[0:16:19]]
+2018-08-26 03:15:25 [main        ] INFO     [#updates[117800] train loss[2.40716] remaining[0:14:34]]
+2018-08-26 03:15:58 [main        ] INFO     [#updates[117900] train loss[2.40675] remaining[0:14:10]]
+2018-08-26 03:16:31 [main        ] INFO     [#updates[118000] train loss[2.40616] remaining[0:13:35]]
+2018-08-26 03:17:05 [main        ] INFO     [#updates[118100] train loss[2.40572] remaining[0:13:06]]
+2018-08-26 03:17:38 [main        ] INFO     [#updates[118200] train loss[2.40518] remaining[0:12:35]]
+2018-08-26 03:18:12 [main        ] INFO     [#updates[118300] train loss[2.40464] remaining[0:12:04]]
+2018-08-26 03:18:45 [main        ] INFO     [#updates[118400] train loss[2.40410] remaining[0:11:30]]
+2018-08-26 03:19:19 [main        ] INFO     [#updates[118500] train loss[2.40354] remaining[0:10:58]]
+2018-08-26 03:19:53 [main        ] INFO     [#updates[118600] train loss[2.40306] remaining[0:10:26]]
+2018-08-26 03:20:27 [main        ] INFO     [#updates[118700] train loss[2.40248] remaining[0:09:52]]
+2018-08-26 03:21:00 [main        ] INFO     [#updates[118800] train loss[2.40196] remaining[0:09:19]]
+2018-08-26 03:21:33 [main        ] INFO     [#updates[118900] train loss[2.40154] remaining[0:08:46]]
+2018-08-26 03:22:06 [main        ] INFO     [#updates[119000] train loss[2.40101] remaining[0:08:12]]
+2018-08-26 03:22:39 [main        ] INFO     [#updates[119100] train loss[2.40040] remaining[0:07:37]]
+2018-08-26 03:23:13 [main        ] INFO     [#updates[119200] train loss[2.39982] remaining[0:07:05]]
+2018-08-26 03:23:47 [main        ] INFO     [#updates[119300] train loss[2.39925] remaining[0:06:32]]
+2018-08-26 03:24:22 [main        ] INFO     [#updates[119400] train loss[2.39876] remaining[0:05:59]]
+2018-08-26 03:24:56 [main        ] INFO     [#updates[119500] train loss[2.39829] remaining[0:05:26]]
+2018-08-26 03:25:28 [main        ] INFO     [#updates[119600] train loss[2.39789] remaining[0:04:52]]
+2018-08-26 03:26:02 [main        ] INFO     [#updates[119700] train loss[2.39756] remaining[0:04:18]]
+2018-08-26 03:26:36 [main        ] INFO     [#updates[119800] train loss[2.39712] remaining[0:03:45]]
+2018-08-26 03:27:09 [main        ] INFO     [#updates[119900] train loss[2.39678] remaining[0:03:11]]
+2018-08-26 03:27:43 [main        ] INFO     [#updates[120000] train loss[2.39627] remaining[0:02:38]]
+2018-08-26 03:28:17 [main        ] INFO     [#updates[120100] train loss[2.39577] remaining[0:02:04]]
+2018-08-26 03:28:50 [main        ] INFO     [#updates[120200] train loss[2.39535] remaining[0:01:31]]
+2018-08-26 03:29:24 [main        ] INFO     [#updates[120300] train loss[2.39488] remaining[0:00:57]]
+2018-08-26 03:29:57 [main        ] INFO     [#updates[120400] train loss[2.39440] remaining[0:00:24]]
+2018-08-26 03:31:29 [main        ] INFO     [scheduler_type ms]
+2018-08-26 03:31:32 [main        ] WARNING  [Epoch 43 - dev EM: 76.178 F1: 83.884 (best EM: 76.263 F1: 84.124)]
+2018-08-26 03:31:32 [main        ] WARNING  [At epoch 44]
+2018-08-26 03:31:32 [main        ] INFO     [#updates[120473] train loss[2.39400] remaining[0:16:14]]
+2018-08-26 03:31:41 [main        ] INFO     [#updates[120500] train loss[2.39391] remaining[0:14:54]]
+2018-08-26 03:32:15 [main        ] INFO     [#updates[120600] train loss[2.39342] remaining[0:14:36]]
+2018-08-26 03:32:48 [main        ] INFO     [#updates[120700] train loss[2.39303] remaining[0:14:02]]
+2018-08-26 03:33:21 [main        ] INFO     [#updates[120800] train loss[2.39257] remaining[0:13:27]]
+2018-08-26 03:33:55 [main        ] INFO     [#updates[120900] train loss[2.39210] remaining[0:12:55]]
+2018-08-26 03:34:28 [main        ] INFO     [#updates[121000] train loss[2.39160] remaining[0:12:19]]
+2018-08-26 03:35:01 [main        ] INFO     [#updates[121100] train loss[2.39107] remaining[0:11:44]]
+2018-08-26 03:35:35 [main        ] INFO     [#updates[121200] train loss[2.39075] remaining[0:11:11]]
+2018-08-26 03:36:09 [main        ] INFO     [#updates[121300] train loss[2.39020] remaining[0:10:39]]
+2018-08-26 03:36:42 [main        ] INFO     [#updates[121400] train loss[2.38980] remaining[0:10:05]]
+2018-08-26 03:37:15 [main        ] INFO     [#updates[121500] train loss[2.38933] remaining[0:09:31]]
+2018-08-26 03:37:49 [main        ] INFO     [#updates[121600] train loss[2.38886] remaining[0:08:59]]
+2018-08-26 03:38:25 [main        ] INFO     [#updates[121700] train loss[2.38830] remaining[0:08:28]]
+2018-08-26 03:38:59 [main        ] INFO     [#updates[121800] train loss[2.38783] remaining[0:07:54]]
+2018-08-26 03:39:32 [main        ] INFO     [#updates[121900] train loss[2.38738] remaining[0:07:20]]
+2018-08-26 03:40:05 [main        ] INFO     [#updates[122000] train loss[2.38700] remaining[0:06:46]]
+2018-08-26 03:40:38 [main        ] INFO     [#updates[122100] train loss[2.38657] remaining[0:06:12]]
+2018-08-26 03:41:11 [main        ] INFO     [#updates[122200] train loss[2.38603] remaining[0:05:38]]
+2018-08-26 03:41:45 [main        ] INFO     [#updates[122300] train loss[2.38551] remaining[0:05:05]]
+2018-08-26 03:42:18 [main        ] INFO     [#updates[122400] train loss[2.38510] remaining[0:04:31]]
+2018-08-26 03:42:52 [main        ] INFO     [#updates[122500] train loss[2.38466] remaining[0:03:58]]
+2018-08-26 03:43:25 [main        ] INFO     [#updates[122600] train loss[2.38415] remaining[0:03:24]]
+2018-08-26 03:43:58 [main        ] INFO     [#updates[122700] train loss[2.38370] remaining[0:02:50]]
+2018-08-26 03:44:32 [main        ] INFO     [#updates[122800] train loss[2.38322] remaining[0:02:17]]
+2018-08-26 03:45:06 [main        ] INFO     [#updates[122900] train loss[2.38282] remaining[0:01:43]]
+2018-08-26 03:45:39 [main        ] INFO     [#updates[123000] train loss[2.38231] remaining[0:01:10]]
+2018-08-26 03:46:12 [main        ] INFO     [#updates[123100] train loss[2.38174] remaining[0:00:36]]
+2018-08-26 03:46:46 [main        ] INFO     [#updates[123200] train loss[2.38124] remaining[0:00:03]]
+2018-08-26 03:47:57 [main        ] INFO     [scheduler_type ms]
+2018-08-26 03:48:00 [main        ] WARNING  [Epoch 44 - dev EM: 76.055 F1: 83.906 (best EM: 76.263 F1: 84.124)]
+2018-08-26 03:48:01 [main        ] WARNING  [At epoch 45]
+2018-08-26 03:48:01 [main        ] INFO     [#updates[123211] train loss[2.38117] remaining[0:16:44]]
+2018-08-26 03:48:32 [main        ] INFO     [#updates[123300] train loss[2.38072] remaining[0:15:16]]
+2018-08-26 03:49:05 [main        ] INFO     [#updates[123400] train loss[2.38031] remaining[0:14:26]]
+2018-08-26 03:49:39 [main        ] INFO     [#updates[123500] train loss[2.37986] remaining[0:13:49]]
+2018-08-26 03:50:13 [main        ] INFO     [#updates[123600] train loss[2.37950] remaining[0:13:15]]
+2018-08-26 03:50:46 [main        ] INFO     [#updates[123700] train loss[2.37913] remaining[0:12:38]]
+2018-08-26 03:51:20 [main        ] INFO     [#updates[123800] train loss[2.37867] remaining[0:12:04]]
+2018-08-26 03:51:53 [main        ] INFO     [#updates[123900] train loss[2.37827] remaining[0:11:30]]
+2018-08-26 03:52:26 [main        ] INFO     [#updates[124000] train loss[2.37763] remaining[0:10:55]]
+2018-08-26 03:53:00 [main        ] INFO     [#updates[124100] train loss[2.37701] remaining[0:10:20]]
+2018-08-26 03:53:33 [main        ] INFO     [#updates[124200] train loss[2.37653] remaining[0:09:47]]
+2018-08-26 03:54:07 [main        ] INFO     [#updates[124300] train loss[2.37605] remaining[0:09:13]]
+2018-08-26 03:54:40 [main        ] INFO     [#updates[124400] train loss[2.37571] remaining[0:08:39]]
+2018-08-26 03:55:14 [main        ] INFO     [#updates[124500] train loss[2.37529] remaining[0:08:06]]
+2018-08-26 03:55:48 [main        ] INFO     [#updates[124600] train loss[2.37480] remaining[0:07:33]]
+2018-08-26 03:56:22 [main        ] INFO     [#updates[124700] train loss[2.37417] remaining[0:07:00]]
+2018-08-26 03:56:56 [main        ] INFO     [#updates[124800] train loss[2.37367] remaining[0:06:26]]
+2018-08-26 03:57:29 [main        ] INFO     [#updates[124900] train loss[2.37318] remaining[0:05:52]]
+2018-08-26 03:58:01 [main        ] INFO     [#updates[125000] train loss[2.37278] remaining[0:05:18]]
+2018-08-26 03:58:34 [main        ] INFO     [#updates[125100] train loss[2.37237] remaining[0:04:44]]
+2018-08-26 03:59:08 [main        ] INFO     [#updates[125200] train loss[2.37204] remaining[0:04:11]]
+2018-08-26 03:59:43 [main        ] INFO     [#updates[125300] train loss[2.37173] remaining[0:03:37]]
+2018-08-26 04:00:17 [main        ] INFO     [#updates[125400] train loss[2.37123] remaining[0:03:04]]
+2018-08-26 04:00:50 [main        ] INFO     [#updates[125500] train loss[2.37074] remaining[0:02:30]]
+2018-08-26 04:01:24 [main        ] INFO     [#updates[125600] train loss[2.37032] remaining[0:01:57]]
+2018-08-26 04:01:58 [main        ] INFO     [#updates[125700] train loss[2.36977] remaining[0:01:23]]
+2018-08-26 04:02:32 [main        ] INFO     [#updates[125800] train loss[2.36932] remaining[0:00:49]]
+2018-08-26 04:03:05 [main        ] INFO     [#updates[125900] train loss[2.36894] remaining[0:00:16]]
+2018-08-26 04:04:30 [main        ] INFO     [scheduler_type ms]
+2018-08-26 04:04:33 [main        ] WARNING  [Epoch 45 - dev EM: 76.216 F1: 84.060 (best EM: 76.263 F1: 84.124)]
+2018-08-26 04:04:33 [main        ] WARNING  [At epoch 46]
+2018-08-26 04:04:33 [main        ] INFO     [#updates[125949] train loss[2.36868] remaining[0:17:11]]
+2018-08-26 04:04:50 [main        ] INFO     [#updates[126000] train loss[2.36839] remaining[0:14:17]]
+2018-08-26 04:05:23 [main        ] INFO     [#updates[126100] train loss[2.36795] remaining[0:14:07]]
+2018-08-26 04:05:56 [main        ] INFO     [#updates[126200] train loss[2.36751] remaining[0:13:40]]
+2018-08-26 04:06:30 [main        ] INFO     [#updates[126300] train loss[2.36707] remaining[0:13:09]]
+2018-08-26 04:07:03 [main        ] INFO     [#updates[126400] train loss[2.36661] remaining[0:12:38]]
+2018-08-26 04:07:37 [main        ] INFO     [#updates[126500] train loss[2.36629] remaining[0:12:08]]
+2018-08-26 04:08:11 [main        ] INFO     [#updates[126600] train loss[2.36585] remaining[0:11:37]]
+2018-08-26 04:08:44 [main        ] INFO     [#updates[126700] train loss[2.36538] remaining[0:11:01]]
+2018-08-26 04:09:17 [main        ] INFO     [#updates[126800] train loss[2.36501] remaining[0:10:27]]
+2018-08-26 04:09:50 [main        ] INFO     [#updates[126900] train loss[2.36463] remaining[0:09:54]]
+2018-08-26 04:10:23 [main        ] INFO     [#updates[127000] train loss[2.36417] remaining[0:09:21]]
+2018-08-26 04:10:57 [main        ] INFO     [#updates[127100] train loss[2.36372] remaining[0:08:48]]
+2018-08-26 04:11:31 [main        ] INFO     [#updates[127200] train loss[2.36322] remaining[0:08:16]]
+2018-08-26 04:12:05 [main        ] INFO     [#updates[127300] train loss[2.36263] remaining[0:07:43]]
+2018-08-26 04:12:39 [main        ] INFO     [#updates[127400] train loss[2.36220] remaining[0:07:10]]
+2018-08-26 04:13:12 [main        ] INFO     [#updates[127500] train loss[2.36174] remaining[0:06:36]]
+2018-08-26 04:13:45 [main        ] INFO     [#updates[127600] train loss[2.36135] remaining[0:06:02]]
+2018-08-26 04:14:18 [main        ] INFO     [#updates[127700] train loss[2.36077] remaining[0:05:29]]
+2018-08-26 04:14:52 [main        ] INFO     [#updates[127800] train loss[2.36041] remaining[0:04:56]]
+2018-08-26 04:15:25 [main        ] INFO     [#updates[127900] train loss[2.35993] remaining[0:04:22]]
+2018-08-26 04:15:59 [main        ] INFO     [#updates[128000] train loss[2.35948] remaining[0:03:49]]
+2018-08-26 04:16:32 [main        ] INFO     [#updates[128100] train loss[2.35901] remaining[0:03:15]]
+2018-08-26 04:17:05 [main        ] INFO     [#updates[128200] train loss[2.35856] remaining[0:02:42]]
+2018-08-26 04:17:39 [main        ] INFO     [#updates[128300] train loss[2.35813] remaining[0:02:09]]
+2018-08-26 04:18:13 [main        ] INFO     [#updates[128400] train loss[2.35779] remaining[0:01:35]]
+2018-08-26 04:18:46 [main        ] INFO     [#updates[128500] train loss[2.35738] remaining[0:01:02]]
+2018-08-26 04:19:20 [main        ] INFO     [#updates[128600] train loss[2.35697] remaining[0:00:28]]
+2018-08-26 04:20:57 [main        ] INFO     [scheduler_type ms]
+2018-08-26 04:21:00 [main        ] WARNING  [Epoch 46 - dev EM: 75.866 F1: 83.856 (best EM: 76.263 F1: 84.124)]
+2018-08-26 04:21:00 [main        ] WARNING  [At epoch 47]
+2018-08-26 04:21:01 [main        ] INFO     [#updates[128687] train loss[2.35670] remaining[0:16:14]]
+2018-08-26 04:21:05 [main        ] INFO     [#updates[128700] train loss[2.35666] remaining[0:16:26]]
+2018-08-26 04:21:39 [main        ] INFO     [#updates[128800] train loss[2.35624] remaining[0:14:56]]
+2018-08-26 04:22:12 [main        ] INFO     [#updates[128900] train loss[2.35575] remaining[0:14:05]]
+2018-08-26 04:22:45 [main        ] INFO     [#updates[129000] train loss[2.35519] remaining[0:13:31]]
+2018-08-26 04:23:19 [main        ] INFO     [#updates[129100] train loss[2.35481] remaining[0:12:56]]
+2018-08-26 04:23:53 [main        ] INFO     [#updates[129200] train loss[2.35444] remaining[0:12:25]]
+2018-08-26 04:24:26 [main        ] INFO     [#updates[129300] train loss[2.35400] remaining[0:11:50]]
+2018-08-26 04:25:00 [main        ] INFO     [#updates[129400] train loss[2.35347] remaining[0:11:18]]
+2018-08-26 04:25:33 [main        ] INFO     [#updates[129500] train loss[2.35312] remaining[0:10:44]]
+2018-08-26 04:26:06 [main        ] INFO     [#updates[129600] train loss[2.35276] remaining[0:10:10]]
+2018-08-26 04:26:39 [main        ] INFO     [#updates[129700] train loss[2.35236] remaining[0:09:36]]
+2018-08-26 04:27:13 [main        ] INFO     [#updates[129800] train loss[2.35195] remaining[0:09:03]]
+2018-08-26 04:27:47 [main        ] INFO     [#updates[129900] train loss[2.35152] remaining[0:08:30]]
+2018-08-26 04:28:20 [main        ] INFO     [#updates[130000] train loss[2.35096] remaining[0:07:56]]
+2018-08-26 04:28:53 [main        ] INFO     [#updates[130100] train loss[2.35051] remaining[0:07:23]]
+2018-08-26 04:29:27 [main        ] INFO     [#updates[130200] train loss[2.35012] remaining[0:06:50]]
+2018-08-26 04:30:01 [main        ] INFO     [#updates[130300] train loss[2.34968] remaining[0:06:16]]
+2018-08-26 04:30:34 [main        ] INFO     [#updates[130400] train loss[2.34933] remaining[0:05:43]]
+2018-08-26 04:31:07 [main        ] INFO     [#updates[130500] train loss[2.34887] remaining[0:05:09]]
+2018-08-26 04:31:41 [main        ] INFO     [#updates[130600] train loss[2.34856] remaining[0:04:35]]
+2018-08-26 04:32:14 [main        ] INFO     [#updates[130700] train loss[2.34807] remaining[0:04:02]]
+2018-08-26 04:32:47 [main        ] INFO     [#updates[130800] train loss[2.34762] remaining[0:03:28]]
+2018-08-26 04:33:21 [main        ] INFO     [#updates[130900] train loss[2.34715] remaining[0:02:55]]
+2018-08-26 04:33:53 [main        ] INFO     [#updates[131000] train loss[2.34677] remaining[0:02:21]]
+2018-08-26 04:34:27 [main        ] INFO     [#updates[131100] train loss[2.34634] remaining[0:01:48]]
+2018-08-26 04:35:01 [main        ] INFO     [#updates[131200] train loss[2.34591] remaining[0:01:14]]
+2018-08-26 04:35:34 [main        ] INFO     [#updates[131300] train loss[2.34545] remaining[0:00:41]]
+2018-08-26 04:36:08 [main        ] INFO     [#updates[131400] train loss[2.34506] remaining[0:00:08]]
+2018-08-26 04:37:26 [main        ] INFO     [scheduler_type ms]
+2018-08-26 04:37:30 [main        ] WARNING  [Epoch 47 - dev EM: 76.197 F1: 84.101 (best EM: 76.263 F1: 84.124)]
+2018-08-26 04:37:30 [main        ] WARNING  [At epoch 48]
+2018-08-26 04:37:30 [main        ] INFO     [#updates[131425] train loss[2.34496] remaining[0:13:10]]
+2018-08-26 04:37:55 [main        ] INFO     [#updates[131500] train loss[2.34456] remaining[0:15:00]]
+2018-08-26 04:38:29 [main        ] INFO     [#updates[131600] train loss[2.34419] remaining[0:14:22]]
+2018-08-26 04:39:03 [main        ] INFO     [#updates[131700] train loss[2.34382] remaining[0:13:52]]
+2018-08-26 04:39:36 [main        ] INFO     [#updates[131800] train loss[2.34344] remaining[0:13:16]]
+2018-08-26 04:40:10 [main        ] INFO     [#updates[131900] train loss[2.34304] remaining[0:12:40]]
+2018-08-26 04:40:43 [main        ] INFO     [#updates[132000] train loss[2.34263] remaining[0:12:06]]
+2018-08-26 04:41:16 [main        ] INFO     [#updates[132100] train loss[2.34220] remaining[0:11:31]]
+2018-08-26 04:41:50 [main        ] INFO     [#updates[132200] train loss[2.34185] remaining[0:10:58]]
+2018-08-26 04:42:24 [main        ] INFO     [#updates[132300] train loss[2.34136] remaining[0:10:24]]
+2018-08-26 04:42:57 [main        ] INFO     [#updates[132400] train loss[2.34083] remaining[0:09:51]]
+2018-08-26 04:43:31 [main        ] INFO     [#updates[132500] train loss[2.34042] remaining[0:09:17]]
+2018-08-26 04:44:04 [main        ] INFO     [#updates[132600] train loss[2.34004] remaining[0:08:43]]
+2018-08-26 04:44:38 [main        ] INFO     [#updates[132700] train loss[2.33967] remaining[0:08:10]]
+2018-08-26 04:45:12 [main        ] INFO     [#updates[132800] train loss[2.33912] remaining[0:07:37]]
+2018-08-26 04:45:46 [main        ] INFO     [#updates[132900] train loss[2.33873] remaining[0:07:03]]
+2018-08-26 04:46:20 [main        ] INFO     [#updates[133000] train loss[2.33839] remaining[0:06:31]]
+2018-08-26 04:46:54 [main        ] INFO     [#updates[133100] train loss[2.33801] remaining[0:05:57]]
+2018-08-26 04:47:27 [main        ] INFO     [#updates[133200] train loss[2.33766] remaining[0:05:23]]
+2018-08-26 04:48:01 [main        ] INFO     [#updates[133300] train loss[2.33717] remaining[0:04:50]]
+2018-08-26 04:48:35 [main        ] INFO     [#updates[133400] train loss[2.33671] remaining[0:04:16]]
+2018-08-26 04:49:09 [main        ] INFO     [#updates[133500] train loss[2.33632] remaining[0:03:42]]
+2018-08-26 04:49:42 [main        ] INFO     [#updates[133600] train loss[2.33599] remaining[0:03:09]]
+2018-08-26 04:50:15 [main        ] INFO     [#updates[133700] train loss[2.33557] remaining[0:02:35]]
+2018-08-26 04:50:49 [main        ] INFO     [#updates[133800] train loss[2.33527] remaining[0:02:01]]
+2018-08-26 04:51:23 [main        ] INFO     [#updates[133900] train loss[2.33479] remaining[0:01:28]]
+2018-08-26 04:51:56 [main        ] INFO     [#updates[134000] train loss[2.33426] remaining[0:00:54]]
+2018-08-26 04:52:29 [main        ] INFO     [#updates[134100] train loss[2.33388] remaining[0:00:20]]
+2018-08-26 04:53:58 [main        ] INFO     [scheduler_type ms]
+2018-08-26 04:54:01 [main        ] WARNING  [Epoch 48 - dev EM: 76.187 F1: 83.919 (best EM: 76.263 F1: 84.124)]
+2018-08-26 04:54:01 [main        ] WARNING  [At epoch 49]
+2018-08-26 04:54:02 [main        ] INFO     [#updates[134163] train loss[2.33354] remaining[0:19:37]]
+2018-08-26 04:54:14 [main        ] INFO     [#updates[134200] train loss[2.33337] remaining[0:14:45]]
+2018-08-26 04:54:46 [main        ] INFO     [#updates[134300] train loss[2.33293] remaining[0:13:55]]
+2018-08-26 04:55:18 [main        ] INFO     [#updates[134400] train loss[2.33248] remaining[0:13:24]]
+2018-08-26 04:55:50 [main        ] INFO     [#updates[134500] train loss[2.33216] remaining[0:12:53]]
+2018-08-26 04:56:22 [main        ] INFO     [#updates[134600] train loss[2.33176] remaining[0:12:21]]
+2018-08-26 04:56:54 [main        ] INFO     [#updates[134700] train loss[2.33139] remaining[0:11:46]]
+2018-08-26 04:57:26 [main        ] INFO     [#updates[134800] train loss[2.33100] remaining[0:11:13]]
+2018-08-26 04:57:57 [main        ] INFO     [#updates[134900] train loss[2.33048] remaining[0:10:39]]
+2018-08-26 04:58:30 [main        ] INFO     [#updates[135000] train loss[2.33011] remaining[0:10:09]]
+2018-08-26 04:59:03 [main        ] INFO     [#updates[135100] train loss[2.32969] remaining[0:09:38]]
+2018-08-26 04:59:35 [main        ] INFO     [#updates[135200] train loss[2.32923] remaining[0:09:06]]
+2018-08-26 05:00:07 [main        ] INFO     [#updates[135300] train loss[2.32887] remaining[0:08:33]]
+2018-08-26 05:00:39 [main        ] INFO     [#updates[135400] train loss[2.32848] remaining[0:08:01]]
+2018-08-26 05:01:11 [main        ] INFO     [#updates[135500] train loss[2.32814] remaining[0:07:30]]
+2018-08-26 05:01:44 [main        ] INFO     [#updates[135600] train loss[2.32786] remaining[0:06:58]]
+2018-08-26 05:02:16 [main        ] INFO     [#updates[135700] train loss[2.32749] remaining[0:06:25]]
+2018-08-26 05:02:48 [main        ] INFO     [#updates[135800] train loss[2.32716] remaining[0:05:53]]
+2018-08-26 05:03:20 [main        ] INFO     [#updates[135900] train loss[2.32675] remaining[0:05:21]]
+2018-08-26 05:03:52 [main        ] INFO     [#updates[136000] train loss[2.32640] remaining[0:04:49]]
+2018-08-26 05:04:24 [main        ] INFO     [#updates[136100] train loss[2.32608] remaining[0:04:17]]
+2018-08-26 05:04:57 [main        ] INFO     [#updates[136200] train loss[2.32563] remaining[0:03:45]]
+2018-08-26 05:05:30 [main        ] INFO     [#updates[136300] train loss[2.32510] remaining[0:03:13]]
+2018-08-26 05:06:03 [main        ] INFO     [#updates[136400] train loss[2.32469] remaining[0:02:41]]
+2018-08-26 05:06:36 [main        ] INFO     [#updates[136500] train loss[2.32427] remaining[0:02:09]]
+2018-08-26 05:07:09 [main        ] INFO     [#updates[136600] train loss[2.32386] remaining[0:01:36]]
+2018-08-26 05:07:43 [main        ] INFO     [#updates[136700] train loss[2.32348] remaining[0:01:04]]
+2018-08-26 05:08:16 [main        ] INFO     [#updates[136800] train loss[2.32308] remaining[0:00:32]]
+2018-08-26 05:08:50 [main        ] INFO     [#updates[136900] train loss[2.32274] remaining[0:00:00]]
+2018-08-26 05:09:59 [main        ] INFO     [scheduler_type ms]
+2018-08-26 05:10:02 [main        ] WARNING  [Epoch 49 - dev EM: 76.008 F1: 83.961 (best EM: 76.263 F1: 84.124)]
