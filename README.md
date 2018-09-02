@@ -29,7 +29,7 @@ Please cite the above paper if you use this code.
 
 
 ## TODO
-1. Publish the pretrained models.
+1. ADD ELMo.
 
 ## Notes and Acknowledgments
 Some of code are adapted from: https://github.com/hitvoice/DrQA
@@ -38,7 +38,5 @@ Related: <a href="https://arxiv.org/abs/1804.07888">NLI</a>
 
 by
 xiaodl@microsoft.com
-
-
 
 
