@@ -100,6 +100,7 @@ def model_config(parser):
     return parser
 
 def data_config(parser):
+    parser.add_argument('--v2_on', action='store_true')
     parser.add_argument('--log_file', default='san.log', help='path for log file.')
     parser.add_argument('--data_dir', default='data/')
     parser.add_argument('--meta', default='meta.pick')
@@ -145,11 +146,6 @@ def train_config(parser):
     parser.add_argument('--model_dir', default='checkpoint')
     parser.add_argument('--seed', type=int, default=2018)
 
-    # dummy settings on philly
-    parser.add_argument('--gpu', default=0, type=int, help='Use for philly tools.')
-    parser.add_argument('--dataDir', default=None, type=str, help='Use for philly tools.')
-    parser.add_argument('--modelDir', default='checkpoint', type=str, help='Use for philly tools. Will replace model_dir if exists.')
-    parser.add_argument('--logDir',default='.', type=str, help='Use for philly tools. Will replace log_file location if exists.')
     return parser
 
 def set_args():

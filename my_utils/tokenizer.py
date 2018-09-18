@@ -13,10 +13,10 @@ from collections import Counter
 
 logger = logging.getLogger(__name__)
 
-PAD = '<PAD>'
-UNK = '<UNK>'
-STA= '<BOS>'
-END = '<EOS>'
+PAD = 'PADPAD'
+UNK = 'UNKUNK'
+STA= 'BOSBOS'
+END = 'EOSEOS'
 
 PAD_ID = 0
 UNK_ID = 1
@@ -114,3 +114,66 @@ class Vocabulary(object):
         vocab = Vocabulary(neat)
         for w in words: vocab.add(w)
         return vocab
+
+def build_vocab(data, glove_vocab=None, sort_all=False, thread=24, clean_on=False, cl_on=True):
+    if cl_on:
+        nlp = spacy.load('en', disable=['vectors', 'textcat', 'parser'])
+    else:
+        nlp = spacy.load('en', disable=['vectors', 'textcat', 'tagger', 'ner', 'parser'])
+
+    print('Collect vocab/pos counter/ner counter')
+    # docs
+    docs = [reform_text(sample['context']) for sample in data]
+    doc_tokened = [doc for doc in nlp.pipe(docs, batch_size=10000, n_threads=thread)]
+    print('Done with doc tokenize')
+    questions = [reform_text(sample['question']) for sample in data]
+    questions_tokened = [question for question in nlp.pipe(questions, batch_size=10000, n_threads=thread)]
+    print('Done with question tokenize')
+
+    tag_counter = Counter()
+    ner_counter = Counter()
+    if sort_all:
+        counter = Counter()
+        merged = doc_tokened + questions_tokened
+        for tokened in tqdm.tqdm(merged, total=len(data)):
+            counter.update([normalize_text(w.text) for w in tokened if len(normalize_text(w.text)) > 0])
+            if cl_on:
+                tag_counter.update([w.tag_ for w in tokened if len(w.text) > 0])
+                ner_counter.update(['{}_{}'.format(w.ent_type_, w.ent_iob_) for w in tokened])
+        vocab = sorted([w for w in counter if w in glove_vocab], key=counter.get, reverse=True)
+    else:
+        query_counter = Counter()
+        doc_counter = Counter()
+
+        for tokened in tqdm.tqdm(doc_tokened, total=len(doc_tokened)):
+            doc_counter.update([normalize_text(w.text) for w in tokened if len(normalize_text(w.text)) > 0])
+            if cl_on:
+                tag_counter.update([w.tag_ for w in tokened if len(w.text) > 0])
+                ner_counter.update(['{}_{}'.format(w.ent_type_, w.ent_iob_) for w in tokened])
+
+        for tokened in tqdm.tqdm(questions_tokened, total=len(questions_tokened)):
+            query_counter.update([normalize_text(w.text) for w in tokened if len(normalize_text(w.text)) > 0])
+            if cl_on:
+                tag_counter.update([w.tag_ for w in tokened if len(w.text) > 0])
+                ner_counter.update(['{}_{}'.format(w.ent_type_, w.ent_iob_) for w in tokened])
+        counter = query_counter + doc_counter
+        # sort query words
+        vocab = sorted([w for w in query_counter if w in glove_vocab], key=query_counter.get, reverse=True)
+        vocab += sorted([w for w in doc_counter.keys() - query_counter.keys() if w in glove_vocab], key=counter.get, reverse=True)
+    tag_vocab, ner_vocab = None, None
+    if cl_on:
+        tag_counter = sorted([w for w in tag_counter], key=tag_counter.get, reverse=True)
+        ner_counter = sorted([w for w in ner_counter], key=ner_counter.get, reverse=True)
+        tag_vocab = Vocabulary.build(tag_counter)
+        ner_vocab = Vocabulary.build(ner_counter)
+        print('POS Tag vocab size: {}'.format(len(tag_vocab)))
+        print('NER Tag vocab size: {}'.format(len(ner_vocab)))
+    total = sum(counter.values())
+    matched = sum(counter[w] for w in vocab)
+    print('Raw vocab size vs vocab in glove: {0}/{1}'.format(len(counter), len(vocab)))
+    print('OOV rate:{0:.4f}={1}/{2}'.format(100.0 * (total - matched)/total, (total - matched), total))
+    vocab = Vocabulary.build(vocab)
+
+    print('final vocab size: {}'.format(len(vocab)))
+
+    return vocab, tag_vocab, ner_vocab
