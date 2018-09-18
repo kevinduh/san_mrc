@@ -19,6 +19,8 @@ from config import set_args
 from my_utils.utils import set_environment
 from my_utils.log_wrapper import create_logger
 from my_utils.squad_eval import evaluate
+from my_utils.data_utils import predict_squad
+from my_utils.squad_eval_v2 import my_evaluation as evaluate_v2
 
 args = set_args()
 # set model dir
@@ -32,29 +34,10 @@ set_environment(args.seed, args.cuda)
 logger =  create_logger(__name__, to_disk=True, log_file=args.log_file)
 
 def load_squad(data_path):
-    """Loading squad data
-    """
-    expected_version = '1.1'
     with open(data_path) as dataset_file:
         dataset_json = json.load(dataset_file)
-        if (dataset_json['version'] != expected_version):
-            print('Evaluation expects v-' + expected_version +
-                  ', but got dataset with v-' + dataset_json['version'],
-                  file=sys.stderr)
         dataset = dataset_json['data']
         return dataset
-
-def check(model, data, gold):
-    data.reset()
-    predictions = {}
-    for batch in data:
-        phrase, _ = model.predict(batch)
-        uids = batch['uids']
-        for uid, pred in zip(uids, phrase):
-            predictions[uid] = pred
-
-    results = evaluate(gold, predictions)
-    return results['exact_match'], results['f1'], predictions
 
 def main():
     logger.info('Launching the SAN')
@@ -63,7 +46,8 @@ def main():
     embedding, opt = load_meta(opt, os.path.join(args.data_dir, args.meta))
     train_data = BatchGen(os.path.join(args.data_dir, args.train_data),
                           batch_size=args.batch_size,
-                          gpu=args.cuda)
+                          gpu=args.cuda,
+                          with_label=args.v2_on)
     dev_data = BatchGen(os.path.join(args.data_dir, args.dev_data),
                           batch_size=args.batch_size,
                           gpu=args.cuda, is_train=False)
@@ -95,7 +79,13 @@ def main():
                     model.updates, model.train_loss.avg,
                     str((datetime.now() - start) / (i + 1) * (len(train_data) - i - 1)).split('.')[0]))
         # dev eval
-        em, f1, results = check(model, dev_data, dev_gold)
+        results = predict_squad(model, dev_data)
+        metric = None
+        if args.v2_on:
+            metric = evaluate_v2(dev_gold, results, na_prob_thresh=args.classifier_threshold)
+            em, f1 = metric['exact'], metric['f1']
+        else:
+            em, f1 = evaluate(dev_gold, results)
         output_path = os.path.join(model_dir, 'dev_output_{}.json'.format(epoch))
         with open(output_path, 'w') as f:
             json.dump(results, f)
@@ -115,6 +105,8 @@ def main():
             best_em_score, best_f1_score = em, f1
             logger.info('Saved the new best model and prediction')
         logger.warning("Epoch {0} - dev EM: {1:.3f} F1: {2:.3f} (best EM: {3:.3f} F1: {4:.3f})".format(epoch, em, f1, best_em_score, best_f1_score))
+        if metric is not None:
+            logger.warning("Epoch {0}: {1}".format(epoch, metric))
 
 if __name__ == '__main__':
     main()

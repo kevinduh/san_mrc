@@ -81,10 +81,18 @@ class DocReaderModel(object):
         self.network.train()
         if self.opt['cuda']:
             y = Variable(batch['start'].cuda(async=True)), Variable(batch['end'].cuda(async=True))
+            if self.opt.get('v2_on', False):
+                label = Variable(batch['label'].cuda(async=True), requires_grad=False)
         else:
             y = Variable(batch['start']), Variable(batch['end'])
-        start, end = self.network(batch)
+            if self.opt.get('v2_on', False):
+                label = Variable(batch['label'], requires_grad=False)
+
+        start, end, pred = self.network(batch)
         loss = F.cross_entropy(start, y[0]) + F.cross_entropy(end, y[1])
+        if self.opt.get('v2_on', False):
+            loss = loss + F.binary_cross_entropy(pred, torch.unsqueeze(label, 1)) * self.opt.get('classifier_gamma', 1)
+
         self.train_loss.update(loss.item(), len(start))
         self.optimizer.zero_grad()
         loss.backward()
@@ -101,15 +109,19 @@ class DocReaderModel(object):
         if self.eval_embed_transfer:
             self.update_eval_embed()
             self.eval_embed_transfer = False
-        start, end = self.network(batch)
+        start, end, lab = self.network(batch)
         start = F.softmax(start, 1)
         end = F.softmax(end, 1)
         start = start.data.cpu()
         end = end.data.cpu()
+        if lab is not None:
+            lab = lab.data.cpu()
+
         text = batch['text']
         spans = batch['span']
         predictions = []
         best_scores = []
+        label_predictions = []
 
         max_len = self.opt['max_len'] or start.size(1)
         doc_len = start.size(1)
@@ -122,10 +134,21 @@ class DocReaderModel(object):
             best_idx = np.argpartition(scores, -top_k, axis=None)[-top_k]
             best_score = np.partition(scores, -top_k, axis=None)[-top_k]
             s_idx, e_idx = np.unravel_index(best_idx, scores.shape)
-            s_offset, e_offset = spans[i][s_idx][0], spans[i][e_idx][1]
-            predictions.append(text[i][s_offset:e_offset])
-            best_scores.append(best_score)
-
+            if self.opt.get('v2_on', False):
+                label_score = float(lab[i])
+                s_offset, e_offset = spans[i][s_idx][0], spans[i][e_idx][1]
+                answer = text[i][s_offset:e_offset]
+                if s_idx == len(spans[i]) - 1:
+                    answer = ''
+                predictions.append(answer)
+                best_scores.append(best_score)
+                label_predictions.append(label_score)
+            else:
+                s_offset, e_offset = spans[i][s_idx][0], spans[i][e_idx][1]
+                predictions.append(text[i][s_offset:e_offset])
+                best_scores.append(best_score)
+        if self.opt.get('v2_on', False):
+            return (predictions, best_scores, label_predictions)
         return (predictions, best_scores)
 
     def setup_eval_embed(self, eval_embed, padding_idx = 0):

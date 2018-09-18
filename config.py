@@ -97,6 +97,12 @@ def model_config(parser):
     parser.add_argument('--decoder_sum_att_type', type=str, default='bilinear',
                         help='bilinear/simple/defualt')
     parser.add_argument('--decoder_weight_norm_on', action='store_true')
+    parser.add_argument('--classifier_merge_opt', type=int, default=0)
+    parser.add_argument('--classifier_dropout_p', type=float, default=0.4)
+    parser.add_argument('--classifier_weight_norm_on', action='store_false')
+    parser.add_argument('--classifier_gamma', type=float, default=1)
+    parser.add_argument('--classifier_threshold', type=float, default=0.5)
+    parser.add_argument('--label_size', type=int, default=1)
     return parser
 
 def data_config(parser):

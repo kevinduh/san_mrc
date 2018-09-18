@@ -9,13 +9,7 @@ from my_utils.tokenizer import Vocabulary, reform_text
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
-def load_squad_v2(path):
-    with open(path, 'r', encoding='utf-8') as f:
-        dataset_json = json.load(f)
-        dataset = dataset_json['data']
-        return dataset
-
-def evaluate_squad_v2(model, data):
+def predict_squad(model, data):
     data.reset()
     predictions = {}
     span_score_list = {}
@@ -23,11 +17,9 @@ def evaluate_squad_v2(model, data):
     for batch in data:
         phrase, spans, scores = model.predict(batch)
         uids = batch['uids']
-        for uid, pred, score in zip(uids, phrase, scores):
+        for uid, pred in zip(uids, phrase):
             predictions[uid] = pred
-            span_score_list[uid] = pred
-            score_list[uid] = score
-    return predictions, span_score_list, score_list
+    return predictions
 
 def load_squad_v2_label(path):
     rows = {}

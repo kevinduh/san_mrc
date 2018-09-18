@@ -20,7 +20,8 @@ def load_meta(opt, meta_path):
     return embedding, opt
 
 class BatchGen:
-    def __init__(self, data_path, batch_size, gpu, is_train=True, doc_maxlen=1000, dropout_w=0.05, dw_type=0):
+    def __init__(self, data_path, batch_size, gpu, is_train=True, doc_maxlen=1000, dropout_w=0.05, dw_type=0,
+                 with_label=False):
         self.batch_size = batch_size
         self.doc_maxlen = doc_maxlen
         self.is_train = is_train
@@ -39,6 +40,7 @@ class BatchGen:
         data = [self.data[i:i + batch_size] for i in range(0, len(self.data), batch_size)]
         self.data = data
         self.offset = 0
+        self.with_label = with_label
 
     def load(self, path, is_train=True, doc_maxlen=1000):
         with open(path, 'r', encoding='utf-8') as reader:
@@ -129,6 +131,9 @@ class BatchGen:
                 end = [sample['end'] for sample in batch]
                 batch_dict['start'] = torch.LongTensor(start)
                 batch_dict['end'] = torch.LongTensor(end)
+                if self.with_label:
+                    label = [sample['label'] for sample in batch]
+                    batch_dict['label'] = torch.FloatTensor(label)
 
             if self.gpu:
                 for k, v in batch_dict.items():
