@@ -31,7 +31,7 @@ Please cite the above paper if you use this code.
 1. preprocess data
    > python prepro.py --v2_on --train_data squad_train_v2.json --dev_data squad_dev_v2.json --meta squad_meta_v2.pick
 2. train a Model
-   > python train.py --data_dir data --train_data squad_train_v2.json --dev_data squad_dev_v2.json --dev_gold data\dev-v2.0.json --v2_on
+   > python train.py --data_dir data --train_data squad_train_v2.json --dev_data squad_dev_v2.json --dev_gold data\dev-v2.0.json --meta squad_meta_v2.pick --v2_on
 
 ## TODO
 1. ADD ELMo.
