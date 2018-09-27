@@ -3,11 +3,18 @@
 This PyTorch package implements the Stochastic Answer Network (SAN) for Machine Reading Comprehension, as described in:
 
 Xiaodong Liu, Yelong Shen, Kevin Duh, Jianfeng Gao<br/>
-Stochastic Answer Networks for Machine Reading Comprehension</br>
+Stochastic Answer Networks for Machine Reading Comprehension<br/>
 Proceedings of the 56th Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers)<br/>
 [arXiv version](https://arxiv.org/abs/1712.03556)
 
-Please cite the above paper if you use this code. 
+
+Xiaodong Liu, Wei Li, Yuwei Fang, Aerin Kim, Kevin Duh and Jianfeng Gao<br/>
+Stochastic Answer Networks for SQuAD 2.0 <br/>
+Technical Report
+[arXiv version](https://arxiv.org/abs/1809.09194)
+
+
+Please cite the above papers if you use this code. 
 
 ## Quickstart 
 
@@ -34,14 +41,22 @@ Please cite the above paper if you use this code.
    > python train.py --data_dir data --train_data squad_train_v2.json --dev_data squad_dev_v2.json --dev_gold data\dev-v2.0.json --meta squad_meta_v2.pick --v2_on
 
 ## TODO
-1. ADD ELMo.
+1. Add ELMo.
+2. Add Multi-Task Training
 
 ## Notes and Acknowledgments
 Some of code are adapted from: https://github.com/hitvoice/DrQA
 
-Related: <a href="https://arxiv.org/abs/1804.07888">NLI</a>
+## Results
+We report results produced by this package as follows.
+| Dataset | EM/F1 on Dev|
+| --- | --- |
+| `SQuAD v1.1` (Rajpurkar et al., 2016) | **76.8**/**84.6** (vs 76.2/84.1 SAN paper) |
+| `SQuAD v2.0`  (Rajpurkar et al., 2018)| **69.5**/**72.7** |
+| `NewsQA` (Trischler et al., 2016)| **55.8**/**67.9**|
 
-by
-xiaodl@microsoft.com
+Related:
+1. <a href="https://arxiv.org/abs/1809.06963">Multi-Task Learning for MRC</a>
+2. <a href="https://arxiv.org/abs/1804.07888">NLI</a>
 
 
