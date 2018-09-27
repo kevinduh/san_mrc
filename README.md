@@ -49,8 +49,9 @@ Some of code are adapted from: https://github.com/hitvoice/DrQA
 
 ## Results
 We report results produced by this package as follows.
-| Dataset | EM/F1 on Dev|
-| --- | --- |
+
+| Dataset | EM/F1 on Dev |
+| ------- | ------- |
 | `SQuAD v1.1` (Rajpurkar et al., 2016) | **76.8**/**84.6** (vs 76.2/84.1 SAN paper) |
 | `SQuAD v2.0`  (Rajpurkar et al., 2018)| **69.5**/**72.7** |
 | `NewsQA` (Trischler et al., 2016)| **55.8**/**67.9**|
