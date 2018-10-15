@@ -96,7 +96,7 @@ class DocReaderModel(object):
         self.train_loss.update(loss.item(), len(start))
         self.optimizer.zero_grad()
         loss.backward()
-        torch.nn.utils.clip_grad_norm_(self.network.parameters(),self.opt['grad_clipping'])
+        torch.nn.utils.clip_grad_norm_(self.network.parameters(), self.opt['grad_clipping'])
         self.optimizer.step()
         self.updates += 1
         self.reset_embeddings()
@@ -147,9 +147,11 @@ class DocReaderModel(object):
                 s_offset, e_offset = spans[i][s_idx][0], spans[i][e_idx][1]
                 predictions.append(text[i][s_offset:e_offset])
                 best_scores.append(best_score)
-        if self.opt.get('v2_on', False):
-            return (predictions, best_scores, label_predictions)
-        return (predictions, best_scores)
+        #if self.opt.get('v2_on', False):
+        #    return (predictions, best_scores, label_predictions)
+        #return (predictions, best_scores)
+        return (predictions, best_scores, label_predictions)
+
 
     def setup_eval_embed(self, eval_embed, padding_idx = 0):
         self.network.lexicon_encoder.eval_embed = nn.Embedding(eval_embed.size(0),

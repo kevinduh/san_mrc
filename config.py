@@ -1,4 +1,3 @@
-#/usr/bin/env python3
 import argparse
 import multiprocessing
 import torch
@@ -109,10 +108,10 @@ def data_config(parser):
     parser.add_argument('--v2_on', action='store_true')
     parser.add_argument('--log_file', default='san.log', help='path for log file.')
     parser.add_argument('--data_dir', default='data/')
-    parser.add_argument('--meta', default='meta.pick')
-    parser.add_argument('--train_data', default='train_data.json',
+    parser.add_argument('--meta', default='meta')
+    parser.add_argument('--train_data', default='train_data',
                         help='path to preprocessed training data file.')
-    parser.add_argument('--dev_data', default='dev_data.json',
+    parser.add_argument('--dev_data', default='dev_data',
                         help='path to preprocessed validation data file.')
     parser.add_argument('--dev_gold', default='data/dev-v1.1.json',
                         help='path to preprocessed validation data file.')

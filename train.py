@@ -19,7 +19,7 @@ from config import set_args
 from my_utils.utils import set_environment
 from my_utils.log_wrapper import create_logger
 from my_utils.squad_eval import evaluate
-from my_utils.data_utils import predict_squad
+from my_utils.data_utils import predict_squad, gen_name
 from my_utils.squad_eval_v2 import my_evaluation as evaluate_v2
 
 args = set_args()
@@ -43,12 +43,15 @@ def main():
     logger.info('Launching the SAN')
     opt = vars(args)
     logger.info('Loading data')
-    embedding, opt = load_meta(opt, os.path.join(args.data_dir, args.meta))
-    train_data = BatchGen(os.path.join(args.data_dir, args.train_data),
+    version = 'v1'
+    if args.v2_on:
+        version = 'v2'
+    embedding, opt = load_meta(opt, gen_name(args.data_dir, args.meta, version, suffix='pick'))
+    train_data = BatchGen(gen_name(args.data_dir, args.train_data, version),
                           batch_size=args.batch_size,
                           gpu=args.cuda,
                           with_label=args.v2_on)
-    dev_data = BatchGen(os.path.join(args.data_dir, args.dev_data),
+    dev_data = BatchGen(gen_name(args.data_dir, args.dev_data, version),
                           batch_size=args.batch_size,
                           gpu=args.cuda, is_train=False)
 
@@ -79,13 +82,16 @@ def main():
                     model.updates, model.train_loss.avg,
                     str((datetime.now() - start) / (i + 1) * (len(train_data) - i - 1)).split('.')[0]))
         # dev eval
-        results = predict_squad(model, dev_data)
-        metric = None
+        results, labels = predict_squad(model, dev_data, v2_on=args.v2_on)
+        import pdb; pdb.set_trace()
         if args.v2_on:
             metric = evaluate_v2(dev_gold, results, na_prob_thresh=args.classifier_threshold)
-            em, f1 = metric['exact'], metric['f1']
         else:
-            em, f1 = evaluate(dev_gold, results)
+            metric = evaluate(dev_gold, results)
+
+        # extract em/f1 value
+        em, f1 = metric['exact_match'], metric['f1']
+
         output_path = os.path.join(model_dir, 'dev_output_{}.json'.format(epoch))
         with open(output_path, 'w') as f:
             json.dump(results, f)

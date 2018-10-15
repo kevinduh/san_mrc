@@ -1,4 +1,5 @@
 import re
+import os
 import numpy as np
 import logging
 import tqdm
@@ -9,17 +10,23 @@ from my_utils.tokenizer import Vocabulary, reform_text
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
-def predict_squad(model, data):
+def gen_name(dir, path, version, suffix='json'):
+    fname = '{}_{}.{}'.format(path, version, suffix)
+    return os.path.join(dir, fname)
+
+def predict_squad(model, data, v2_on=False):
     data.reset()
-    predictions = {}
-    span_score_list = {}
-    score_list = {}
+    span_predictions = {}
+    label_predictions = {}
     for batch in data:
         phrase, spans, scores = model.predict(batch)
         uids = batch['uids']
         for uid, pred in zip(uids, phrase):
-            predictions[uid] = pred
-    return predictions
+            span_predictions[uid] = pred
+        if v2_on:
+            for uid, pred in zip(uids, scores):
+                label_predictions[uid] = pred
+    return span_predictions, label_predictions
 
 def load_squad_v2_label(path):
     rows = {}
@@ -84,11 +91,11 @@ def build_span(context, answer, context_token, answer_start, answer_end, is_trai
     else:
         return (t_start, t_end, t_span)
 
-def feature_func(sample, query_tokend, doc_tokend, vocab, vocab_tag, vocab_ner, is_train):
+def feature_func(sample, query_tokend, doc_tokend, vocab, vocab_tag, vocab_ner, is_train, v2_on=False):
     # features
     fea_dict = {}
     fea_dict['uid'] = sample['uid']
-    if is_train:
+    if v2_on and is_train:
         fea_dict['label'] = sample['label']
     fea_dict['query_tok'] = tok_func(query_tokend, vocab)
     fea_dict['query_pos'] = postag_func(query_tokend, vocab_tag)
@@ -116,7 +123,7 @@ def feature_func(sample, query_tokend, doc_tokend, vocab, vocab_tag, vocab_ner, 
     fea_dict['end'] = end
     return fea_dict
 
-def build_data(data, vocab, vocab_tag, vocab_ner, fout, is_train, thread=16, NLP=None):
+def build_data(data, vocab, vocab_tag, vocab_ner, fout, is_train, thread=16, NLP=None, v2_on=False):
     passages = [reform_text(sample['context']) for sample in data]
     passage_tokened = [doc for doc in NLP.pipe(passages, batch_size=1000, n_threads=thread)]
     logger.info('Done with document tokenize')
@@ -128,7 +135,7 @@ def build_data(data, vocab, vocab_tag, vocab_ner, fout, is_train, thread=16, NLP
     with open(fout, 'w', encoding='utf-8') as writer:
         for idx, sample in enumerate(data):
             if idx % 5000 == 0: logger.info('parse {}-th sample'.format(idx))
-            feat_dict = feature_func(sample, question_tokened[idx], passage_tokened[idx], vocab, vocab_tag, vocab_ner, is_train)
+            feat_dict = feature_func(sample, question_tokened[idx], passage_tokened[idx], vocab, vocab_tag, vocab_ner, is_train, v2_on)
             if feat_dict is not None:
                 writer.write('{}\n'.format(json.dumps(feat_dict)))
     logger.info('dropped {} in total {}'.format(dropped_sample, len(data)))
