@@ -19,7 +19,7 @@ from config import set_args
 from my_utils.utils import set_environment
 from my_utils.log_wrapper import create_logger
 from my_utils.squad_eval import evaluate
-from my_utils.data_utils import predict_squad, gen_name
+from my_utils.data_utils import predict_squad, gen_name, load_squad_v2_label, compute_acc
 from my_utils.squad_eval_v2 import my_evaluation as evaluate_v2
 
 args = set_args()
@@ -46,6 +46,8 @@ def main():
     version = 'v1'
     if args.v2_on:
         version = 'v2'
+        dev_labels = load_squad_v2_label(args.dev_gold)
+
     embedding, opt = load_meta(opt, gen_name(args.data_dir, args.meta, version, suffix='pick'))
     train_data = BatchGen(gen_name(args.data_dir, args.train_data, version),
                           batch_size=args.batch_size,
@@ -83,14 +85,13 @@ def main():
                     str((datetime.now() - start) / (i + 1) * (len(train_data) - i - 1)).split('.')[0]))
         # dev eval
         results, labels = predict_squad(model, dev_data, v2_on=args.v2_on)
-        import pdb; pdb.set_trace()
         if args.v2_on:
             metric = evaluate_v2(dev_gold, results, na_prob_thresh=args.classifier_threshold)
+            em, f1 = metric['exact'], metric['f1']
+            acc = compute_acc(labels, dev_labels)
         else:
             metric = evaluate(dev_gold, results)
-
-        # extract em/f1 value
-        em, f1 = metric['exact_match'], metric['f1']
+            em, f1 = metric['exact_match'], metric['f1']
 
         output_path = os.path.join(model_dir, 'dev_output_{}.json'.format(epoch))
         with open(output_path, 'w') as f:
@@ -104,15 +105,19 @@ def main():
             else:
                 model.scheduler.step()
         # save
-        model_file = os.path.join(model_dir, 'checkpoint_epoch_{}.pt'.format(epoch))
+        model_file = os.path.join(model_dir, 'checkpoint_{}_epoch_{}.pt'.format(version, epoch))
+
         model.save(model_file, epoch)
         if em + f1 > best_em_score + best_f1_score:
-            copyfile(os.path.join(model_dir, model_file), os.path.join(model_dir, 'best_checkpoint.pt'))
+            copyfile(os.path.join(model_dir, model_file), os.path.join(model_dir, 'best_{}_checkpoint.pt'.format(version)))
             best_em_score, best_f1_score = em, f1
             logger.info('Saved the new best model and prediction')
+
         logger.warning("Epoch {0} - dev EM: {1:.3f} F1: {2:.3f} (best EM: {3:.3f} F1: {4:.3f})".format(epoch, em, f1, best_em_score, best_f1_score))
+        if args.v2_on:
+            logger.warning("Epoch {0} - ACC: {1:.4f}".format(epoch, acc))
         if metric is not None:
-            logger.warning("Epoch {0}: {1}".format(epoch, metric))
+            logger.warning("Detailed Metric at Epoch {0}: {1}".format(epoch, metric))
 
 if __name__ == '__main__':
     main()

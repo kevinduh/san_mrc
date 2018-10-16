@@ -25,7 +25,7 @@ This script is to preproces SQuAD dataset.
 """
 
 #Turn off
-DEBUG_ON = True
+DEBUG_ON = False
 DEBUG_SIZE = 2000
 
 NLP = spacy.load('en', disable=['vectors', 'textcat', 'parser'])
@@ -119,7 +119,7 @@ def main():
     with open(os.path.join(resource_path,'vocab_ner.pick'),'rb') as f:
         vocab_ner = pickle.load(f)
 
-    meta_path = gen_name(args.data_dir, args.meta, version)
+    meta_path = gen_name(args.data_dir, args.meta, version, suffix='pick')
     logger.info('building embedding')
     embedding = build_embedding(emb_path, vocab, embedding_dim, fast_vec_format=args.fasttext_on)
     meta = {'vocab': vocab, 'vocab_tag': vocab_tag, 'vocab_ner': vocab_ner, 'embedding': embedding}

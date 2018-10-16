@@ -10,6 +10,13 @@ from my_utils.tokenizer import Vocabulary, reform_text
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
+def compute_acc(score_list, gold, threshold=0.5):
+    correct = 0
+    for key, val in score_list.items():
+        lab = 1 if val > threshold else 0
+        if lab == gold[key]: correct += 1
+    return correct * 100.0 / len(gold)
+
 def gen_name(dir, path, version, suffix='json'):
     fname = '{}_{}.{}'.format(path, version, suffix)
     return os.path.join(dir, fname)
