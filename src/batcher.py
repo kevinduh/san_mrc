@@ -52,7 +52,7 @@ class BatchGen:
                 cnt += 1
                 if is_train and (len(sample['doc_tok']) > doc_maxlen or \
                                  sample['start'] is None or sample['end'] is None):
-                    import pdb; pdb.set_trace()
+                    #import pdb; pdb.set_trace()
                     print(sample['uid'])
                     continue
                 data.append(sample)
@@ -117,7 +117,7 @@ class BatchGen:
 
             doc_mask = torch.eq(doc_id, 0)
             query_mask = torch.eq(query_id, 0)
-            
+
             batch_dict['doc_tok'] = doc_id
             batch_dict['doc_pos'] = doc_tag
             batch_dict['doc_ner'] = doc_ent
