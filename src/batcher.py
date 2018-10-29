@@ -9,6 +9,8 @@ import numpy as np
 import pickle as pkl
 from shutil import copyfile
 from my_utils.tokenizer import UNK_ID
+from allennlp.modules.elmo import batch_to_ids
+from allennlp.data.token_indexers.elmo_indexer import ELMoCharacterMapper
 
 def load_meta(opt, meta_path):
     with open(meta_path, 'rb') as f:
@@ -21,7 +23,7 @@ def load_meta(opt, meta_path):
 
 class BatchGen:
     def __init__(self, data_path, batch_size, gpu, is_train=True, doc_maxlen=1000, dropout_w=0.05, dw_type=0,
-                 with_label=False):
+                 with_label=False, elmo_on=False):
         self.batch_size = batch_size
         self.doc_maxlen = doc_maxlen
         self.is_train = is_train
@@ -29,6 +31,7 @@ class BatchGen:
         self.data_path = data_path
         self.dropout_w = dropout_w
         self.dw_type = dw_type
+        self.elmo_on = elmo_on
 
         self.data = self.load(self.data_path, is_train, doc_maxlen)
 
@@ -114,6 +117,18 @@ class BatchGen:
 
                 select_len = min(len(query_tok), query_len)
                 query_id[i, :len(sample['query_tok'])] = torch.LongTensor(query_tok[:select_len])
+                if self.elmo_on:
+                    doc_ctok = sample['doc_ctok']
+                    for j, w in enumerate(batch_to_ids(doc_ctok)[0].tolist()):
+                        if j >= doc_select_len:
+                            break
+                        doc_cid[i, j, :len(w)] = torch.LongTensor(w)
+
+                    query_ctok = sample['query_ctok']
+                    for j, w in enumerate(batch_to_ids(query_ctok)[0].tolist()):
+                        if j >= query_select_len:
+                            break
+                        query_cid[i, j, :len(w)] = torch.LongTensor(w)
 
             doc_mask = torch.eq(doc_id, 0)
             query_mask = torch.eq(query_id, 0)
@@ -125,7 +140,9 @@ class BatchGen:
             batch_dict['query_tok'] = query_id
             batch_dict['doc_mask'] = doc_mask
             batch_dict['query_mask'] = query_mask
-
+            if self.elmo_on:
+                batch_dict['doc_ctok'] = doc_cid
+                batch_dict['query_ctok'] = query_cid
             if self.is_train:
                 start = [sample['start'] for sample in batch]
                 end = [sample['end'] for sample in batch]
