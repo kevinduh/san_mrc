@@ -79,7 +79,7 @@ class LexiconEncoder(nn.Module):
         self.dropout = DropoutWrapper(opt['dropout_p']) if dropout == None else dropout
         self.dropout_emb = DropoutWrapper(opt['dropout_emb'])
         self.dropout_cove = DropoutWrapper(opt['dropout_cov'])
-        elmo_size = self.create_elmo(opt)
+        self.elmo_size = self.create_elmo(opt)
 
         # word embedding
         embedding_dim = self.create_word_embed(embedding, opt)
