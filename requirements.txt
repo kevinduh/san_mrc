@@ -3,3 +3,4 @@ spacy==2.0.12
 pytorch==0.4.0
 tqdm
 colorlog
+allennlp
