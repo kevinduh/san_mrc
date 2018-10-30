@@ -105,8 +105,8 @@ def model_config(parser):
 
     ### ELMo setting
     parser.add_argument('--elmo_on', action='store_true')
-    parser.add_argument('--elmo_config_path', default='data/elmo_2x1024_128_2048cnn_1xhighway_5.5B_options.json')
-    parser.add_argument('--elmo_weight_path', default='data/elmo_2x1024_128_2048cnn_1xhighway_5.5B_weights.hdf5')
+    parser.add_argument('--elmo_config_path', default='data/elmo_2x4096_512_2048cnn_2xhighway_5.5B_options.json')
+    parser.add_argument('--elmo_weight_path', default='data/elmo_2x4096_512_2048cnn_2xhighway_5.5B_weights.hdf5')
     parser.add_argument('--elmo_size', type=int, default=1024)
     parser.add_argument('--elmo_lexicon_on', action='store_true')
     parser.add_argument('--elmo_att_on', action='store_false')
