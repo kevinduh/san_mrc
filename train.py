@@ -59,10 +59,11 @@ def main():
     train_data = BatchGen(gen_name(args.data_dir, args.train_data, version),
                           batch_size=args.batch_size,
                           gpu=args.cuda,
-                          with_label=args.v2_on)
+                          with_label=args.v2_on,
+                          elmo_on=args.elmo_on)
     dev_data = BatchGen(dev_path,
                           batch_size=args.batch_size,
-                          gpu=args.cuda, is_train=False)
+                          gpu=args.cuda, is_train=False, elmo_on=args.elmo_on)
 
 
 

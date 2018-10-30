@@ -99,9 +99,12 @@ class BatchGen:
             doc_feature = torch.Tensor(batch_size, doc_len, feature_len).fill_(0)
             query_len = max(len(x['query_tok']) for x in batch)
             query_id = torch.LongTensor(batch_size, query_len).fill_(0)
+            if self.elmo_on:
+                doc_cid = torch.LongTensor(batch_size, doc_len, ELMoCharacterMapper.max_word_length).fill_(0)
+                query_cid = torch.LongTensor(batch_size, query_len, ELMoCharacterMapper.max_word_length).fill_(0)
 
             for i, sample in enumerate(batch):
-                select_len = min(len(sample['doc_tok']), doc_len)
+                doc_select_len = min(len(sample['doc_tok']), doc_len)
                 doc_tok = sample['doc_tok']
                 query_tok = sample['query_tok']
 
@@ -109,14 +112,15 @@ class BatchGen:
                     doc_tok = self.__random_select__(doc_tok)
                     query_tok = self.__random_select__(query_tok)
 
-                doc_id[i, :select_len] = torch.LongTensor(doc_tok[:select_len])
-                doc_tag[i, :select_len] = torch.LongTensor(sample['doc_pos'][:select_len])
-                doc_ent[i, :select_len] = torch.LongTensor(sample['doc_ner'][:select_len])
+                doc_id[i, :doc_select_len] = torch.LongTensor(doc_tok[:doc_select_len])
+                doc_tag[i, :doc_select_len] = torch.LongTensor(sample['doc_pos'][:doc_select_len])
+                doc_ent[i, :doc_select_len] = torch.LongTensor(sample['doc_ner'][:doc_select_len])
                 for j, feature in enumerate(eval(sample['doc_fea'])):
-                    doc_feature[i, j, :] = torch.Tensor(feature)
+                    if j >= doc_select_len:
+                        doc_feature[i, j, :] = torch.Tensor(feature)
 
-                select_len = min(len(query_tok), query_len)
-                query_id[i, :len(sample['query_tok'])] = torch.LongTensor(query_tok[:select_len])
+                query_select_len = min(len(query_tok), query_len)
+                query_id[i, :len(sample['query_tok'])] = torch.LongTensor(query_tok[:query_select_len])
                 if self.elmo_on:
                     doc_ctok = sample['doc_ctok']
                     for j, w in enumerate(batch_to_ids(doc_ctok)[0].tolist()):

@@ -177,8 +177,8 @@ class LexiconEncoder(nn.Module):
             drnn_input_list.append(doc_fea)
 
         if self.elmo_on:
-            doc_ctok = batch['doc_ctok']
-            query_ctok = batch['query_ctok']
+            doc_ctok = self.patch(batch['doc_ctok'])
+            query_ctok = self.patch(batch['query_ctok'])
             doc_elmo = self.elmo(doc_ctok)['elmo_representations']
             query_elmo = self.elmo(query_ctok)['elmo_representations']
         else:
