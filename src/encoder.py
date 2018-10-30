@@ -15,6 +15,7 @@ from .dropout_wrapper import DropoutWrapper
 from .common import activation
 from .similarity import AttentionWrapper
 from .sub_layers import PositionwiseNN
+from allennlp.modules.elmo import Elmo
 
 class LexiconEncoder(nn.Module):
     def create_embed(self, vocab_size, embed_dim, padding_idx=0):
@@ -57,6 +58,20 @@ class LexiconEncoder(nn.Module):
     def create_prealign(self, x1_dim, x2_dim, opt={}, prefix='prealign'):
         self.prealign = AttentionWrapper(x1_dim, x2_dim, prefix, opt, self.dropout)
 
+    def create_elmo(self, opt):
+        elmo_on = opt.get('elmo_on', False)
+        num_layer = opt['contextual_num_layers']
+        if opt['elmo_att_on']: num_layer += 1
+        if opt['elmo_self_att_on']: num_layer += 1
+        size = opt['elmo_size']
+        self.elmo_on = elmo_on
+        if elmo_on:
+            self.elmo = Elmo(opt['elmo_config_path'], opt['elmo_weight_path'], num_layer, dropout=opt['elmo_dropout'])
+        else:
+            self.elmo = None
+            size = 0
+        return size
+
     def __init__(self, opt, pwnn_on=True, embedding=None, padding_idx=0, dropout=None):
         super(LexiconEncoder, self).__init__()
         doc_input_size = 0
@@ -64,6 +79,7 @@ class LexiconEncoder(nn.Module):
         self.dropout = DropoutWrapper(opt['dropout_p']) if dropout == None else dropout
         self.dropout_emb = DropoutWrapper(opt['dropout_emb'])
         self.dropout_cove = DropoutWrapper(opt['dropout_cov'])
+        self.elmo_size = self.create_elmo(opt)
 
         # word embedding
         embedding_dim = self.create_word_embed(embedding, opt)
@@ -83,7 +99,7 @@ class LexiconEncoder(nn.Module):
         pos_size = self.create_pos_embed(opt) if opt['pos_on'] else 0
         ner_size = self.create_ner_embed(opt) if opt['ner_on'] else 0
         feat_size = opt['num_features'] if opt['feat_on'] else 0
-        print(feat_size)
+
         doc_hidden_size = embedding_dim + covec_size + prealign_size + pos_size + ner_size + feat_size
         que_hidden_size = embedding_dim + covec_size
         if opt['prealign_bidi']:
@@ -160,6 +176,15 @@ class LexiconEncoder(nn.Module):
             doc_fea = self.dropout(doc_fea)
             drnn_input_list.append(doc_fea)
 
+        if self.elmo_on:
+            doc_ctok = batch['doc_ctok']
+            query_ctok = batch['query_ctok']
+            doc_elmo = self.elmo(doc_ctok)['elmo_representations']
+            query_elmo = self.elmo(query_ctok)['elmo_representations']
+        else:
+            doc_elmo = None
+            query_elmo = None
+
         doc_input = torch.cat(drnn_input_list, 2)
         query_input = torch.cat(qrnn_input_list, 2)
         if self.pwnn_on:
@@ -168,4 +193,4 @@ class LexiconEncoder(nn.Module):
             doc_input = self.doc_pwnn(doc_input)
             query_input = self.que_pwnn(query_input)
 
-        return doc_input, query_input, doc_emb, query_emb, doc_cove_low, doc_cove_high, query_cove_low, query_cove_high, doc_mask, query_mask
+        return doc_input, query_input, doc_emb, query_emb, doc_cove_low, doc_cove_high, query_cove_low, query_cove_high, doc_mask, query_mask, doc_elmo, query_elmo

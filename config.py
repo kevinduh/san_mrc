@@ -102,6 +102,18 @@ def model_config(parser):
     parser.add_argument('--classifier_gamma', type=float, default=1)
     parser.add_argument('--classifier_threshold', type=float, default=0.5)
     parser.add_argument('--label_size', type=int, default=1)
+
+    ### ELMo setting
+    parser.add_argument('--elmo_on', action='store_true')
+    parser.add_argument('--elmo_options_file', default='data/elmo_2x1024_128_2048cnn_1xhighway_5.5B_options.json')
+    parser.add_argument('--elmo_weights_file', default='data/elmo_2x1024_128_2048cnn_1xhighway_5.5B_weights.hdf5')
+    parser.add_argument('--elmo_size', type=int, default=1024)
+    parser.add_argument('--elmo_lexicon_on', action='store_true')
+    parser.add_argument('--elmo_att_on', action='store_false')
+    parser.add_argument('--elmo_self_att_on', action='store_true')
+    parser.add_argument('--elmo_l2', type=float, default=0.001)
+    parser.add_argument('--elmo_dropout', type=float, default=0.5)
+
     return parser
 
 def data_config(parser):

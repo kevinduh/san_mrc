@@ -41,8 +41,7 @@ Please cite the above papers if you use this code.
    > python train.py --v2_on --dev_gold data\dev-v2.0.json
 
 ## TODO
-1. Add ELMo.
-2. Add Multi-Task Training
+1. Multi-Task Training.
 
 ## Notes and Acknowledgments
 Some of code are adapted from: https://github.com/hitvoice/DrQA
