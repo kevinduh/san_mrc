@@ -40,11 +40,19 @@ Please cite the above papers if you use this code.
 2. train a Model
    > python train.py --v2_on --dev_gold data\dev-v2.0.json
 
+### Use of ELMo
+1. download ELMo resource from AllenNLP
+2. train a Model with ELMo
+   > python train.py --elmo_on
+
+Note that we only tested on SQuAD v1.1.
+
 ## TODO
 1. Multi-Task Training.
 
 ## Notes and Acknowledgments
 Some of code are adapted from: https://github.com/hitvoice/DrQA
+ELMo is from: https://allennlp.org
 
 ## Results
 We report results produced by this package as follows.
