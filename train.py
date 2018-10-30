@@ -7,8 +7,6 @@ import logging
 import argparse
 import json
 import torch
-import msgpack
-import pandas as pd
 import numpy as np
 from shutil import copyfile
 from datetime import datetime
