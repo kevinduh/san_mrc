@@ -74,7 +74,7 @@ def model_config(parser):
     parser.add_argument('--self_att_norm_on', action='store_true')
     parser.add_argument('--self_att_proj_on', action='store_true')
     parser.add_argument('--self_att_residual_on', action='store_true')
-    parser.add_argument('--self_att_dropout', type=float, default=0)
+    parser.add_argument('--self_att_dropout', type=float, default=0.1)
     parser.add_argument('--self_att_drop_diagonal', action='store_false')
     parser.add_argument('--self_att_share', action='store_false')
 
@@ -113,7 +113,11 @@ def data_config(parser):
                         help='path to preprocessed training data file.')
     parser.add_argument('--dev_data', default='dev_data',
                         help='path to preprocessed validation data file.')
-    parser.add_argument('--dev_gold', default='data/dev-v1.1.json',
+    parser.add_argument('--dev_gold', default='dev',
+                        help='path to preprocessed validation data file.')
+    parser.add_argument('--test_data', default='test_data',
+                        help='path to preprocessed test data file.')
+    parser.add_argument('--test_gold', default='test',
                         help='path to preprocessed validation data file.')
     parser.add_argument('--covec_path', default='data/MT-LSTM.pt')
     parser.add_argument('--glove', default='data/glove.840B.300d.txt',
@@ -126,7 +130,7 @@ def data_config(parser):
     return parser
 
 def train_config(parser):
-    parser.add_argument('--cuda', type=bool, default=torch.cuda.is_available(), 
+    parser.add_argument('--cuda', type=bool, default=torch.cuda.is_available(),
                         help='Use GPU acceleration.')
     parser.add_argument('--log_per_updates', type=int, default=100)
     parser.add_argument('--epoches', type=int, default=50)
@@ -137,7 +141,7 @@ def train_config(parser):
     parser.add_argument('--learning_rate', type=float, default=0.002)
     parser.add_argument('--momentum', type=float, default=0)
     parser.add_argument('--vb_dropout', action='store_false')
-    parser.add_argument('--dropout_p', type=float, default=0.35)
+    parser.add_argument('--dropout_p', type=float, default=0.3)
     parser.add_argument('--dropout_emb', type=float, default=0.4)
     parser.add_argument('--dropout_cov', type=float, default=0.4)
     parser.add_argument('--dropout_w', type=float, default=0.05)

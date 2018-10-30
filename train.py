@@ -7,8 +7,6 @@ import logging
 import argparse
 import json
 import torch
-import msgpack
-import pandas as pd
 import numpy as np
 from shutil import copyfile
 from datetime import datetime
@@ -19,7 +17,7 @@ from config import set_args
 from my_utils.utils import set_environment
 from my_utils.log_wrapper import create_logger
 from my_utils.squad_eval import evaluate
-from my_utils.data_utils import predict_squad, gen_name, load_squad_v2_label, compute_acc
+from my_utils.data_utils import predict_squad, gen_name, gen_gold_name, load_squad_v2_label, compute_acc
 from my_utils.squad_eval_v2 import my_evaluation as evaluate_v2
 
 args = set_args()
@@ -44,8 +42,17 @@ def main():
     opt = vars(args)
     logger.info('Loading data')
     version = 'v1'
+    gold_version = 'v1.1'
+
+    dev_path = gen_name(args.data_dir, args.dev_data, version)
+    dev_gold_path = gen_gold_name(args.data_dir, args.dev_gold, gold_version)
+
+    test_path = gen_name(args.data_dir, args.test_data, version)
+    test_gold_path = gen_gold_name(args.data_dir, args.test_gold, gold_version)
+
     if args.v2_on:
         version = 'v2'
+        gold_version = 'v2.0'
         dev_labels = load_squad_v2_label(args.dev_gold)
 
     embedding, opt = load_meta(opt, gen_name(args.data_dir, args.meta, version, suffix='pick'))
@@ -53,12 +60,25 @@ def main():
                           batch_size=args.batch_size,
                           gpu=args.cuda,
                           with_label=args.v2_on)
-    dev_data = BatchGen(gen_name(args.data_dir, args.dev_data, version),
+    dev_data = BatchGen(dev_path,
                           batch_size=args.batch_size,
                           gpu=args.cuda, is_train=False)
 
+
+
+    test_data = None
+    test_gold = None
+
+    if os.path.exists(test_path):
+        test_data = BatchGen(test_path,
+                            batch_size=args.batch_size,
+                            gpu=args.cuda, is_train=False)
+
     # load golden standard
-    dev_gold = load_squad(args.dev_gold)
+    dev_gold = load_squad(dev_gold_path)
+
+    if os.path.exists(test_gold_path):
+        test_gold = load_squad(test_gold_path)
 
     model = DocReaderModel(opt, embedding)
     # model meta str
@@ -93,9 +113,25 @@ def main():
             metric = evaluate(dev_gold, results)
             em, f1 = metric['exact_match'], metric['f1']
 
+
         output_path = os.path.join(model_dir, 'dev_output_{}.json'.format(epoch))
         with open(output_path, 'w') as f:
             json.dump(results, f)
+
+        if test_data is not None:
+            test_results, test_labels = predict_squad(model, test_data, v2_on=args.v2_on)
+            test_output_path = os.path.join(model_dir, 'test_output_{}.json'.format(epoch))
+            with open(test_output_path, 'w') as f:
+                json.dump(test_results, f)
+
+            if (test_gold is not None):
+                if args.v2_on:
+                    test_metric = evaluate_v2(test_gold, test_results, na_prob_thresh=args.classifier_threshold)
+                    test_em, test_f1 = test_metric['exact'], test_metric['f1']
+                    test_acc = compute_acc(labels, test_labels)
+                else:
+                    test_metric = evaluate(test_gold, test_results)
+                    test_em, test_f1 = test_metric['exact_match'], test_metric['f1']
 
         # setting up scheduler
         if model.scheduler is not None:
@@ -118,6 +154,11 @@ def main():
             logger.warning("Epoch {0} - ACC: {1:.4f}".format(epoch, acc))
         if metric is not None:
             logger.warning("Detailed Metric at Epoch {0}: {1}".format(epoch, metric))
+
+        if (test_data is not None) and (test_gold is not None):
+            logger.warning("Epoch {0} - test EM: {1:.3f} F1: {2:.3f}".format(epoch, test_em, test_f1))
+            if args.v2_on:
+                logger.warning("Epoch {0} - test ACC: {1:.4f}".format(epoch, test_acc))
 
 if __name__ == '__main__':
     main()

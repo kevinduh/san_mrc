@@ -21,6 +21,10 @@ def gen_name(dir, path, version, suffix='json'):
     fname = '{}_{}.{}'.format(path, version, suffix)
     return os.path.join(dir, fname)
 
+def gen_gold_name(dir, path, version, suffix='json'):
+    fname = '{}-{}.{}'.format(path, version, suffix)
+    return os.path.join(dir, fname)
+
 def predict_squad(model, data, v2_on=False):
     data.reset()
     span_predictions = {}
