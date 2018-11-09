@@ -49,9 +49,10 @@ Note that we only tested on SQuAD v1.1.
 
 ## TODO
 1. Multi-Task Training.
+2. Release BERT version.
 
 ## Notes and Acknowledgments
-Some of code are adapted from: https://github.com/hitvoice/DrQA
+Some of code are adapted from: https://github.com/hitvoice/DrQA <br/>
 ELMo is from: https://allennlp.org
 
 ## Results
@@ -60,7 +61,7 @@ We report results produced by this package as follows.
 | Dataset | EM/F1 on Dev |
 | ------- | ------- |
 | `SQuAD v1.1` (Rajpurkar et al., 2016) | **76.8**/**84.6** (vs 76.2/84.1 SAN paper) |
-| `SQuAD v2.0`  (Rajpurkar et al., 2018)| **69.5**/**72.7** |
+| `SQuAD v2.0`  (Rajpurkar et al., 2018)| **69.5**/**72.7** (<a href="https://worksheets.codalab.org/worksheets/0x5d6dd1b40dcf406581bb29be15016628/">Official Submission of SQUAD v2</a>)|
 | `NewsQA` (Trischler et al., 2016)| **55.8**/**67.9**|
 
 Related:
