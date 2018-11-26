@@ -28,6 +28,8 @@ Please cite the above papers if you use this code.
    > python -m spacy download en              # default English model (~50MB) <br/>
    > python -m spacy download en_core_web_md  # larger English model (~1GB)
 
+Or pull our published docker: allenlao/pytorch-allennlp-rt
+
 ### Train a SAN Model on SQuAD v1.1
 1. preprocess data
    > python prepro.py

@@ -1,6 +1,6 @@
 pandas==0.22.0
 spacy==2.0.12
-pytorch==0.4.0
+pytorch==0.4.1
 tqdm
 colorlog
 allennlp
